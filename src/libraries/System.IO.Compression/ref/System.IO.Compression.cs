@@ -25,6 +25,7 @@ namespace System.IO.Compression
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode) { }
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode, bool leaveOpen) { }
         public System.IO.Stream BaseStream { get { throw null; } }
+        public void ThisIsANewMethod() { }
         public override bool CanRead { get { throw null; } }
         public override bool CanSeek { get { throw null; } }
         public override bool CanWrite { get { throw null; } }
