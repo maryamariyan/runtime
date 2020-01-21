@@ -7,16 +7,16 @@
 
 namespace System.IO.Compression
 {
+    public enum CompressionMode
+    {
+        Decompress = 0,
+        Compress = 1,
+    }
     public enum CompressionLevel
     {
         Optimal = 0,
         Fastest = 1,
         NoCompression = 2,
-    }
-    public enum CompressionMode
-    {
-        Decompress = 0,
-        Compress = 1,
     }
     public partial class DeflateStream : System.IO.Stream
     {
