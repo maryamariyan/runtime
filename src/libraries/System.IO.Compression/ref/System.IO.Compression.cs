@@ -20,7 +20,9 @@ namespace System.IO.Compression
     }
     public partial class DeflateStream : System.IO.Stream
     {
+#if DEBUG
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionLevel compressionLevel) { }
+#endif
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionLevel compressionLevel, bool leaveOpen) { }
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode) { }
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode, bool leaveOpen) { }
