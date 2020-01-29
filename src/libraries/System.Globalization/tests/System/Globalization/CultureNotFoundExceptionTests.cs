@@ -18,17 +18,6 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
-        public void Ctor_String_Exception()
-        {
-            string message = "this is a test string";
-            Exception innerException = new Exception("inner exception string");
-            CultureNotFoundException cultureNotFoundException = new CultureNotFoundException(message, innerException);
-
-            Assert.Equal(message, cultureNotFoundException.Message);
-            Assert.Same(innerException, cultureNotFoundException.InnerException);
-        }
-
-        [Fact]
         public void Ctor_String_String()
         {
             string paramName = "nameOfParam";
