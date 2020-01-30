@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetCoreAppCurrent);net472</TargetFrameworks>
-    <Configurations>$(NetCoreAppCurrent)-Debug;$(NetCoreAppCurrent)-Release;net472-Debug;net472-Release</Configurations>
-    <!-- <TargetFrameworks>$(DefaultNetCoreTargetFramework);net472</TargetFrameworks> -->
-    <!-- <Configurations>$(DefaultNetCoreTargetFramework)-Debug;$(DefaultNetCoreTargetFramework)-Release;net472-Debug;net472-Release</Configurations> -->
+    <TargetFrameworks>$(DefaultNetCoreTargetFramework);net472</TargetFrameworks>
+    <Configurations>$(DefaultNetCoreTargetFramework)-Debug;$(DefaultNetCoreTargetFramework)-Release;net472-Debug;net472-Release</Configurations>
+    <!-- <TargetFrameworks>$(NetCoreAppCurrent);net472</TargetFrameworks> -->
+    <!-- <Configurations>$(NetCoreAppCurrent)-Debug;$(NetCoreAppCurrent)-Release;net472-Debug;net472-Release</Configurations> -->
   </PropertyGroup>
 
   <ItemGroup>
