@@ -7,21 +7,28 @@ Microsoft.Extensions.Primitives.StringValues
 Microsoft.Extensions.Primitives.StringSegment</Description> -->
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <Configurations>netstandard2.0-Debug;netstandard2.0-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;CA1200;SA1121;SA1028;SA1129;SA1027</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageTags>primitives</PackageTags> -->
-    <IsPackable>true</IsPackable>
-    <IsShipping>true</IsShipping>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(SharedSourceRoot)HashCodeCombiner\**\*.cs" />
+    <Compile Include="C:\Users\maariyan\OneDrive - Microsoft\Documents\CodeHub\Extensions\src\Shared\src\HashCodeCombiner\**\*.cs" />
+    <Compile Include="*.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <Reference Include="System.Memory" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
   </ItemGroup>
-
 </Project>

@@ -218,7 +218,7 @@ namespace Microsoft.Extensions.Primitives
                         length += value.Length;
                     }
                 }
-#if NETSTANDARD2_1
+#if NETCOREAPP
                 // Create the new string
                 return string.Create(length, values, (span, strings) => {
                     var offset = 0;
