@@ -1,6 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <BuildConfigurations>
+      net472;
       $(NetCoreAppCurrent);
     </BuildConfigurations>
   </PropertyGroup>

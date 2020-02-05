@@ -15,6 +15,15 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.Extensions.Primitives",
+    "Description": "Primitives shared by framework extensions. Commonly used types include:"
+    "CommonTypes": [
+      "Microsoft.Extensions.Primitives.IChangeToken",
+      "Microsoft.Extensions.Primitives.StringValues",
+      "Microsoft.Extensions.Primitives.StringSegment"
+    ]
+  },
+  {
     "Name": "Microsoft.CSharp",
     "Description": "Provides support for compilation and code generation, including dynamic, using the C# language.",
     "CommonTypes": [

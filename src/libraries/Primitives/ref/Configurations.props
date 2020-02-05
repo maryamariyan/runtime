@@ -1,7 +1,10 @@
-<Project>
+<Project DefaultTargets="Build">
   <PropertyGroup>
-    <BuildConfigurations>
+    <PackageConfigurations>
       netstandard2.0;
+    </PackageConfigurations>
+    <BuildConfigurations>
+      $(PackageConfigurations);
       netstandard2.1;
     </BuildConfigurations>
   </PropertyGroup>

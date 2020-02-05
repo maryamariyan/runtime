@@ -1,34 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <!-- <Description>Primitives shared by framework extensions. Commonly used types include:
-Microsoft.Extensions.Primitives.IChangeToken
-Microsoft.Extensions.Primitives.StringValues
-Microsoft.Extensions.Primitives.StringSegment</Description> -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <Configurations>netstandard2.0-Debug;netstandard2.0-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
+    <TargetFrameworks>$(NetCoreAppCurrent);netcoreapp3.0;netstandard2.0</TargetFrameworks>
+    <Configurations>netcoreapp3.0-Debug;netcoreapp3.0-Release;netstandard2.0-Debug;netstandard2.0-Release</Configurations>
     <NoWarn>$(NoWarn);CS1591;CA1200;SA1121;SA1028;SA1129;SA1027</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <ProjectGuid>{31785605-3555-4D71-8B24-59DC43F7439A}</ProjectGuid>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="C:\Users\maariyan\OneDrive - Microsoft\Documents\CodeHub\Extensions\src\Shared\src\HashCodeCombiner\**\*.cs" />
     <Compile Include="*.cs" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="System.Runtime" />
+  <ItemGroup Condition="'$(TargetFramework)' == '$(NetCoreAppCurrent)'">
     <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Threading" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Memory" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <Reference Include="System.Memory" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <Reference Include="System.Runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
 </Project>
