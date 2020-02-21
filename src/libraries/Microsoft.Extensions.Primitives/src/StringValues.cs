@@ -522,7 +522,7 @@ namespace Microsoft.Extensions.Primitives
         }
 
         /// <summary>
-        /// Determines whether two specified <see cref="StringValues"/> objects have the same values in the same order. 
+        /// Determines whether two specified <see cref="StringValues"/> objects have the same values in the same order.
         /// </summary>
         /// <param name="left">The first <see cref="StringValues"/> to compare.</param>
         /// <param name="right">The second <see cref="StringValues"/> to compare.</param>
@@ -548,7 +548,7 @@ namespace Microsoft.Extensions.Primitives
         }
 
         /// <summary>
-        /// Determines whether two specified <see cref="StringValues"/> have the same values. 
+        /// Determines whether two specified <see cref="StringValues"/> have the same values.
         /// </summary>
         /// <param name="left">The first <see cref="StringValues"/> to compare.</param>
         /// <param name="right">The second <see cref="StringValues"/> to compare.</param>
@@ -667,7 +667,7 @@ namespace Microsoft.Extensions.Primitives
         public static bool operator !=(string[] left, StringValues right) => !Equals(new StringValues(left), right);
 
         /// <summary>
-        /// Determines whether the specified <see cref="StringValues"/> and <see cref="System.Object"/>, which must be a 
+        /// Determines whether the specified <see cref="StringValues"/> and <see cref="System.Object"/>, which must be a
         /// <see cref="StringValues"/>, <see cref="string"/>, or array of <see cref="string"/>, have the same value.
         /// </summary>
         /// <param name="left">The <see cref="StringValues"/> to compare.</param>
@@ -676,7 +676,7 @@ namespace Microsoft.Extensions.Primitives
         public static bool operator ==(StringValues left, object right) => left.Equals(right);
 
         /// <summary>
-        /// Determines whether the specified <see cref="StringValues"/> and <see cref="System.Object"/>, which must be a 
+        /// Determines whether the specified <see cref="StringValues"/> and <see cref="System.Object"/>, which must be a
         /// <see cref="StringValues"/>, <see cref="string"/>, or array of <see cref="string"/>, have different values.
         /// </summary>
         /// <param name="left">The <see cref="StringValues"/> to compare.</param>
@@ -685,7 +685,7 @@ namespace Microsoft.Extensions.Primitives
         public static bool operator !=(StringValues left, object right) => !left.Equals(right);
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/>, which must be a 
+        /// Determines whether the specified <see cref="System.Object"/>, which must be a
         /// <see cref="StringValues"/>, <see cref="string"/>, or array of <see cref="string"/>, and specified <see cref="StringValues"/>,  have the same value.
         /// </summary>
         /// <param name="left">The <see cref="StringValues"/> to compare.</param>
