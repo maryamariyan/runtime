@@ -120,7 +120,7 @@ namespace Microsoft.Extensions.Primitives
             private object _dummy;
             private int _dummyPrimitive;
             public Enumerator(ref Microsoft.Extensions.Primitives.StringTokenizer tokenizer) { throw null; }
-            public Microsoft.Extensions.Primitives.StringSegment Current { get { throw null; } }
+            public readonly Microsoft.Extensions.Primitives.StringSegment Current { get { throw null; } }
             object System.Collections.IEnumerator.Current { get { throw null; } }
             public void Dispose() { }
             public bool MoveNext() { throw null; }
