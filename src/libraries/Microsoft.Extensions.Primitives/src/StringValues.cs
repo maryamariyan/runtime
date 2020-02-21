@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Internal;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.Extensions.Primitives
 {

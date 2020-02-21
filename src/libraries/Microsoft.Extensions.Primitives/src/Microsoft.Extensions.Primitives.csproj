@@ -6,7 +6,6 @@
     <ExcludeCurrentNetCoreApp>true</ExcludeCurrentNetCoreApp>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Shared\HashCodeCombiner.cs" />
     <Compile Include="CancellationChangeToken.cs" />
     <Compile Include="ChangeToken.cs" />
     <Compile Include="CompositeChangeToken.cs" />
@@ -19,6 +18,11 @@
     <Compile Include="StringValues.cs" />
     <Compile Include="ThrowHelper.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\installer\managed\Microsoft.DotNet.PlatformAbstractions\HashCodeCombiner.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
