@@ -67,8 +67,8 @@
       <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' and '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
     </BinPlaceTargetFrameworks>
     <BinPlaceTargetFrameworks Condition="'$(IsAspNetCoreApp)' == 'true'" Include="$(NetCoreAppCurrent)">
-      <RuntimePath Condition="'$(AspNetCoreRuntimePath)' == 'true'">C:\CodeHub\runtime\artifacts\bin\pkg\aspnetcore\runtime</RuntimePath>
-      <RefPath Condition="'$(AspNetCoreRuntimePath)' == 'true'">C:\CodeHub\runtime\artifacts\bin\pkg\aspnetcore\ref</RefPath>
+      <RuntimePath>$(ASPNETCoreAppPackageRuntimePath)</RuntimePath>
+      <RefPath>$(ASPNETCoreAppPackageRefPath)</RefPath>
     </BinPlaceTargetFrameworks>
 
     <!-- Setup the shared framework directory for testing -->
