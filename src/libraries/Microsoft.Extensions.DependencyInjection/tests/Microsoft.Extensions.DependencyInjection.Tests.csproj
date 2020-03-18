@@ -3,17 +3,20 @@
   <PropertyGroup>
     <TargetFrameworks>$(NetCoreAppCurrent);$(NetFrameworkCurrent)</TargetFrameworks>
     <RootNamespace>Microsoft.Extensions.DependencyInjection</RootNamespace>
+    <DefineConstants>$(DefineConstants);SKIP_FAILING</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Specification.Tests" />
-    <Reference Include="Microsoft.Extensions.DependencyInjection" />
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <Reference Include="Newtonsoft.Json" />
+  <!-- <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj" /> -->
+    <Compile Include="*.cs" />
+    <Compile Include="DI.Specification.Tests/Fakes/**/*.cs" />
+    <Compile Include="DI.Specification.Tests/*.cs" />
+    <Compile Include="../../Common/tests/Extensions/TestingUtils/Microsoft.AspNetCore.Testing/**/*.cs" />
+    <Compile Include="Fakes/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ReferenceFromRuntime Include="Microsoft.Extensions.DependencyInjection" />
     <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

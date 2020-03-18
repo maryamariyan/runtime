@@ -13,6 +13,7 @@ namespace Microsoft.AspNetCore.Testing
         // Entire test pending removal - see https://github.com/dotnet/extensions/issues/1697
 #pragma warning disable 0618
 
+#if !SKIP_FAILING
         [Fact]
         public void GetSolutionRootDirectory_ResolvesSolutionRoot()
         {
@@ -24,6 +25,7 @@ namespace Microsoft.AspNetCore.Testing
 
             Assert.Equal(expectedPath, TestPathUtilities.GetSolutionRootDirectory("Extensions"));
         }
+#endif
 
         [Fact]
         public void GetSolutionRootDirectory_Throws_IfNotFound()

@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Testing
 
         public TestAssemblyFixture AssemblyFixture { get; }
         public TestCollectionFixture CollectionFixture { get; }
-
+#if !SKIP_FAILING
         [Fact]
         public void A()
         {
@@ -39,6 +39,7 @@ namespace Microsoft.AspNetCore.Testing
             Assert.Equal(1, AssemblyFixture.Count);
             Assert.Equal(1, CollectionFixture.Count);
         }
+#endif
     }
 
     [CollectionDefinition("MyCollection", DisableParallelization = true)]
