@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(NetCoreAppCurrent);$(NetFrameworkCurrent)</TargetFrameworks>
-    <RootNamespace>Microsoft.Extensions.DependencyInjection</RootNamespace>
     <DefineConstants>$(DefineConstants);SKIP_FAILING</DefineConstants>
   </PropertyGroup>
 
@@ -17,6 +16,7 @@
 
   <ItemGroup>
     <ReferenceFromRuntime Include="Microsoft.Extensions.DependencyInjection" />
+    <ReferenceFromRuntime Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
