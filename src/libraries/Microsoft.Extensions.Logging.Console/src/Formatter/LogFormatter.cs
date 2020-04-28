@@ -5,9 +5,10 @@ using System;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public interface ILogFormatter
+    public class LogFormatter
     {
-        string Name { get; }
-        LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception);
+        public string Name { get; }
+
+        public abstract LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception);
     }
 }
