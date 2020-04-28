@@ -3,7 +3,9 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdLogFormatterOptions
+    public class SystemdLogFormatterOptions : ConsoleLoggerOptions
     {
+        public override ConsoleLoggerFormat Format => ConsoleLoggerFormat.Systemd;
+        public override string Formatter => "Systemd";
     }
 }

@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.Logging.Console
         private readonly IOptionsMonitor<ConsoleLoggerOptions> _options;
         private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers;
         private readonly ConsoleLoggerProcessor _messageQueue;
-        private readonly IEnumerable<ILogFormatter> _formatters;
+        private readonly IEnumerable<LogFormatter> _formatters;
 
         private IDisposable _optionsReloadToken;
         private IExternalScopeProvider _scopeProvider = NullExternalScopeProvider.Instance;
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.Logging.Console
         /// </summary>
         /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
         /// <param name="formatters"></param>
-        public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<ILogFormatter> formatters)
+        public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<LogFormatter> formatters)
         {
             _options = options;
             _loggers = new ConcurrentDictionary<string, ConsoleLogger>();

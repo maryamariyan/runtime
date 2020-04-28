@@ -7,8 +7,11 @@ namespace Microsoft.Extensions.Logging.Console
 {
     public class LogFormatter
     {
-        public string Name { get; }
+        public virtual string Name { get; }
 
-        public abstract LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception);
+        public virtual LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

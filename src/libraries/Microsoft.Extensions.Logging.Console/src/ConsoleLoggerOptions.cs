@@ -26,12 +26,12 @@ namespace Microsoft.Extensions.Logging.Console
         /// <summary>
         /// Gets or sets log message format. Defaults to <see cref="ConsoleLoggerFormat.Default" />.
         /// </summary>
-        public ConsoleLoggerFormat Format
+        public virtual ConsoleLoggerFormat Format
         {
             get => _format;
             set
             {
-                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Systemd)
+                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Json)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.Logging.Console
         /// <summary>
         /// 
         /// </summary>
-        public string Formatter { get; set; }
+        public virtual string Formatter { get; set; }
 
         /// <summary>
         /// Gets or sets value indicating the minimum level of messaged that would get written to <c>Console.Error</c>.

@@ -20,8 +20,21 @@ namespace Microsoft.Extensions.Logging
         {
             builder.AddConfiguration();
 
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, DefaultLogFormatter>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, SystemdLogFormatter>());
+            // builder.Services.AddSingleton<DefaultLogFormatter>();
+            // builder.Services.AddOptions<DefaultLogFormatterOptions>("Default")
+            //     .Configure<DefaultLogFormatter>((options, formatter) =>
+            // {
+            //     options.Formatter = formatter;
+            // });
+            // builder.Services.AddSingleton<SystemdLogFormatter>();
+            // builder.Services.AddOptions<SystemdLogFormatterOptions>("Systemd")
+            //     .Configure<SystemdLogFormatter>((options, formatter) =>
+            // {
+            //     options.Formatter = formatter;
+            // });
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<LogFormatter, DefaultLogFormatter>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<LogFormatter, SystemdLogFormatter>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
             return builder;

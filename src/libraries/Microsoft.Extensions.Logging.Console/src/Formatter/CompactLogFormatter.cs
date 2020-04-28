@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    internal class DefaultLogFormatter : LogFormatter
+    internal class CompactLogFormatter : LogFormatter
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -15,14 +15,14 @@ namespace Microsoft.Extensions.Logging.Console
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static DefaultLogFormatter()
+        static CompactLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public override string Name => "Default";
+        public override string Name => "Compact";
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
 

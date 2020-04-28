@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdLogFormatter : ILogFormatter
+    internal class SystemdLogFormatter : LogFormatter
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -17,13 +17,13 @@ namespace Microsoft.Extensions.Logging.Console
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
         }
 
-        public string Name => "Systemd";
+        public override string Name => "Systemd";
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
 
         internal ConsoleLoggerOptions Options { get; set; }
 
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        public override LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
