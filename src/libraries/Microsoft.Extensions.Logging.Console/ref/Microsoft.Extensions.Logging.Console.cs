@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         Default = 0,
         Systemd = 1,
+        Compact = 2
     }
     public partial class ConsoleLoggerOptions
     {

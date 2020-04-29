@@ -68,7 +68,7 @@ namespace Microsoft.Extensions.Logging.Console
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
             var format = Options.Format;
-            Debug.Assert(format >= ConsoleLoggerFormat.Default && format <= ConsoleLoggerFormat.Systemd);
+            Debug.Assert(format >= ConsoleLoggerFormat.Default && format <= ConsoleLoggerFormat.Compact);
 
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -87,6 +87,10 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 entry = CreateSystemdLogMessage(logBuilder, logLevel, logName, eventId, message, exception);
             }
+            else if (format == ConsoleLoggerFormat.Compact)
+            {
+                entry = CreateCompactLogMessage(logBuilder, logLevel, logName, eventId, message, exception);
+            }
             else
             {
                 entry = default;
@@ -99,6 +103,62 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder.Capacity = 1024;
             }
             _logBuilder = logBuilder;
+        }
+
+        private LogMessageEntry CreateCompactLogMessage(StringBuilder logBuilder, LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        {
+            // Example:
+            // INFO: ConsoleApp.Program[10]
+            //       Request received
+
+            var logLevelColors = GetLogLevelConsoleColors(logLevel);
+            var logLevelString = GetCompactLogLevelString(logLevel);
+            // category and event id
+            logBuilder.Append(_loglevelPadding);
+            logBuilder.Append(logName);
+            logBuilder.Append('[');
+            logBuilder.Append(eventId);
+            logBuilder.AppendLine("]");
+
+            // scope information
+            GetScopeInformation(logBuilder, multiLine: true);
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                // message
+                logBuilder.Append(_messagePadding);
+
+                var len = logBuilder.Length;
+                logBuilder.AppendLine(message);
+                logBuilder.Replace(Environment.NewLine, _newLineWithMessagePadding, len, message.Length);
+            }
+
+            // Example:
+            // System.InvalidOperationException
+            //    at Namespace.Class.Function() in File:line X
+            if (exception != null)
+            {
+                // exception message
+                logBuilder.AppendLine(exception.ToString());
+            }
+
+            string timestamp = null;
+            var timestampFormat = Options.TimestampFormat;
+            if (timestampFormat != null)
+            {
+                var dateTime = GetCurrentDateTime();
+                timestamp = dateTime.ToString(timestampFormat);
+            }
+
+            return new LogMessageEntry(
+                message: logBuilder.ToString(),
+                timeStamp: timestamp,
+                levelString: logLevelString,
+                levelBackground: logLevelColors.Background,
+                levelForeground: logLevelColors.Foreground,
+                messageColor: DefaultConsoleColor,
+                logAsError: logLevel >= Options.LogToStandardErrorThreshold
+            );
         }
 
         private LogMessageEntry CreateDefaultLogMessage(StringBuilder logBuilder, LogLevel logLevel, string logName, int eventId, string message, Exception exception)
@@ -251,6 +311,27 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        private static string GetCompactLogLevelString(LogLevel logLevel)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.Trace:
+                    return "compact_trce";
+                case LogLevel.Debug:
+                    return "compact_dbug";
+                case LogLevel.Information:
+                    return "compact_info";
+                case LogLevel.Warning:
+                    return "compact_warn";
+                case LogLevel.Error:
+                    return "compact_fail";
+                case LogLevel.Critical:
+                    return "compact_crit";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(logLevel));
+            }
+        }
+
         private static string GetSyslogSeverityString(LogLevel logLevel)
         {
             // 'Syslog Message Severities' from https://tools.ietf.org/html/rfc5424.
@@ -258,15 +339,15 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 case LogLevel.Trace:
                 case LogLevel.Debug:
-                    return "<7>"; // debug-level messages
+                    return "<789>"; // debug-level messages
                 case LogLevel.Information:
-                    return "<6>"; // informational messages
+                    return "<689>"; // informational messages
                 case LogLevel.Warning:
-                    return "<4>"; // warning conditions
+                    return "<489>"; // warning conditions
                 case LogLevel.Error:
-                    return "<3>"; // error conditions
+                    return "<389>"; // error conditions
                 case LogLevel.Critical:
-                    return "<2>"; // critical conditions
+                    return "<289>"; // critical conditions
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel));
             }

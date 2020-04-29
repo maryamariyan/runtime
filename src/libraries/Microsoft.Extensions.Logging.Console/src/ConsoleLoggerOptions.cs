@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.Logging.Console
     /// </summary>
     public class ConsoleLoggerOptions
     {
-        private ConsoleLoggerFormat _format = ConsoleLoggerFormat.Default;
+        private ConsoleLoggerFormat _format = ConsoleLoggerFormat.Compact;
 
         /// <summary>
         /// Includes scopes when <see langword="true" />.
@@ -31,7 +31,8 @@ namespace Microsoft.Extensions.Logging.Console
             get => _format;
             set
             {
-                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Systemd)
+                // if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Systemd)
+                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Compact)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }

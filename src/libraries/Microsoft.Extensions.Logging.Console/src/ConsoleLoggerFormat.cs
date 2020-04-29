@@ -17,5 +17,6 @@ namespace Microsoft.Extensions.Logging.Console
         /// Produces messages in a format suitable for console output to the systemd journal.
         /// </summary>
         Systemd,
+        Compact
     }
 }
