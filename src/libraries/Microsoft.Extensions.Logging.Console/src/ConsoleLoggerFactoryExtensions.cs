@@ -19,9 +19,6 @@ namespace Microsoft.Extensions.Logging
         public static ILoggingBuilder AddConsole(this ILoggingBuilder builder)
         {
             builder.AddConfiguration();
-
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, DefaultLogFormatter>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, SystemdLogFormatter>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
             return builder;
@@ -44,5 +41,17 @@ namespace Microsoft.Extensions.Logging
 
             return builder;
         }
+
+        // public static ILoggingBuilder AddFormatter(this ILoggingBuilder builder, Action<ILogFormatter> configure) 
+        // {
+        //     if (configure == null)
+        //     {
+        //         throw new ArgumentNullException(nameof(configure));
+        //     }
+
+        //     // builder.Services.Configure(configure);
+        //     return builder;
+        // }
+
     }
 }

@@ -11,8 +11,6 @@ namespace Microsoft.Extensions.Logging.Console
     /// </summary>
     public class ConsoleLoggerOptions
     {
-        private ConsoleLoggerFormat _format = ConsoleLoggerFormat.Default;
-
         /// <summary>
         /// Includes scopes when <see langword="true" />.
         /// </summary>
@@ -28,22 +26,30 @@ namespace Microsoft.Extensions.Logging.Console
         /// </summary>
         public ConsoleLoggerFormat Format
         {
-            get => _format;
+            get
+            {
+                try {
+                    return (ConsoleLoggerFormat) Enum.Parse(typeof(ConsoleLoggerFormat), Formatter);
+                }
+                catch (ArgumentException) {
+                    return ConsoleLoggerFormat.Custom;
+                }
+            }
             set
             {
-                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Systemd)
+                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Custom)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                _format = value;
+                Formatter = Enum.GetName(typeof(ConsoleLoggerFormat), value);
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Formatter { get; set; }
-
+        public virtual string Formatter { get; set; }
+        
         /// <summary>
         /// Gets or sets value indicating the minimum level of messaged that would get written to <c>Console.Error</c>.
         /// </summary>

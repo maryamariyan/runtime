@@ -3,7 +3,8 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdLogFormatter : ILogFormatter
+    internal class SystemdLogFormatter : ILogFormatter
+    // public class SystemdLogFormatter : LogFormatter
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -23,8 +24,11 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal ConsoleLoggerOptions Options { get; set; }
 
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, ConsoleLoggerOptions options)
+        // public override LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
+            // todo fix later:
+            Options = options;
             var logBuilder = _logBuilder;
             _logBuilder = null;
 

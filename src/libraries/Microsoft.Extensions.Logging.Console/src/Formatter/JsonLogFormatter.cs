@@ -3,8 +3,9 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    internal class DefaultLogFormatter : ILogFormatter
+    public class JsonConsoleLogFormatter : ILogFormatter
     // similar to: public partial class DefaultTraceListener : System.Diagnostics.TraceListener
+    // public class DefaultLogFormatter : LogFormatter
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -16,14 +17,14 @@ namespace Microsoft.Extensions.Logging.Console
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static DefaultLogFormatter()
+        static JsonConsoleLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public string Name => "Default";
+        public string Name => "Json";
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
 
@@ -114,17 +115,17 @@ namespace Microsoft.Extensions.Logging.Console
             switch (logLevel)
             {
                 case LogLevel.Trace:
-                    return "trce";
+                    return "json_trce";
                 case LogLevel.Debug:
-                    return "dbug";
+                    return "json_dbug";
                 case LogLevel.Information:
-                    return "info";
+                    return "json_info";
                 case LogLevel.Warning:
-                    return "warn";
+                    return "json_warn";
                 case LogLevel.Error:
-                    return "fail";
+                    return "json_fail";
                 case LogLevel.Critical:
-                    return "crit";
+                    return "json_crit";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel));
             }

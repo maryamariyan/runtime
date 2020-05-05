@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
 
@@ -19,7 +20,7 @@ namespace Microsoft.Extensions.Logging.Console
         private readonly IOptionsMonitor<ConsoleLoggerOptions> _options;
         private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers;
         private readonly ConsoleLoggerProcessor _messageQueue;
-        private readonly IEnumerable<ILogFormatter> _formatters;
+        private readonly Dictionary<string, ILogFormatter> _formatters;
 
         private IDisposable _optionsReloadToken;
         private IExternalScopeProvider _scopeProvider = NullExternalScopeProvider.Instance;
@@ -33,7 +34,12 @@ namespace Microsoft.Extensions.Logging.Console
         {
             _options = options;
             _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
-            _formatters = formatters;
+            if (formatters == null)
+            {
+                throw new ArgumentNullException(nameof(formatters));
+            }
+
+            _formatters = formatters.ToDictionary(f => f.Name);
 
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = _options.OnChange(ReloadLoggerOptions);
@@ -53,19 +59,29 @@ namespace Microsoft.Extensions.Logging.Console
 
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
+            // ILogFormatter we have access to the formatters and we the names
+            _formatters.TryGetValue(options.Formatter, out ILogFormatter logFormatter);
+            // when creating and when changes happen
             foreach (var logger in _loggers)
             {
                 logger.Value.Options = options;
+                // the value is ConsoleLogger
+                logger.Value.Formatter = logFormatter;
             }
         }
 
         /// <inheritdoc />
         public ILogger CreateLogger(string name)
         {
-            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue, _formatters)
+            // assign a LogFormatter here too
+            //_formatters.TryGetValue("Json", out ILogFormatter logFormatter);
+            _formatters.TryGetValue(_options.CurrentValue.Formatter, out ILogFormatter logFormatter);
+            //_formatters.TryGetValue(name, out ILogFormatter logFormatter);
+            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
             {
                 Options = _options.CurrentValue,
-                ScopeProvider = _scopeProvider
+                ScopeProvider = _scopeProvider,
+                Formatter = logFormatter
             });
         }
 
