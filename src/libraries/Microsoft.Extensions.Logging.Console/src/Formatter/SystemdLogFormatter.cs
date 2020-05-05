@@ -8,6 +8,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
+        private readonly FormatterInternals _formatterInternals;
 
         [ThreadStatic]
         private static StringBuilder _logBuilder;
@@ -16,6 +17,11 @@ namespace Microsoft.Extensions.Logging.Console
         {
             var logLevelString = GetSyslogSeverityString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
+        }
+
+        internal SystemdLogFormatter(FormatterInternals formatterInternals)
+        {
+            _formatterInternals = formatterInternals;
         }
 
         public string Name => "Systemd";
@@ -28,6 +34,7 @@ namespace Microsoft.Extensions.Logging.Console
         // public override LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
             // todo fix later:
+            _formatterInternals.Options = options;
             Options = options;
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -133,7 +140,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         private void GetScopeInformation(StringBuilder stringBuilder)
         {
-            var scopeProvider = ScopeProvider;
+            var scopeProvider = _formatterInternals.ScopeProvider;
             if (Options.IncludeScopes && scopeProvider != null)
             {
                 var initialLength = stringBuilder.Length;

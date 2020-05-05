@@ -10,10 +10,20 @@ using System.Linq;
 
 namespace Microsoft.Extensions.Logging.Console
 {
+    internal class FormatterInternals
+    {
+        internal IExternalScopeProvider ScopeProvider { get; set; }
+
+        internal ConsoleLoggerOptions Options { get; set; }
+    }
+
     internal class ConsoleLogger : ILogger
     {
-        private readonly ILogFormatter _defaultFormatter = new DefaultLogFormatter();
-        private readonly ILogFormatter _systemdFormatter = new SystemdLogFormatter();
+        private readonly FormatterInternals _formatterInternals = new FormatterInternals();
+        private readonly ILogFormatter _defaultFormatter;
+        private readonly ILogFormatter _compactFormatter;
+        private readonly ILogFormatter _systemdFormatter;
+        private readonly ILogFormatter _jsonFormatter;
 
         private readonly string _name;
         private ILogFormatter _consoleLogFormatter;
@@ -28,12 +38,38 @@ namespace Microsoft.Extensions.Logging.Console
 
             _name = name;
             _queueProcessor = loggerProcessor;
+            _formatterInternals.ScopeProvider = new LoggerExternalScopeProvider();
+            _defaultFormatter = new DefaultLogFormatter(_formatterInternals);
+            _compactFormatter = new CompactLogFormatter(_formatterInternals);
+            _systemdFormatter = new SystemdLogFormatter(_formatterInternals);
+            _jsonFormatter = new JsonConsoleLogFormatter(_formatterInternals);
         }
 
-        internal IExternalScopeProvider ScopeProvider { get; set; }
+        internal IExternalScopeProvider ScopeProvider 
+        {
+            get 
+            {
+                return _formatterInternals.ScopeProvider;
+            }
+            set
+            {
+                _formatterInternals.ScopeProvider = value;
+            }
+        }
 
-        internal ConsoleLoggerOptions Options { get; set; }
-        
+        internal ConsoleLoggerOptions Options
+        {
+            get 
+            {
+                return _formatterInternals.Options;
+            }
+            set
+            {
+                _formatterInternals.Options = value;
+            }
+        }
+
+
         internal ILogFormatter Formatter
         {
             get { return _consoleLogFormatter; }
@@ -83,6 +119,14 @@ namespace Microsoft.Extensions.Logging.Console
             else if (format == ConsoleLoggerFormat.Systemd)
             {
                 formatter = _systemdFormatter;
+            }
+            else if (format == ConsoleLoggerFormat.Compact)
+            {
+                formatter = _compactFormatter;
+            }
+            else if (format == ConsoleLoggerFormat.Json)
+            {
+                formatter = _jsonFormatter;
             }
             else // custom
             {

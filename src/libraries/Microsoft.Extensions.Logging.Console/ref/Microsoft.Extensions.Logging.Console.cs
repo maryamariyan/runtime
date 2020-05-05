@@ -19,8 +19,9 @@ namespace Microsoft.Extensions.Logging.Console
     {
         Default = 0,
         Systemd = 1,
-        Json = 2,
-        Custom = 3,
+        Compact = 2,
+        Json = 3,
+        Custom = 4
     }
     public partial class ConsoleLoggerOptions
     {
@@ -32,6 +33,7 @@ namespace Microsoft.Extensions.Logging.Console
         public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
         public string TimestampFormat { get { throw null; } set { } }
         public bool UseUtcTimestamp { get { throw null; } set { } }
+        public System.Text.Json.JsonWriterOptions JsonWriterOptions { get; set; }
     }
     [Microsoft.Extensions.Logging.ProviderAliasAttribute("Console")]
     public partial class ConsoleLoggerProvider : Microsoft.Extensions.Logging.ILoggerProvider, Microsoft.Extensions.Logging.ISupportExternalScope, System.IDisposable
@@ -43,19 +45,14 @@ namespace Microsoft.Extensions.Logging.Console
     }
     public partial class JsonConsoleLogFormatter : Microsoft.Extensions.Logging.Console.ILogFormatter
     {
-        public JsonConsoleLogFormatter() { }
+        internal JsonConsoleLogFormatter() { }
         public string Name { get { throw null; } }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, ConsoleLoggerOptions options) { throw null; }
-    }
-    public partial class JsonConsoleLogFormatterOptions : ConsoleLoggerOptions
-    {
-        public JsonConsoleLogFormatterOptions() { }
-        public System.Text.Json.JsonWriterOptions JsonWriterOptions { get; set; }
+        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions options) { throw null; }
     }
     public partial interface ILogFormatter
     {
         string Name { get; }
-        Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, ConsoleLoggerOptions options);
+        Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions options);
     }
     public readonly partial struct LogMessageEntry
     {

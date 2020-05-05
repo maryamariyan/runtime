@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Text.Json;
 
 namespace Microsoft.Extensions.Logging.Console
 {
@@ -39,9 +40,12 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Custom)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    Formatter = Enum.GetName(typeof(ConsoleLoggerFormat), ConsoleLoggerFormat.Custom);
                 }
-                Formatter = Enum.GetName(typeof(ConsoleLoggerFormat), value);
+                else
+                {
+                    Formatter = Enum.GetName(typeof(ConsoleLoggerFormat), value);
+                }
             }
         }
 
@@ -64,5 +68,7 @@ namespace Microsoft.Extensions.Logging.Console
         /// Gets or sets indication whether or not UTC timezone should be used to for timestamps in logging messages. Defaults to <c>false</c>.
         /// </summary>
         public bool UseUtcTimestamp { get; set; }
+
+        public JsonWriterOptions JsonWriterOptions { get; set; }
     }
 }
