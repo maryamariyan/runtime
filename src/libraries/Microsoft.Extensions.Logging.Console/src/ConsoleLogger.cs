@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Logging.Console
 
     internal class ConsoleLogger : ILogger
     {
+        // private readonly IConsoleLogFormatterConfigurationFactory _formatterFactory;
         private readonly FormatterInternals _formatterInternals = new FormatterInternals();
         private readonly ILogFormatter _defaultFormatter;
         private readonly ILogFormatter _compactFormatter;
@@ -30,6 +31,7 @@ namespace Microsoft.Extensions.Logging.Console
         private readonly ConsoleLoggerProcessor _queueProcessor;
 
         internal ConsoleLogger(string name, ConsoleLoggerProcessor loggerProcessor)
+        // internal ConsoleLogger(string name, ConsoleLoggerProcessor loggerProcessor, IConsoleLogFormatterConfigurationFactory formatterFactory)
         {
             if (name == null)
             {
@@ -43,6 +45,10 @@ namespace Microsoft.Extensions.Logging.Console
             _compactFormatter = new CompactLogFormatter(_formatterInternals);
             _systemdFormatter = new SystemdLogFormatter(_formatterInternals);
             _jsonFormatter = new JsonConsoleLogFormatter(_formatterInternals);
+            // _formatterFactory = formatterFactory;
+            // _jsonFormatter = _formatterFactory.CreateJsonFormatter((formatter) => {
+            //     ((JsonConsoleLogFormatter)formatter)._formatterInternals = _formatterInternals;
+            // });
         }
 
         internal IExternalScopeProvider ScopeProvider 

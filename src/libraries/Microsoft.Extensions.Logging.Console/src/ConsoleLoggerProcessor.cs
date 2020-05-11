@@ -50,10 +50,11 @@ namespace Microsoft.Extensions.Logging.Console
         }
 
         // for testing
-        internal virtual void WriteMessage(LogMessageEntry message)
+        internal virtual void WriteMessage(LogMessageEntry message) // also pass an action
         {
             var console = message.LogAsError ? ErrorConsole : Console;
-
+// this is keeping user away from making log customized
+// this ordering is restricting
             if (message.TimeStamp != null)
             {
                 console.Write(message.TimeStamp, message.MessageColor, message.MessageColor);

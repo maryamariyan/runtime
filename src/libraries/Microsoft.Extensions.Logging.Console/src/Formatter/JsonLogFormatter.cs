@@ -182,6 +182,7 @@ namespace Microsoft.Extensions.Logging.Console
         private static readonly string _messagePadding;
         private static readonly string _newLineWithMessagePadding;
         private readonly FormatterInternals _formatterInternals;
+        // internal FormatterInternals _formatterInternals;
 
         // ConsoleColor does not have a value to specify the 'Default' color
         private readonly ConsoleColor? DefaultConsoleColor = null;
@@ -202,6 +203,16 @@ namespace Microsoft.Extensions.Logging.Console
         {
             _formatterInternals = formatterInternals;
         }
+
+        // // internal JsonConsoleLogFormatter(FormatterInternals formatterInternals)
+        // // {
+        // //     _formatterInternals = formatterInternals;
+        // // }
+
+        // public JsonConsoleLogFormatter()
+        // {
+        //     // temp testing DI
+        // }
 
         public string Name => "Json";
 
@@ -274,7 +285,7 @@ namespace Microsoft.Extensions.Logging.Console
                         writer.WriteString("Message", exception.Message.ToString());
                         writer.WriteString("Type", exception.GetType().ToString());
                         writer.WriteStartArray("StackTrace");
-                        foreach (var xx in exception.StackTrace.Split(Environment.NewLine))
+                        foreach (var xx in exception?.StackTrace?.Split(Environment.NewLine))
                         {
                             JsonSerializer.Serialize<string>(writer, xx);
                         }

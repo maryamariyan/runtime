@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.Logging.Console
         private readonly IOptionsMonitor<ConsoleLoggerOptions> _options;
         private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers;
         private readonly ConsoleLoggerProcessor _messageQueue;
+        // private readonly IConsoleLogFormatterConfigurationFactory _formatterFactory;
         private readonly Dictionary<string, ILogFormatter> _formatters;
 
         private IDisposable _optionsReloadToken;
@@ -31,6 +32,11 @@ namespace Microsoft.Extensions.Logging.Console
         /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
         /// <param name="formatters"></param>
         public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<ILogFormatter> formatters)
+        // /// <param name="formatterFactory"></param>
+        // public ConsoleLoggerProvider(
+        //     IOptionsMonitor<ConsoleLoggerOptions> options,
+        //     IEnumerable<ILogFormatter> formatters,
+        //     IConsoleLogFormatterConfigurationFactory formatterFactory)
         {
             _options = options;
             _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
@@ -39,7 +45,8 @@ namespace Microsoft.Extensions.Logging.Console
                 throw new ArgumentNullException(nameof(formatters));
             }
 
-            _formatters = formatters.ToDictionary(f => f.Name);
+            _formatters = formatters.ToDictionary(f => f.Name); 
+            // _formatterFactory = formatterFactory;
 
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = _options.OnChange(ReloadLoggerOptions);
@@ -57,6 +64,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+// warning:  ReloadLoggerOptions can be called before the ctor completed,... before registering all of the state used in this method need to be initialized
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
             // ILogFormatter we have access to the formatters and we the names
@@ -78,12 +86,15 @@ namespace Microsoft.Extensions.Logging.Console
             _formatters.TryGetValue(_options.CurrentValue.Formatter, out ILogFormatter logFormatter);
             //_formatters.TryGetValue(name, out ILogFormatter logFormatter);
             return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
+            // return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue, _formatterFactory)
             {
                 Options = _options.CurrentValue,
                 ScopeProvider = _scopeProvider,
                 Formatter = logFormatter
             });
         }
+
+        // got ReloadLoggerOptions
 
         /// <inheritdoc />
         public void Dispose()
