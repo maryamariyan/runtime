@@ -8,9 +8,8 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdLogFormatter : ILogFormatter
+    public class SystemdLogFormatter : ILogFormatter, IDisposable
     {
-        private readonly IOptionsMonitor<SystemdLogFormatterOptions> _options;
         private IDisposable _optionsReloadToken;
 
         private static readonly string _loglevelPadding = ": ";
@@ -27,9 +26,9 @@ namespace Microsoft.Extensions.Logging.Console
 
         public SystemdLogFormatter(IOptionsMonitor<SystemdLogFormatterOptions> options)
         {
-            _options = options;
+            FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
-            _optionsReloadToken = _options.OnChange(ReloadLoggerOptions);
+            _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
         private void ReloadLoggerOptions(SystemdLogFormatterOptions options)
@@ -37,11 +36,16 @@ namespace Microsoft.Extensions.Logging.Console
             FormatterOptions = options;
         }
 
+        public void Dispose()
+        {
+            _optionsReloadToken?.Dispose();
+        }
+
         public string Name => "Systemd";
 
         public SystemdLogFormatterOptions FormatterOptions { get; set; }
 
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, ConsoleLoggerOptions options, IExternalScopeProvider scopeProvider)
+        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -62,10 +66,10 @@ namespace Microsoft.Extensions.Logging.Console
             logBuilder.Append(logLevelString);
 
             // timestamp
-            var timestampFormat = options.TimestampFormat;
+            var timestampFormat = FormatterOptions.TimestampFormat;
             if (timestampFormat != null)
             {
-                var dateTime = GetCurrentDateTime(options);
+                var dateTime = GetCurrentDateTime();
                 logBuilder.Append(dateTime.ToString(timestampFormat));
             }
 
@@ -76,7 +80,7 @@ namespace Microsoft.Extensions.Logging.Console
             logBuilder.Append("]");
 
             // scope information
-            GetScopeInformation(logBuilder, options, scopeProvider);
+            GetScopeInformation(logBuilder, scopeProvider);
 
             // message
             if (!string.IsNullOrEmpty(message))
@@ -108,7 +112,7 @@ namespace Microsoft.Extensions.Logging.Console
 
             return new LogMessageEntry(
                 message: formattedMessage,
-                logAsError: logLevel >= options.LogToStandardErrorThreshold,
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold,
                 writeCallback : console =>
                 {
                     console.Write(formattedMessage, null, null);
@@ -124,9 +128,9 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private DateTime GetCurrentDateTime(ConsoleLoggerOptions options)
+        private DateTime GetCurrentDateTime()
         {
-            return options.UseUtcTimestamp ? DateTime.UtcNow : DateTime.Now;
+            return FormatterOptions.UseUtcTimestamp ? DateTime.UtcNow : DateTime.Now;
         }
 
         private static string GetSyslogSeverityString(LogLevel logLevel)
@@ -150,9 +154,9 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringBuilder stringBuilder, ConsoleLoggerOptions options, IExternalScopeProvider scopeProvider)
+        private void GetScopeInformation(StringBuilder stringBuilder, IExternalScopeProvider scopeProvider)
         {
-            if (options.IncludeScopes && scopeProvider != null)
+            if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
                 var initialLength = stringBuilder.Length;
 

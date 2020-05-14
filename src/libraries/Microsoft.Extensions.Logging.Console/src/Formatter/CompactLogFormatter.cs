@@ -4,11 +4,13 @@
 
 using System;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    internal class CompactLogFormatter : ILogFormatter
+    internal class CompactLogFormatter : ILogFormatter, IDisposable
     {
+        private IDisposable _optionsReloadToken;
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
         private static readonly string _newLineWithMessagePadding;
@@ -26,11 +28,28 @@ namespace Microsoft.Extensions.Logging.Console
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public CompactLogFormatter() { }
+        public CompactLogFormatter(IOptionsMonitor<CompactLogFormatterOptions> options)
+        {
+            FormatterOptions = options.CurrentValue;
+            ReloadLoggerOptions(options.CurrentValue);
+            _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+        }
+
+        private void ReloadLoggerOptions(CompactLogFormatterOptions options)
+        {
+            FormatterOptions = options;
+        }
+
+        public void Dispose()
+        {
+            _optionsReloadToken?.Dispose();
+        }
+
+        public CompactLogFormatterOptions FormatterOptions { get; set; }
 
         public string Name => "Compact";
 
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, ConsoleLoggerOptions options, IExternalScopeProvider scopeProvider)
+        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
         {
             // todo fix later:
             var logBuilder = _logBuilder;
@@ -45,7 +64,7 @@ namespace Microsoft.Extensions.Logging.Console
             // INFO: ConsoleApp.Program[10]
             //       Request received
 
-            var logLevelColors = GetLogLevelConsoleColors(logLevel, options);
+            var logLevelColors = GetLogLevelConsoleColors(logLevel);
             var logLevelString = GetLogLevelString(logLevel);
             // category and event id
             logBuilder.Append(_loglevelPadding);
@@ -56,7 +75,7 @@ namespace Microsoft.Extensions.Logging.Console
             // logBuilder.AppendLine("]");
 
             // scope information
-            GetScopeInformation(logBuilder, options, scopeProvider);
+            GetScopeInformation(logBuilder, scopeProvider);
 
             if (!string.IsNullOrEmpty(message))
             {
@@ -78,10 +97,10 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             string timestamp = null;
-            var timestampFormat = options.TimestampFormat;
+            var timestampFormat = FormatterOptions.TimestampFormat;
             if (timestampFormat != null)
             {
-                var dateTime = GetCurrentDateTime(options);
+                var dateTime = GetCurrentDateTime();
                 timestamp = dateTime.ToString(timestampFormat);
             }
 
@@ -100,7 +119,7 @@ namespace Microsoft.Extensions.Logging.Console
                 levelBackground: logLevelColors.Background,
                 levelForeground: logLevelColors.Foreground,
                 messageColor: DefaultConsoleColor,
-                logAsError: logLevel >= options.LogToStandardErrorThreshold,
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold,
                 writeCallback : console =>
                 {
                     if (timestamp != null)
@@ -119,9 +138,9 @@ namespace Microsoft.Extensions.Logging.Console
             );
         }
 
-        private DateTime GetCurrentDateTime(ConsoleLoggerOptions options)
+        private DateTime GetCurrentDateTime()
         {
-            return options.UseUtcTimestamp ? DateTime.UtcNow : DateTime.Now;
+            return FormatterOptions.UseUtcTimestamp ? DateTime.UtcNow : DateTime.Now;
         }
 
         private static string GetLogLevelString(LogLevel logLevel)
@@ -145,9 +164,9 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private ConsoleColors GetLogLevelConsoleColors(LogLevel logLevel, ConsoleLoggerOptions options)
+        private ConsoleColors GetLogLevelConsoleColors(LogLevel logLevel)
         {
-            if (options.DisableColors)
+            if (FormatterOptions.DisableColors)
             {
                 return new ConsoleColors(null, null);
             }
@@ -173,9 +192,9 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringBuilder stringBuilder, ConsoleLoggerOptions options, IExternalScopeProvider scopeProvider)
+        private void GetScopeInformation(StringBuilder stringBuilder, IExternalScopeProvider scopeProvider)
         {
-            if (options.IncludeScopes && scopeProvider != null)
+            if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
                 var initialLength = stringBuilder.Length;
 
