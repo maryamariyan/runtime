@@ -31,8 +31,6 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
 
-        internal ConsoleLoggerOptions Options { get; set; }
-
         internal ILogFormatter Formatter { get; set; }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -57,7 +55,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
-            var entry = Formatter.Format(logLevel, logName, eventId, message, exception, Options, ScopeProvider);
+            var entry = Formatter.Format(logLevel, logName, eventId, message, exception, ScopeProvider);
             _queueProcessor.EnqueueMessage(entry);
         }
 

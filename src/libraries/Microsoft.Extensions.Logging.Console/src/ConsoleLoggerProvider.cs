@@ -64,7 +64,6 @@ namespace Microsoft.Extensions.Logging.Console
 
             foreach (var logger in _loggers)
             {
-                logger.Value.Options = options;
                 logger.Value.Formatter = logFormatter;
             }
         }
@@ -81,7 +80,6 @@ namespace Microsoft.Extensions.Logging.Console
 
             return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
             {
-                Options = _options.CurrentValue,
                 ScopeProvider = _scopeProvider,
                 Formatter = logFormatter
             });
