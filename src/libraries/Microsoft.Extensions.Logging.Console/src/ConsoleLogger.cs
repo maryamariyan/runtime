@@ -25,8 +25,6 @@ namespace Microsoft.Extensions.Logging.Console
 
             _name = name;
             _queueProcessor = loggerProcessor;
-            ScopeProvider = new LoggerExternalScopeProvider();
-
         }
 
         internal IExternalScopeProvider ScopeProvider { get; set; }

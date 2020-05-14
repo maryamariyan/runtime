@@ -84,7 +84,6 @@ namespace Microsoft.Extensions.Logging.Console
     public partial class JsonLogFormatterOptions
     {
         public JsonLogFormatterOptions() { }
-        public bool DisableColors { get { throw null; } set { } }
         public bool IncludeScopes { get { throw null; } set { } }
         public System.Text.Json.JsonSerializerOptions JsonSerializerOptions { get { throw null; } set { } }
         public System.Text.Json.JsonWriterOptions JsonWriterOptions { get { throw null; } set { } }
@@ -115,7 +114,6 @@ namespace Microsoft.Extensions.Logging.Console
     public partial class SystemdLogFormatterOptions
     {
         public SystemdLogFormatterOptions() { }
-        public bool DisableColors { get { throw null; } set { } }
         public bool IncludeScopes { get { throw null; } set { } }
         public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
         public string TimestampFormat { get { throw null; } set { } }
