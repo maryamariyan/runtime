@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class DefaultLogFormatter : ILogFormatter, IDisposable
+    public class DefaultConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -22,21 +22,21 @@ namespace Microsoft.Extensions.Logging.Console
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static DefaultLogFormatter()
+        static DefaultConsoleLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public DefaultLogFormatter(IOptionsMonitor<DefaultLogFormatterOptions> options)
+        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(DefaultLogFormatterOptions options)
+        private void ReloadLoggerOptions(DefaultConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -48,7 +48,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public string Name => "Default";
 
-        public DefaultLogFormatterOptions FormatterOptions { get; set; }
+        public DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
