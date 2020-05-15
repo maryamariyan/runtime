@@ -62,12 +62,15 @@ namespace Microsoft.Extensions.Logging.Console
                 if (exception != null)
                 {
                     writer.WriteStartObject("exception");
-                    writer.WriteString("message", exception.Message.ToString() + "' anc'");
+                    writer.WriteString("message", exception.Message.ToString());
                     writer.WriteString("type", exception.GetType().ToString());
                     writer.WriteStartArray("stackTrace");
-                    foreach (var xx in exception?.StackTrace?.Split(Environment.NewLine))
+                    if (exception?.StackTrace != null)
                     {
-                        JsonSerializer.Serialize<string>(writer, xx, FormatterOptions.JsonSerializerOptions);
+                        foreach (var xx in exception?.StackTrace?.Split(Environment.NewLine))
+                        {
+                            JsonSerializer.Serialize<string>(writer, xx, FormatterOptions.JsonSerializerOptions);
+                        }
                     }
                     writer.WriteEndArray();
                     writer.WriteNumber("hResult", exception.HResult);
@@ -81,6 +84,16 @@ namespace Microsoft.Extensions.Logging.Console
                 writer.Flush();
             }
             return Encoding.UTF8.GetString(output.WrittenMemory.Span);
+        }
+
+        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        {
+            var message = formatter(state, exception);
+            if (!string.IsNullOrEmpty(message) || exception != null)
+            {
+                return Format(logLevel, logName, eventId, message, exception, scopeProvider);
+            }
+            return default;
         }
 
         public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
@@ -153,8 +166,7 @@ namespace Microsoft.Extensions.Logging.Console
                         {
                             foreach (var kvp in kvps)
                             {
-
-                                if (kvp.Value is String ss)
+                                if (kvp.Value is string ss)
                                     state.WriteString(kvp.Key, ss);
                                 else
                                 if (kvp.Value is int ii)
@@ -168,6 +180,10 @@ namespace Microsoft.Extensions.Logging.Console
                             }
                             //state is the writer
                             //JsonSerializer.Serialize(state, scope);
+                        }
+                        else
+                        {
+                            state.WriteString("noName", scope.ToString());
                         }
                     }, (writer));
                     writer.WriteEndObject();
