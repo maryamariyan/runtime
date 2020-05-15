@@ -21,7 +21,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class JsonConsoleLogFormatter : IConsoleLogFormatter, IDisposable
+    internal class JsonConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private IDisposable _optionsReloadToken;
         

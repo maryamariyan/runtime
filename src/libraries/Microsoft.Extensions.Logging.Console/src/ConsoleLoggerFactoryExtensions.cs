@@ -57,6 +57,58 @@ namespace Microsoft.Extensions.Logging
 
             return builder;
         }
+ 
+        public static ILoggingBuilder AddCompactConsoleLogFormatter(this ILoggingBuilder builder, Action<CompactLogFormatterOptions> configure)
+        {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            return builder;
+        }
+        
+        public static ILoggingBuilder AddDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
+                {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            return builder;
+        }
+
+        public static ILoggingBuilder AddJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
+        {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            return builder;
+        }
+        
+        public static ILoggingBuilder AddSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
+         {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            return builder;
+        }
 
         public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
             where TOptions : class
