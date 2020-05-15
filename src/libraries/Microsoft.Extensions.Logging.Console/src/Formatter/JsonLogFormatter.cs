@@ -115,20 +115,12 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder.Capacity = 1024;
             }
             _logBuilder = logBuilder;
+            
+            var messages = new ConsoleMessage[1] { new ConsoleMessage(formattedMessage, null, null) };
 
             return new LogMessageEntry(
-                message: formattedMessage,
-//                timeStamp: timestamp,
-//                levelString: logLevelString,
-                levelBackground: null,
-                levelForeground: null,
-                messageColor: null,
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold,
-                writeCallback: console =>
-                {
-                    console.WriteLine(formattedMessage, null, null);
-                    console.Flush();
-                }
+                messages: messages,
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
             );
         }
 

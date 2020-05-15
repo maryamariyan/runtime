@@ -21,9 +21,6 @@ namespace Microsoft.Extensions.Logging.Console
         // ConsoleColor does not have a value to specify the 'Default' color
         private readonly ConsoleColor? DefaultConsoleColor = null;
 
-        [ThreadStatic]
-        private static StringBuilder _logBuilder;
-
         static CompactLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
@@ -69,41 +66,36 @@ namespace Microsoft.Extensions.Logging.Console
 
         private LogMessageEntry FormatHelper<TState>(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope)
         {
-            List<Message> msgs = new List<Message>();
-            // todo fix later:
-            var logBuilder = _logBuilder;
-            _logBuilder = null;
-
-            if (logBuilder == null)
-            {
-                logBuilder = new StringBuilder();
-            }
-
-            // Example:
-            // INFO: ConsoleApp.Program[10]
-            //       Request received
+            var messages = new List<ConsoleMessage>();
 
             var logLevelColors = GetLogLevelConsoleColors(logLevel);
             var logLevelString = GetLogLevelString(logLevel);
-            // category and event id
-            logBuilder.Append(_loglevelPadding);
-            logBuilder.Append(logName);
-            logBuilder.Append("[");
-            logBuilder.Append(eventId);
-            logBuilder.Append("]");
-            // logBuilder.AppendLine("]");
 
-            msgs.Add(new Message($"{logName}[{eventId}] ", null, null));
+            string timestamp = null;
+            var timestampFormat = FormatterOptions.TimestampFormat;
+            if (timestampFormat != null)
+            {
+                var dateTime = GetCurrentDateTime();
+                timestamp = dateTime.ToString(timestampFormat);
+            }
+            if (timestamp != null)
+            {
+                messages.Add(new ConsoleMessage(timestamp + " ", null, null));
+            }
+            if (logLevelString != null)
+            {
+                messages.Add(new ConsoleMessage(logLevelString,logLevelColors.Background, logLevelColors.Foreground));
+            }
+
+            messages.Add(new ConsoleMessage($"{logName}[{eventId}] ", null, null));
             string originalFormat = null;
             int count = 0;
 
             if (scope != null)
             {
-                logBuilder.Append(_messagePadding);
                 if (scope is IReadOnlyList<KeyValuePair<string, object>> kvpsx)
                 {
                     var strings = new List<KeyValuePair<string, object>>();
-                    logBuilder.Append(" -> ");
                     foreach (var kvp in kvpsx)
                     {
                         if (kvp.Key.Contains("{OriginalFormat}"))
@@ -112,10 +104,7 @@ namespace Microsoft.Extensions.Logging.Console
                         }
                         else
                         {
-                            //count++;
                             strings.Add(kvp);
-                            logBuilder.Append(kvp.Value.ToString());
-                            logBuilder.Append(", ");
                         }
                     }
                     int prevIndex = 0;
@@ -129,13 +118,10 @@ namespace Microsoft.Extensions.Logging.Console
                                 if (curIndex != -1)
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    msgs.Add(new Message(curString, null, null));
-                                    msgs.Add(new Message(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan));
+                                    messages.Add(new ConsoleMessage(curString, null, null));
+                                    messages.Add(new ConsoleMessage(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan));
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
-                                    //strings.Add(kvp.Value.ToString());
-                                    logBuilder.Append(kvp.Value.ToString());
-                                    logBuilder.Append(", ");
                                 }
                             }
                         }
@@ -144,7 +130,6 @@ namespace Microsoft.Extensions.Logging.Console
                 else if (scope is IReadOnlyList<KeyValuePair<string, string>> kvps)
                 {
                     var strings = new List<KeyValuePair<string, string>>();
-                    logBuilder.Append(" -> ");
                     foreach (var kvp in kvps)
                     {
                         if (kvp.Key.Contains("{OriginalFormat}"))
@@ -153,10 +138,7 @@ namespace Microsoft.Extensions.Logging.Console
                         }
                         else
                         {
-                            //count++;
                             strings.Add(kvp);
-                            logBuilder.Append(kvp.Value);
-                            logBuilder.Append(", ");
                         }
                     }
                     int prevIndex = 0;
@@ -170,140 +152,44 @@ namespace Microsoft.Extensions.Logging.Console
                                 if (curIndex != -1)
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    msgs.Add(new Message(curString, null, null));
-                                    msgs.Add(new Message(strings.ElementAt(count).Value, null, ConsoleColor.Cyan));
+                                    messages.Add(new ConsoleMessage(curString, null, null));
+                                    messages.Add(new ConsoleMessage(strings.ElementAt(count).Value, null, ConsoleColor.Cyan));
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
-                                    logBuilder.Append(kvp.Value);
-                                    logBuilder.Append(", ");
                                 }
                             }
                         }
                     }
                 }
-                else
-                {
-                    logBuilder.Append("-> ");
-                    logBuilder.Append(scope.ToString());
-                }
             }
 
             if (!string.IsNullOrEmpty(message))
             {
-                // message
-                logBuilder.Append(_messagePadding);
-
-                var len = logBuilder.Length;
-                logBuilder.AppendLine(message);
                 if (originalFormat == null)
                 {
-                    msgs.Add(new Message(message, null, null));
+                    messages.Add(new ConsoleMessage(message, null, null));
                 }
                 else if (count == 0)
                 {
-                    msgs.Add(new Message(originalFormat, null, null));
+                    messages.Add(new ConsoleMessage(originalFormat, null, null));
                 }
             }
 
-            // scope information
-            msgs.Add(new Message(" ", null, null));
-            GetScopeInformation(logBuilder, scopeProvider, msgs);
+            messages.Add(new ConsoleMessage(" ", null, null));
+            GetScopeInformation(scopeProvider, messages);
 
-            // Example:
-            // System.InvalidOperationException
-            //    at Namespace.Class.Function() in File:line X
             if (exception != null)
             {
                 // exception message
-                logBuilder.Append(exception.ToString());
-                msgs.Add(new Message(" ", null, null));
-                msgs.Add(new Message(exception.ToString(), null, null));
-                // logBuilder.AppendLine(exception.ToString());
+                messages.Add(new ConsoleMessage(" ", null, null));
+                messages.Add(new ConsoleMessage(exception.ToString(), null, null));
+                // TODO: confirm exception message all in one line?
             }
-
-            string timestamp = null;
-            var timestampFormat = FormatterOptions.TimestampFormat;
-            if (timestampFormat != null)
-            {
-                var dateTime = GetCurrentDateTime();
-                timestamp = dateTime.ToString(timestampFormat);
-            }
-
-            var formattedMessage = logBuilder.ToString();
-            logBuilder.Clear();
-            if (logBuilder.Capacity > 1024)
-            {
-                logBuilder.Capacity = 1024;
-            }
-            _logBuilder = logBuilder;
 
             return new LogMessageEntry(
-                message: formattedMessage,
-                timeStamp: timestamp,
-                levelString: logLevelString,
-                levelBackground: logLevelColors.Background,
-                levelForeground: logLevelColors.Foreground,
-                messageColor: DefaultConsoleColor,
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold,
-                writeCallback : console =>
-                {
-                    if (timestamp != null || logLevelString != null)
-                    {
-                        console.Write("[", null, null);
-
-                        if (timestamp != null)
-                        {
-                            console.Write(timestamp, null, null);
-                            console.Write(" ", null, null);
-                        }
-                        if (logLevelString != null)
-                        {
-                            console.Write(logLevelString, logLevelColors.Background, logLevelColors.Foreground);
-                            console.Write("", null, null);
-                        }
-                        console.Write("] ", null, null);
-                    }
-
-                    if (msgs.Count > 0)
-                    {
-                        foreach (var item in msgs)
-                        {
-                            console.Write(item.Content, item.Background, item.Foreground);
-                        }
-                    }
-                    
-                    //console.Write(formattedMessage, DefaultConsoleColor, DefaultConsoleColor);
-                    console.WriteLine(string.Empty, DefaultConsoleColor, DefaultConsoleColor);
-                    console.Flush();
-                }
+                messages: messages.ToArray(),
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
             );
-        }
-
-        internal struct LogEntry
-        {
-            internal LogEntry(Action<IConsole> action, Message[] messages, bool logAsError)
-            {
-                Messages = messages;
-                WriteCallback = action;
-                LogAsError = logAsError;
-            }
-
-            internal Message[] Messages;
-            internal Action<IConsole> WriteCallback;
-            internal bool LogAsError;
-        }
-
-        internal struct Message
-        {
-            internal Message(string message, ConsoleColor? background, ConsoleColor? foreground)
-            {
-                Content = message;
-                Background = background;
-                Foreground = foreground;
-            }
-            internal string Content;
-            internal ConsoleColor? Background;
-            internal ConsoleColor? Foreground;
         }
 
         private DateTime GetCurrentDateTime()
@@ -360,34 +246,17 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringBuilder stringBuilder, IExternalScopeProvider scopeProvider, List<Message> msgs)
+        private void GetScopeInformation(IExternalScopeProvider scopeProvider, List<ConsoleMessage> messages)
         {
             if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
-                var initialLength = stringBuilder.Length;
-
                 scopeProvider.ForEachScope((scope, state) =>
                 {
-                    var (builder, paddAt, messages) = state;
-                    var padd = paddAt == builder.Length;
-                    if (padd)
-                    {
-                        //messages.Add(new Message(_messagePadding, null, null));
-                        builder.Append(_messagePadding);
-                    }
-                    messages.Add(new Message("=> ", null, null));
-                    messages.Add(new Message(scope.ToString(), null, ConsoleColor.DarkGray));
-                    messages.Add(new Message(" ", null, null));
-                    builder.Append("=> ");
-                    builder.Append(scope);
-                    builder.Append(" ");
+                    state.Add(new ConsoleMessage("=> ", null, null));
+                    state.Add(new ConsoleMessage(scope.ToString(), null, ConsoleColor.DarkGray));
+                    state.Add(new ConsoleMessage(" ", null, null));
 
-                }, (stringBuilder, initialLength, msgs));
-
-                if (stringBuilder.Length > initialLength)
-                {
-                    // stringBuilder.AppendLine();
-                }
+                }, messages);
             }
         }
 
