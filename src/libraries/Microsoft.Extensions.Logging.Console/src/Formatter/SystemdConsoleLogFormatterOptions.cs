@@ -4,15 +4,12 @@
 
 using System;
 using System.Text;
-using System.Text.Json;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class JsonLogFormatterOptions
+    public class SystemdConsoleLogFormatterOptions
     {
-        public JsonLogFormatterOptions() { }
-        public JsonWriterOptions JsonWriterOptions { get; set; }
-        public JsonSerializerOptions JsonSerializerOptions { get; set; }
+        public SystemdConsoleLogFormatterOptions() { }
         
         /// <summary>
         /// Includes scopes when <see langword="true" />.

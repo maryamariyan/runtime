@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    internal class CompactLogFormatter : ILogFormatter, IDisposable
+    internal class CompactLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private IDisposable _optionsReloadToken;
         private static readonly string _loglevelPadding = ": ";

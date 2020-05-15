@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         private readonly IOptionsMonitor<ConsoleLoggerOptions> _options;
         private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers;
-        private readonly ConcurrentDictionary<string, ILogFormatter> _formatters;
+        private readonly ConcurrentDictionary<string, IConsoleLogFormatter> _formatters;
         private readonly ConsoleLoggerProcessor _messageQueue;
 
         private IDisposable _optionsReloadToken;
@@ -30,11 +30,11 @@ namespace Microsoft.Extensions.Logging.Console
         /// </summary>
         /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
         /// <param name="formatters"></param>
-        public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<ILogFormatter> formatters)
+        public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<IConsoleLogFormatter> formatters)
         {
             _options = options;
             _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
-            _formatters = new ConcurrentDictionary<string, ILogFormatter>(formatters.ToDictionary(f => f.Name)); 
+            _formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(formatters.ToDictionary(f => f.Name)); 
 
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = _options.OnChange(ReloadLoggerOptions);
@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.Logging.Console
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
             string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options?.Format);
-            _formatters.TryGetValue(options?.Formatter ?? nameFromFormat, out ILogFormatter logFormatter);
+            _formatters.TryGetValue(options?.Formatter ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
             if (logFormatter == null)
             {
                 logFormatter = _formatters[nameFromFormat];
@@ -72,7 +72,7 @@ namespace Microsoft.Extensions.Logging.Console
         public ILogger CreateLogger(string name)
         {
             string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), _options.CurrentValue.Format);
-            _formatters.TryGetValue(_options.CurrentValue.Formatter ?? nameFromFormat, out ILogFormatter logFormatter);
+            _formatters.TryGetValue(_options.CurrentValue.Formatter ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
             if (logFormatter == null)
             {
                 logFormatter = _formatters[nameFromFormat];

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdLogFormatter : ILogFormatter, IDisposable
+    public class SystemdConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private IDisposable _optionsReloadToken;
 
@@ -18,20 +18,20 @@ namespace Microsoft.Extensions.Logging.Console
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static SystemdLogFormatter()
+        static SystemdConsoleLogFormatter()
         {
             var logLevelString = GetSyslogSeverityString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
         }
 
-        public SystemdLogFormatter(IOptionsMonitor<SystemdLogFormatterOptions> options)
+        public SystemdConsoleLogFormatter(IOptionsMonitor<SystemdConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(SystemdLogFormatterOptions options)
+        private void ReloadLoggerOptions(SystemdConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -43,7 +43,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public string Name => "Systemd";
 
-        public SystemdLogFormatterOptions FormatterOptions { get; set; }
+        public SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
