@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdConsoleLogFormatter : IConsoleLogFormatter, IDisposable
+    internal class SystemdConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private IDisposable _optionsReloadToken;
 

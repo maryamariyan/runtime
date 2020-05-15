@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class DefaultConsoleLogFormatter : IConsoleLogFormatter, IDisposable
+    internal class DefaultConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
