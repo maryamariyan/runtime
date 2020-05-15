@@ -45,6 +45,16 @@ namespace Microsoft.Extensions.Logging.Console
 
         public SystemdLogFormatterOptions FormatterOptions { get; set; }
 
+        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        {
+            var message = formatter(state, exception);
+            if (!string.IsNullOrEmpty(message) || exception != null)
+            {
+                return Format(logLevel, logName, eventId, message, exception, scopeProvider);
+            }
+            return default;
+        }
+
         public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
         {
             var logBuilder = _logBuilder;

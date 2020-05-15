@@ -53,6 +53,7 @@ namespace Microsoft.Extensions.Logging.Console
         internal virtual void WriteMessage(LogMessageEntry message)
         {
             var console = message.LogAsError ? ErrorConsole : Console;
+            // is giving user control on this thread over how long the output thread takes to write to console - something to consider
             message.WriteCallback(console);
         }
 

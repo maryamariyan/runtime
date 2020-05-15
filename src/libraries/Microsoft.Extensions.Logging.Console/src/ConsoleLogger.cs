@@ -44,10 +44,10 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             var message = formatter(state, exception);
-
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                WriteMessage(logLevel, _name, eventId.Id, message, exception);
+                var entry = Formatter.Format(logLevel, _name, eventId.Id, state, exception, formatter, ScopeProvider);
+                _queueProcessor.EnqueueMessage(entry);
             }
         }
 
