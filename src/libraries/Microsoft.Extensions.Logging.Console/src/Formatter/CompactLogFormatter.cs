@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public CompactLogFormatterOptions FormatterOptions { get; set; }
 
-        public string Name => "Compact";
+        public string Name => ConsoleLogFormatterNames.Compact;
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
             if (logLevelString != null)
             {
-                messages.Add(new ConsoleMessage(logLevelString,logLevelColors.Background, logLevelColors.Foreground));
+                messages.Add(new ConsoleMessage(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground));
             }
 
             messages.Add(new ConsoleMessage($"{logName}[{eventId}] ", null, null));
@@ -185,6 +185,7 @@ namespace Microsoft.Extensions.Logging.Console
                 messages.Add(new ConsoleMessage(exception.ToString(), null, null));
                 // TODO: confirm exception message all in one line?
             }
+            messages.Add(new ConsoleMessage(Environment.NewLine, null, null));
 
             return new LogMessageEntry(
                 messages: messages.ToArray(),

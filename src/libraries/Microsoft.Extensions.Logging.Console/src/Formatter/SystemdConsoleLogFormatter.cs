@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken?.Dispose();
         }
 
-        public string Name => "Systemd";
+        public string Name => ConsoleLogFormatterNames.Systemd;
 
         public SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 

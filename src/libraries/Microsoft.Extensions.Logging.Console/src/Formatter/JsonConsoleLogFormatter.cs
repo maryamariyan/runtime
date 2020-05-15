@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        public string Name => "Json";
+        public string Name => ConsoleLogFormatterNames.Json;
 
         private string WriteJson(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)//long[] extraData)
         {
@@ -116,7 +116,10 @@ namespace Microsoft.Extensions.Logging.Console
             }
             _logBuilder = logBuilder;
             
-            var messages = new ConsoleMessage[1] { new ConsoleMessage(formattedMessage, null, null) };
+            var messages = new ConsoleMessage[2] {
+                new ConsoleMessage(formattedMessage, null, null),
+                new ConsoleMessage(Environment.NewLine, null, null)
+            };
 
             return new LogMessageEntry(
                 messages: messages,

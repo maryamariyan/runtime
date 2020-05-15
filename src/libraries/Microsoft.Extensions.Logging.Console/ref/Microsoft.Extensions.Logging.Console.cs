@@ -26,6 +26,13 @@ namespace Microsoft.Extensions.Logging.Console
         public string TimestampFormat { get { throw null; } set { } }
         public bool UseUtcTimestamp { get { throw null; } set { } }
     }
+    public static partial class ConsoleLogFormatterNames
+    {
+        public const string Compact = "Compact";
+        public const string Default = "Default";
+        public const string Json = "Json";
+        public const string Systemd = "Systemd";
+    }
     public enum ConsoleLoggerFormat
     {
         Default = 0,

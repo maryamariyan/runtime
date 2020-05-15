@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken?.Dispose();
         }
 
-        public string Name => "Default";
+        public string Name => ConsoleLogFormatterNames.Default;
 
         public DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
