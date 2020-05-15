@@ -9,10 +9,14 @@ namespace Microsoft.Extensions.Logging
 {
     public static partial class ConsoleLoggerExtensions
     {
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddCompactConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.CompactLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<TOptions> configure) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddDefaultConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddJsonConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSystemdConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> configure) { throw null; }
     }
 }
 namespace Microsoft.Extensions.Logging.Console
@@ -59,15 +63,6 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly System.ConsoleColor? Foreground;
         public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
     }
-    public partial class DefaultConsoleLogFormatter : Microsoft.Extensions.Logging.Console.IConsoleLogFormatter, System.IDisposable
-    {
-        public DefaultConsoleLogFormatter(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> options) { }
-        public Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions FormatterOptions { get { throw null; } set { } }
-        public string Name { get { throw null; } }
-        public void Dispose() { }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
-    }
     public partial class DefaultConsoleLogFormatterOptions
     {
         public DefaultConsoleLogFormatterOptions() { }
@@ -82,15 +77,6 @@ namespace Microsoft.Extensions.Logging.Console
         string Name { get; }
         Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
         Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
-    }
-    public partial class JsonConsoleLogFormatter : Microsoft.Extensions.Logging.Console.IConsoleLogFormatter, System.IDisposable
-    {
-        public JsonConsoleLogFormatter(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> options) { }
-        public Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions FormatterOptions { get { throw null; } set { } }
-        public string Name { get { throw null; } }
-        public void Dispose() { }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
     }
     public partial class JsonConsoleLogFormatterOptions
     {
@@ -107,15 +93,6 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly bool LogAsError;
         public readonly Microsoft.Extensions.Logging.Console.ConsoleMessage[] Messages;
         public LogMessageEntry(Microsoft.Extensions.Logging.Console.ConsoleMessage[] messages, bool logAsError = false) { throw null; }
-    }
-    public partial class SystemdConsoleLogFormatter : Microsoft.Extensions.Logging.Console.IConsoleLogFormatter, System.IDisposable
-    {
-        public SystemdConsoleLogFormatter(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> options) { }
-        public Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions FormatterOptions { get { throw null; } set { } }
-        public string Name { get { throw null; } }
-        public void Dispose() { }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
-        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
     }
     public partial class SystemdConsoleLogFormatterOptions
     {
