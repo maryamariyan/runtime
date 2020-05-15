@@ -52,6 +52,7 @@ namespace Microsoft.Extensions.Logging.Console
         public string Name { get { throw null; } }
         public void Dispose() { }
         public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
+        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
     }
     public partial class DefaultLogFormatterOptions
     {
@@ -72,6 +73,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         string Name { get; }
         Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
+        Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
     }
     public partial class JsonConsoleLogFormatter : Microsoft.Extensions.Logging.Console.ILogFormatter, System.IDisposable
     {
@@ -80,6 +82,7 @@ namespace Microsoft.Extensions.Logging.Console
         public string Name { get { throw null; } }
         public void Dispose() { }
         public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
+        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
     }
     public partial class JsonLogFormatterOptions
     {
@@ -110,6 +113,7 @@ namespace Microsoft.Extensions.Logging.Console
         public string Name { get { throw null; } }
         public void Dispose() { }
         public Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
+        public Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { throw null; }
     }
     public partial class SystemdLogFormatterOptions
     {
