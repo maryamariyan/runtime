@@ -8,9 +8,9 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class DefaultLogFormatterOptions
+    public class DefaultConsoleLogFormatterOptions
     {
-        public DefaultLogFormatterOptions() { }
+        public DefaultConsoleLogFormatterOptions() { }
         
         /// <summary>
         /// Includes scopes when <see langword="true" />.

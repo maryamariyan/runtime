@@ -6,7 +6,7 @@ using System;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public interface ILogFormatter
+    public interface IConsoleLogFormatter
     {
         string Name { get; }
         LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider);

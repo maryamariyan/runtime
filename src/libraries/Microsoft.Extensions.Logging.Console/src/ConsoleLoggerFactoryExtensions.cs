@@ -29,10 +29,10 @@ namespace Microsoft.Extensions.Logging
         {
             builder.AddConfiguration();
 
-            builder.AddLogFormatter<JsonConsoleLogFormatter, JsonLogFormatterOptions>();
-            builder.AddLogFormatter<DefaultLogFormatter, DefaultLogFormatterOptions>();
-            builder.AddLogFormatter<SystemdLogFormatter, SystemdLogFormatterOptions>();
-            builder.AddLogFormatter<CompactLogFormatter, CompactLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<JsonConsoleLogFormatter, JsonConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<DefaultConsoleLogFormatter, DefaultConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, SystemdConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<CompactLogFormatter, CompactLogFormatterOptions>();
 
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
@@ -58,13 +58,13 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
-        public static ILoggingBuilder AddLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
+        public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
             where TOptions : class
-            where TFormatter : class, ILogFormatter
+            where TFormatter : class, IConsoleLogFormatter
         {
             builder.AddConfiguration();
 
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, TFormatter>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConsoleLogFormatter, TFormatter>());
             builder.Services.AddSingleton<IConfigureOptions<TOptions>, LogFormatterOptionsSetup<TFormatter, TOptions>>();
             builder.Services.AddSingleton<IOptionsChangeTokenSource<TOptions>, LoggerProviderOptionsChangeTokenSource<TOptions, TFormatter>>();
 
@@ -77,16 +77,16 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
-        public static ILoggingBuilder AddLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
+        public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
             where TOptions : class
-            where TFormatter : class, ILogFormatter
+            where TFormatter : class, IConsoleLogFormatter
         {
             if (configure == null)
             {
                 throw new ArgumentNullException(nameof(configure));
             }
 
-            builder.AddLogFormatter<TFormatter, TOptions>();
+            builder.AddConsoleLogFormatter<TFormatter, TOptions>();
 
             builder.Services.Configure(configure);
 
@@ -96,7 +96,7 @@ namespace Microsoft.Extensions.Logging
 
     internal class LogFormatterOptionsSetup<TFormatter, TOptions> : ConfigureFromConfigurationOptions<TOptions> 
             where TOptions : class
-            where TFormatter : class, ILogFormatter
+            where TFormatter : class, IConsoleLogFormatter
     {
         public LogFormatterOptionsSetup(ILoggerProviderConfiguration<TFormatter> providerConfiguration)
             : base(providerConfiguration.Configuration)

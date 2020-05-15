@@ -21,14 +21,14 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class JsonConsoleLogFormatter : ILogFormatter, IDisposable
+    public class JsonConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private IDisposable _optionsReloadToken;
         
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        public JsonConsoleLogFormatter(IOptionsMonitor<JsonLogFormatterOptions> options)
+        public JsonConsoleLogFormatter(IOptionsMonitor<JsonConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
@@ -187,9 +187,9 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        public JsonLogFormatterOptions FormatterOptions { get; set; }
+        public JsonConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        private void ReloadLoggerOptions(JsonLogFormatterOptions options)
+        private void ReloadLoggerOptions(JsonConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }

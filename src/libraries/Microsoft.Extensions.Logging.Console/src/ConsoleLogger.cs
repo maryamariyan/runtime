@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
 
-        internal ILogFormatter Formatter { get; set; }
+        internal IConsoleLogFormatter Formatter { get; set; }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
