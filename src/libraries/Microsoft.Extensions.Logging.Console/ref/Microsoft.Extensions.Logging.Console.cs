@@ -9,14 +9,14 @@ namespace Microsoft.Extensions.Logging
 {
     public static partial class ConsoleLoggerExtensions
     {
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddCompactConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.CompactLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddCompactFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.CompactLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<TOptions> configure) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddDefaultConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> configure) { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddJsonConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> configure) { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSystemdConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddDefaultFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddJsonFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSystemdFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> configure) { throw null; }
     }
 }
 namespace Microsoft.Extensions.Logging.Console
