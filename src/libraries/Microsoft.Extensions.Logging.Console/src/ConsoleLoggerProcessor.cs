@@ -50,11 +50,14 @@ namespace Microsoft.Extensions.Logging.Console
         }
 
         // for testing
-        internal virtual void WriteMessage(LogMessageEntry message)
+        internal virtual void WriteMessage(LogMessageEntry entry)
         {
-            var console = message.LogAsError ? ErrorConsole : Console;
-            // is giving user control on this thread over how long the output thread takes to write to console - something to consider
-            message.WriteCallback(console);
+            var console = entry.LogAsError ? ErrorConsole : Console;
+            foreach (var message in entry.Messages)
+            {
+                console.Write(message.Content, message.Background, message.Foreground);
+            }
+            console.Flush();
         }
 
         private void ProcessLogQueue()

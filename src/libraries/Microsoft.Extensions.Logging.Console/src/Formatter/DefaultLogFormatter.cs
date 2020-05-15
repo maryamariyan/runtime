@@ -4,6 +4,7 @@
 
 using System;
 using System.Text;
+using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
@@ -119,30 +120,21 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder.Capacity = 1024;
             }
             _logBuilder = logBuilder;
+            
+            var messages = new List<ConsoleMessage>();
+            if (timestamp != null)
+            {
+                messages.Add(new ConsoleMessage(timestamp, DefaultConsoleColor, DefaultConsoleColor));
+            }
+            if (logLevelString != null)
+            {
+                messages.Add(new ConsoleMessage(logLevelString, logLevelColors.Background, logLevelColors.Foreground));
+            }
+            messages.Add(new ConsoleMessage(formattedMessage, DefaultConsoleColor, DefaultConsoleColor));
 
             return new LogMessageEntry(
-                message: formattedMessage,
-                timeStamp: timestamp,
-                levelString: logLevelString,
-                levelBackground: logLevelColors.Background,
-                levelForeground: logLevelColors.Foreground,
-                messageColor: DefaultConsoleColor,
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold,
-                writeCallback : console =>
-                {
-                    if (timestamp != null)
-                    {
-                        console.Write(timestamp, DefaultConsoleColor, DefaultConsoleColor);
-                    }
-
-                    if (logLevelString != null)
-                    {
-                        console.Write(logLevelString, logLevelColors.Background, logLevelColors.Foreground);
-                    }
-                    
-                    console.Write(formattedMessage, DefaultConsoleColor, DefaultConsoleColor);
-                    console.Flush();
-                }
+                messages: messages.ToArray(),
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
             );
         }
 

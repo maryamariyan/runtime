@@ -45,6 +45,13 @@ namespace Microsoft.Extensions.Logging.Console
         public void Dispose() { }
         public void SetScopeProvider(Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { }
     }
+    public readonly partial struct ConsoleMessage
+    {
+        public readonly System.ConsoleColor? Background;
+        public readonly string Content;
+        public readonly System.ConsoleColor? Foreground;
+        public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
+    }
     public partial class DefaultLogFormatter : Microsoft.Extensions.Logging.Console.ILogFormatter, System.IDisposable
     {
         public DefaultLogFormatter(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.DefaultLogFormatterOptions> options) { }
@@ -96,15 +103,9 @@ namespace Microsoft.Extensions.Logging.Console
     }
     public readonly partial struct LogMessageEntry
     {
-        public readonly System.ConsoleColor? LevelBackground;
-        public readonly System.ConsoleColor? LevelForeground;
-        public readonly string LevelString;
         public readonly bool LogAsError;
-        public readonly string Message;
-        public readonly System.ConsoleColor? MessageColor;
-        public readonly string TimeStamp;
-        public readonly System.Action<Microsoft.Extensions.Logging.Console.IConsole> WriteCallback;
-        public LogMessageEntry(string message, string timeStamp = null, string levelString = null, System.ConsoleColor? levelBackground = default(System.ConsoleColor?), System.ConsoleColor? levelForeground = default(System.ConsoleColor?), System.ConsoleColor? messageColor = default(System.ConsoleColor?), bool logAsError = false, System.Action<Microsoft.Extensions.Logging.Console.IConsole> writeCallback = null) { throw null; }
+        public readonly Microsoft.Extensions.Logging.Console.ConsoleMessage[] Messages;
+        public LogMessageEntry(Microsoft.Extensions.Logging.Console.ConsoleMessage[] messages, bool logAsError = false) { throw null; }
     }
     public partial class SystemdLogFormatter : Microsoft.Extensions.Logging.Console.ILogFormatter, System.IDisposable
     {
