@@ -45,6 +45,14 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken?.Dispose();
         }
 
+        public BaseOptions Options 
+        {
+            get
+            {
+                return FormatterOptions as BaseOptions;
+            }
+        }
+
         public CompactLogFormatterOptions FormatterOptions { get; set; }
 
         public string Name => ConsoleLogFormatterNames.Compact;
@@ -56,12 +64,8 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 return FormatHelper(logLevel, logName, eventId, message, exception, scopeProvider, state);
             }
+            // TODO: test use case:
             return default;
-        }
-
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
-        {
-            return FormatHelper<object>(logLevel, logName, eventId, message, exception, scopeProvider, null);
         }
 
         private LogMessageEntry FormatHelper<TState>(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope)
