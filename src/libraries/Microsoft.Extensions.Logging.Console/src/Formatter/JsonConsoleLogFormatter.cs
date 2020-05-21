@@ -96,7 +96,7 @@ namespace Microsoft.Extensions.Logging.Console
             return default;
         }
 
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
+        private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -187,6 +187,14 @@ namespace Microsoft.Extensions.Logging.Console
             catch (Exception ex)
             {
                 System.Console.WriteLine("Something went wrong" + ex.Message);
+            }
+        }
+
+        public BaseOptions Options 
+        {
+            get
+            {
+                return FormatterOptions as BaseOptions;
             }
         }
 

@@ -25,6 +25,13 @@ namespace Microsoft.Extensions.Logging.Console
         private IDisposable _optionsReloadToken;
         private IExternalScopeProvider _scopeProvider = NullExternalScopeProvider.Instance;
 
+        [System.ObsoleteAttribute("ConsoleLoggerProvider.ctor has been deprecated.", false)]
+        public ConsoleLoggerProvider(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> options) 
+            : this(options, Enumerable.Empty<IConsoleLogFormatter>())
+        {
+            ; // todo: check workflow. maybe we should always have 4 formatters prepped instead?
+        }
+
         /// <summary>
         /// Creates an instance of <see cref="ConsoleLoggerProvider"/>.
         /// </summary>
@@ -56,11 +63,12 @@ namespace Microsoft.Extensions.Logging.Console
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
             string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options?.Format);
-            _formatters.TryGetValue(options?.Formatter ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
+            _formatters.TryGetValue(options?.FormatterName ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
             if (logFormatter == null)
             {
                 logFormatter = _formatters[nameFromFormat];
             }
+            UpdateFormatterOptions(logFormatter, options);
 
             foreach (var logger in _loggers)
             {
@@ -68,15 +76,27 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions fromOptions)
+        {
+            formatter.Options.IncludeScopes = fromOptions.IncludeScopes;
+            formatter.Options.LogToStandardErrorThreshold = fromOptions.LogToStandardErrorThreshold;
+            formatter.Options.TimestampFormat = fromOptions.TimestampFormat;
+            formatter.Options.UseUtcTimestamp = fromOptions.UseUtcTimestamp;
+            // kept for deprecated api:
+            if (formatter is DefaultConsoleLogFormatter dFormatter)
+                dFormatter.FormatterOptions.DisableColors = fromOptions.DisableColors;
+        }
+
         /// <inheritdoc />
         public ILogger CreateLogger(string name)
         {
             string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), _options.CurrentValue.Format);
-            _formatters.TryGetValue(_options.CurrentValue.Formatter ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
+            _formatters.TryGetValue(_options.CurrentValue.FormatterName ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
             if (logFormatter == null)
             {
                 logFormatter = _formatters[nameFromFormat];
             }
+            UpdateFormatterOptions(logFormatter, _options.CurrentValue);
 
             return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
             {

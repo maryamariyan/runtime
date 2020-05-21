@@ -21,14 +21,18 @@ namespace Microsoft.Extensions.Logging
 }
 namespace Microsoft.Extensions.Logging.Console
 {
-    public partial class CompactLogFormatterOptions
+    public abstract partial class BaseOptions
     {
-        public CompactLogFormatterOptions() { }
-        public bool DisableColors { get { throw null; } set { } }
+        protected BaseOptions() { }
         public bool IncludeScopes { get { throw null; } set { } }
         public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
         public string TimestampFormat { get { throw null; } set { } }
         public bool UseUtcTimestamp { get { throw null; } set { } }
+    }
+    public partial class CompactLogFormatterOptions : Microsoft.Extensions.Logging.Console.BaseOptions
+    {
+        public CompactLogFormatterOptions() { }
+        public bool DisableColors { get { throw null; } set { } }
     }
     public static partial class ConsoleLogFormatterNames
     {
@@ -42,15 +46,20 @@ namespace Microsoft.Extensions.Logging.Console
         Default = 0,
         Systemd = 1,
     }
-    public partial class ConsoleLoggerOptions
+    public partial class ConsoleLoggerOptions : Microsoft.Extensions.Logging.Console.BaseOptions
     {
         public ConsoleLoggerOptions() { }
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.DisableColors has been deprecated. Please use DefaultConsoleLogFormatterOptions.DisableColors instead.", false)]
+        public bool DisableColors { get { throw null; } set { } }
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.Format has been deprecated. Please use ConsoleLoggerOptions.FormatterName instead.", false)]
         public Microsoft.Extensions.Logging.Console.ConsoleLoggerFormat Format { get { throw null; } set { } }
-        public string Formatter { get { throw null; } set { } }
+        public string FormatterName { get { throw null; } set { } }
     }
     [Microsoft.Extensions.Logging.ProviderAliasAttribute("Console")]
     public partial class ConsoleLoggerProvider : Microsoft.Extensions.Logging.ILoggerProvider, Microsoft.Extensions.Logging.ISupportExternalScope, System.IDisposable
     {
+        [System.ObsoleteAttribute("ConsoleLoggerProvider.ctor has been deprecated.", false)]
+        public ConsoleLoggerProvider(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> options) { }
         public ConsoleLoggerProvider(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> options, System.Collections.Generic.IEnumerable<Microsoft.Extensions.Logging.Console.IConsoleLogFormatter> formatters) { }
         public Microsoft.Extensions.Logging.ILogger CreateLogger(string name) { throw null; }
         public void Dispose() { }
@@ -63,30 +72,22 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly System.ConsoleColor? Foreground;
         public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
     }
-    public partial class DefaultConsoleLogFormatterOptions
+    public partial class DefaultConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.BaseOptions
     {
         public DefaultConsoleLogFormatterOptions() { }
         public bool DisableColors { get { throw null; } set { } }
-        public bool IncludeScopes { get { throw null; } set { } }
-        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
-        public string TimestampFormat { get { throw null; } set { } }
-        public bool UseUtcTimestamp { get { throw null; } set { } }
     }
     public partial interface IConsoleLogFormatter
     {
         string Name { get; }
-        Microsoft.Extensions.Logging.Console.LogMessageEntry Format(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, string message, System.Exception exception, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
+        BaseOptions Options { get; }
         Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
     }
-    public partial class JsonConsoleLogFormatterOptions
+    public partial class JsonConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.BaseOptions
     {
         public JsonConsoleLogFormatterOptions() { }
-        public bool IncludeScopes { get { throw null; } set { } }
         public System.Text.Json.JsonSerializerOptions JsonSerializerOptions { get { throw null; } set { } }
         public System.Text.Json.JsonWriterOptions JsonWriterOptions { get { throw null; } set { } }
-        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
-        public string TimestampFormat { get { throw null; } set { } }
-        public bool UseUtcTimestamp { get { throw null; } set { } }
     }
     public readonly partial struct LogMessageEntry
     {
@@ -94,12 +95,8 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly Microsoft.Extensions.Logging.Console.ConsoleMessage[] Messages;
         public LogMessageEntry(Microsoft.Extensions.Logging.Console.ConsoleMessage[] messages, bool logAsError = false) { throw null; }
     }
-    public partial class SystemdConsoleLogFormatterOptions
+    public partial class SystemdConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.BaseOptions
     {
         public SystemdConsoleLogFormatterOptions() { }
-        public bool IncludeScopes { get { throw null; } set { } }
-        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
-        public string TimestampFormat { get { throw null; } set { } }
-        public bool UseUtcTimestamp { get { throw null; } set { } }
     }
 }

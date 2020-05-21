@@ -51,13 +51,6 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
-        {
-            var entry = Formatter.Format(logLevel, logName, eventId, message, exception, ScopeProvider);
-            _queueProcessor.EnqueueMessage(entry);
-        }
-
-
         public bool IsEnabled(LogLevel logLevel)
         {
             return logLevel != LogLevel.None;
