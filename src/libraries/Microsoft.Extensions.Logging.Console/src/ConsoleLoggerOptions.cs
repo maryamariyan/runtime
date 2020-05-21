@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.Logging.Console
     /// <summary>
     /// Options for a <see cref="ConsoleLogger"/>.
     /// </summary>
-    public class ConsoleLoggerOptions : BaseOptions
+    public class ConsoleLoggerOptions
     {
         [System.ObsoleteAttribute("ConsoleLoggerOptions.DisableColors has been deprecated. Please use DefaultConsoleLogFormatterOptions.DisableColors instead.", false)]
         public bool DisableColors { get; set; }
@@ -44,16 +44,17 @@ namespace Microsoft.Extensions.Logging.Console
         /// 
         /// </summary>
         public string FormatterName { get; set; }
-    }
-
-    public abstract class BaseOptions
-    {
+        
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.IncludeScopes has been deprecated..", false)]
         public bool IncludeScopes { get; set; }
-        
+
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.LogToStandardErrorThreshold has been deprecated..", false)]
         public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get; set; }
-        
+
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.TimestampFormat has been deprecated..", false)]
         public string TimestampFormat { get; set; }
-        
+
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.UseUtcTimestamp has been deprecated..", false)]
         public bool UseUtcTimestamp { get; set; }
     }
 }

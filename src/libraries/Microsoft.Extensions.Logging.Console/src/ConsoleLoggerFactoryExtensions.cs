@@ -30,9 +30,9 @@ namespace Microsoft.Extensions.Logging
             builder.AddConfiguration();
 
             builder.AddConsoleLogFormatter<JsonConsoleLogFormatter, JsonConsoleLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, SystemdConsoleLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<CompactLogFormatter, CompactLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<DefaultConsoleLogFormatter, DefaultConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, BasicConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<CompactLogFormatter, ColoredConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<DefaultConsoleLogFormatter, ColoredConsoleLogFormatterOptions>();
 
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
@@ -57,8 +57,24 @@ namespace Microsoft.Extensions.Logging
 
             return builder;
         }
- 
-        public static ILoggingBuilder AddCompactConsoleLogFormatter(this ILoggingBuilder builder, Action<CompactLogFormatterOptions> configure)
+
+        /// <summary>
+        /// Adds a console logger named 'Console' to the factory.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="formatterName"></param>
+        public static ILoggingBuilder AddConsole(this ILoggingBuilder builder, string formatterName)
+        {
+            if (formatterName == null)
+            {
+                throw new ArgumentNullException(nameof(formatterName));
+            }
+
+            Action<ConsoleLoggerOptions> configure = (options) => { options.FormatterName = formatterName; };
+            return builder.AddConsole(configure);
+        }
+        
+        public static ILoggingBuilder UseCompactConsoleLogFormatter(this ILoggingBuilder builder, Action<ColoredConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -68,23 +84,13 @@ namespace Microsoft.Extensions.Logging
             builder.AddConsole();
             builder.Services.Configure(configure);
 
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Compact; };
+            builder.Services.Configure(configureFormatter);
+
             return builder;
         }
         
-        public static ILoggingBuilder AddDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
-                {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
-
-            builder.AddConsole();
-            builder.Services.Configure(configure);
-
-            return builder;
-        }
-
-        public static ILoggingBuilder AddJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder UseDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<ColoredConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -94,10 +100,29 @@ namespace Microsoft.Extensions.Logging
             builder.AddConsole();
             builder.Services.Configure(configure);
 
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Default; };
+            builder.Services.Configure(configureFormatter);
+
+            return builder;
+        }
+
+        public static ILoggingBuilder UseJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
+        {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Json; };
+            builder.Services.Configure(configureFormatter);
+
             return builder;
         }
         
-        public static ILoggingBuilder AddSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder UseSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<BasicConsoleLogFormatterOptions> configure)
          {
             if (configure == null)
             {
@@ -106,6 +131,9 @@ namespace Microsoft.Extensions.Logging
 
             builder.AddConsole();
             builder.Services.Configure(configure);
+
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Systemd; };
+            builder.Services.Configure(configureFormatter);
 
             return builder;
         }

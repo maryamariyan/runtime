@@ -76,15 +76,27 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions fromOptions)
+        private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions deprecatedFromOptions)
         {
-            formatter.Options.IncludeScopes = fromOptions.IncludeScopes;
-            formatter.Options.LogToStandardErrorThreshold = fromOptions.LogToStandardErrorThreshold;
-            formatter.Options.TimestampFormat = fromOptions.TimestampFormat;
-            formatter.Options.UseUtcTimestamp = fromOptions.UseUtcTimestamp;
-            // kept for deprecated api:
-            if (formatter is DefaultConsoleLogFormatter dFormatter)
-                dFormatter.FormatterOptions.DisableColors = fromOptions.DisableColors;
+            if (deprecatedFromOptions.FormatterName != null)
+                return;
+            // kept for deprecated apis:
+            if (formatter is DefaultConsoleLogFormatter defaultFormatter)
+            {
+                defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
+                defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
+                defaultFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
+                defaultFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
+                defaultFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
+            }
+            else 
+            if (formatter is SystemdConsoleLogFormatter systemdFormatter)
+            {
+                systemdFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
+                systemdFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
+                systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
+                systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
+            }
         }
 
         /// <inheritdoc />

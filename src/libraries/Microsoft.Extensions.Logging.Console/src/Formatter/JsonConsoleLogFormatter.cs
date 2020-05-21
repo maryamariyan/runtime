@@ -190,15 +190,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        public BaseOptions Options 
-        {
-            get
-            {
-                return FormatterOptions as BaseOptions;
-            }
-        }
-
-        public JsonConsoleLogFormatterOptions FormatterOptions { get; set; }
+        internal JsonConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         private void ReloadLoggerOptions(JsonConsoleLogFormatterOptions options)
         {
