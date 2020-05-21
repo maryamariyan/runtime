@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
  
-        public static ILoggingBuilder AddCompactFormatter(this ILoggingBuilder builder, Action<CompactLogFormatterOptions> configure)
+        public static ILoggingBuilder AddCompactConsoleLogFormatter(this ILoggingBuilder builder, Action<CompactLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -71,7 +71,7 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
         
-        public static ILoggingBuilder AddDefaultFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder AddDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
                 {
             if (configure == null)
             {
@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
-        public static ILoggingBuilder AddJsonFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder AddJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -97,7 +97,7 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
         
-        public static ILoggingBuilder AddSystemdFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder AddSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
          {
             if (configure == null)
             {
