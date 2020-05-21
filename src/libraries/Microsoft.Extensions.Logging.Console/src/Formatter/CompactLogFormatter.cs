@@ -28,14 +28,14 @@ namespace Microsoft.Extensions.Logging.Console
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public CompactLogFormatter(IOptionsMonitor<CompactLogFormatterOptions> options)
+        public CompactLogFormatter(IOptionsMonitor<ColoredConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(CompactLogFormatterOptions options)
+        private void ReloadLoggerOptions(ColoredConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -45,15 +45,7 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken?.Dispose();
         }
 
-        public BaseOptions Options 
-        {
-            get
-            {
-                return FormatterOptions as BaseOptions;
-            }
-        }
-
-        public CompactLogFormatterOptions FormatterOptions { get; set; }
+        internal ColoredConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public string Name => ConsoleLogFormatterNames.Compact;
 
@@ -123,6 +115,7 @@ namespace Microsoft.Extensions.Logging.Console
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
                                     messages.Add(new ConsoleMessage(curString, null, null));
+                                    // TODO: when DisableColors is true, also uncolor the inner var colors
                                     messages.Add(new ConsoleMessage(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan));
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
@@ -186,8 +179,9 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 // exception message
                 messages.Add(new ConsoleMessage(" ", null, null));
-                messages.Add(new ConsoleMessage(exception.ToString(), null, null));
-                // TODO: confirm exception message all in one line?
+                messages.Add(new ConsoleMessage(exception.ToString().Replace(Environment.NewLine, " "), null, null));
+                // TODO: try to improve readability for exception message.
+                // TODO: maybe use Compact as default?
             }
             messages.Add(new ConsoleMessage(Environment.NewLine, null, null));
 

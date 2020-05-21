@@ -29,14 +29,14 @@ namespace Microsoft.Extensions.Logging.Console
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options)
+        public DefaultConsoleLogFormatter(IOptionsMonitor<ColoredConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(DefaultConsoleLogFormatterOptions options)
+        private void ReloadLoggerOptions(ColoredConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -48,15 +48,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public string Name => ConsoleLogFormatterNames.Default;
 
-        public BaseOptions Options 
-        {
-            get
-            {
-                return FormatterOptions as BaseOptions;
-            }
-        }
-        
-        public DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
+        internal ColoredConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
