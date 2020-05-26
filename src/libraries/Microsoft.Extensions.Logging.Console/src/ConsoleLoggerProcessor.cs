@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.Logging.Console
             var console = entry.LogAsError ? ErrorConsole : Console;
             foreach (var message in entry.Messages)
             {
-                console.Write(message.Content, message.Background, message.Foreground);
+                console.Write(message.Message, message.Background, message.Foreground);
             }
             console.Flush();
         }
