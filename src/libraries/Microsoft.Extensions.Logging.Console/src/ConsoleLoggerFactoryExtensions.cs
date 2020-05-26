@@ -30,9 +30,8 @@ namespace Microsoft.Extensions.Logging
             builder.AddConfiguration();
 
             builder.AddConsoleLogFormatter<JsonConsoleLogFormatter, JsonConsoleLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, BasicConsoleLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<CompactLogFormatter, ColoredConsoleLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<DefaultConsoleLogFormatter, ColoredConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, SystemdConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<DefaultConsoleLogFormatter, DefaultConsoleLogFormatterOptions>();
 
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
@@ -74,23 +73,7 @@ namespace Microsoft.Extensions.Logging
             return builder.AddConsole(configure);
         }
         
-        public static ILoggingBuilder UseCompactConsoleLogFormatter(this ILoggingBuilder builder, Action<ColoredConsoleLogFormatterOptions> configure)
-        {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
-
-            builder.AddConsole();
-            builder.Services.Configure(configure);
-
-            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Compact; };
-            builder.Services.Configure(configureFormatter);
-
-            return builder;
-        }
-        
-        public static ILoggingBuilder UseDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<ColoredConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder UseDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -122,7 +105,7 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
         
-        public static ILoggingBuilder UseSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<BasicConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder UseSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
          {
             if (configure == null)
             {

@@ -14,33 +14,18 @@ namespace Microsoft.Extensions.Logging
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string formatterName) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<TOptions> configure) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder UseCompactConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.ColoredConsoleLogFormatterOptions> configure) { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder UseDefaultConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.ColoredConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder UseDefaultConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder UseJsonConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> configure) { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder UseSystemdConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.BasicConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder UseSystemdConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> configure) { throw null; }
     }
 }
 namespace Microsoft.Extensions.Logging.Console
 {
-    public partial class BasicConsoleLogFormatterOptions
-    {
-        public BasicConsoleLogFormatterOptions() { }
-        public bool IncludeScopes { get { throw null; } set { } }
-        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
-        public string TimestampFormat { get { throw null; } set { } }
-        public bool UseUtcTimestamp { get { throw null; } set { } }
-    }
-    public partial class ColoredConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.BasicConsoleLogFormatterOptions
-    {
-        public ColoredConsoleLogFormatterOptions() { }
-        public bool DisableColors { get { throw null; } set { } }
-    }
     public static partial class ConsoleLogFormatterNames
     {
-        public const string Compact = "Compact";
-        public const string Default = "Default";
-        public const string Json = "Json";
-        public const string Systemd = "Systemd";
+        public const string Default = "default";
+        public const string Json = "json";
+        public const string Systemd = "systemd";
     }
     public enum ConsoleLoggerFormat
     {
@@ -81,15 +66,20 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly System.ConsoleColor? Foreground;
         public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
     }
+    public partial class DefaultConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
+    {
+        public DefaultConsoleLogFormatterOptions() { }
+        public bool DisableColors { get { throw null; } set { } }
+        public bool MultiLine { get { throw null; } set { } }
+    }
     public partial interface IConsoleLogFormatter
     {
         string Name { get; }
         Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, int eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
     }
-    public partial class JsonConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.BasicConsoleLogFormatterOptions
+    public partial class JsonConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
     {
         public JsonConsoleLogFormatterOptions() { }
-        public System.Text.Json.JsonSerializerOptions JsonSerializerOptions { get { throw null; } set { } }
         public System.Text.Json.JsonWriterOptions JsonWriterOptions { get { throw null; } set { } }
     }
     public readonly partial struct LogMessageEntry
@@ -97,5 +87,13 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly bool LogAsError;
         public readonly Microsoft.Extensions.Logging.Console.ConsoleMessage[] Messages;
         public LogMessageEntry(Microsoft.Extensions.Logging.Console.ConsoleMessage[] messages, bool logAsError = false) { throw null; }
+    }
+    public partial class SystemdConsoleLogFormatterOptions
+    {
+        public SystemdConsoleLogFormatterOptions() { }
+        public bool IncludeScopes { get { throw null; } set { } }
+        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
+        public string TimestampFormat { get { throw null; } set { } }
+        public bool UseUtcTimestamp { get { throw null; } set { } }
     }
 }

@@ -62,13 +62,21 @@ namespace Microsoft.Extensions.Logging.Console
         // warning:  ReloadLoggerOptions can be called before the ctor completed,... before registering all of the state used in this method need to be initialized
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
-            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options?.Format);
-            _formatters.TryGetValue(options?.FormatterName ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
+            IConsoleLogFormatter logFormatter = null;
+            if (options.FormatterName != null)
+            {
+                _formatters.TryGetValue(options.FormatterName.ToLower(), out logFormatter);
+            }
+            //else
+            //{
+            //    string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options?.Format);
+            //    _formatters.TryGetValue(nameFromFormat, out IConsoleLogFormatter logFormatter);
+            //    UpdateFormatterOptions(logFormatter, options);
+            //}
             if (logFormatter == null)
             {
-                logFormatter = _formatters[nameFromFormat];
+                logFormatter = _formatters[ConsoleLogFormatterNames.Default];
             }
-            UpdateFormatterOptions(logFormatter, options);
 
             foreach (var logger in _loggers)
             {

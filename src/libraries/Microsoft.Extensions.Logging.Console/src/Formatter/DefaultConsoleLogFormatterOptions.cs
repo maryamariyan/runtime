@@ -8,13 +8,14 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class ColoredConsoleLogFormatterOptions : BasicConsoleLogFormatterOptions
+    public class DefaultConsoleLogFormatterOptions : SystemdConsoleLogFormatterOptions
     {
-        public ColoredConsoleLogFormatterOptions() { }
+        public DefaultConsoleLogFormatterOptions() { }
         
         /// <summary>
         /// Disables colors when <see langword="true" />.
         /// </summary>
         public bool DisableColors { get; set; }
+        public bool MultiLine { get; set; }
     }
 }
