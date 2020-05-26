@@ -8,10 +8,9 @@ using System.Text.Json;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class JsonConsoleLogFormatterOptions : BasicConsoleLogFormatterOptions
+    public class JsonConsoleLogFormatterOptions : SystemdConsoleLogFormatterOptions
     {
         public JsonConsoleLogFormatterOptions() { }
         public JsonWriterOptions JsonWriterOptions { get; set; }
-        public JsonSerializerOptions JsonSerializerOptions { get; set; }
     }
 }

@@ -69,7 +69,7 @@ namespace Microsoft.Extensions.Logging.Console
                     {
                         foreach (var xx in exception?.StackTrace?.Split(Environment.NewLine))
                         {
-                            JsonSerializer.Serialize<string>(writer, xx, FormatterOptions.JsonSerializerOptions);
+                            JsonSerializer.Serialize<string>(writer, xx);
                         }
                     }
                     writer.WriteEndArray();

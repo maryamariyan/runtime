@@ -7,9 +7,9 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class BasicConsoleLogFormatterOptions
+    public class SystemdConsoleLogFormatterOptions
     {
-        public BasicConsoleLogFormatterOptions() { }
+        public SystemdConsoleLogFormatterOptions() { }
 
         public bool IncludeScopes { get; set; }
         

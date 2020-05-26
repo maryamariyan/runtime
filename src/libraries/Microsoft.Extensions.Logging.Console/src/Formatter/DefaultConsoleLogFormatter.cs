@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
@@ -29,14 +31,14 @@ namespace Microsoft.Extensions.Logging.Console
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public DefaultConsoleLogFormatter(IOptionsMonitor<ColoredConsoleLogFormatterOptions> options)
+        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(ColoredConsoleLogFormatterOptions options)
+        private void ReloadLoggerOptions(DefaultConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -48,16 +50,152 @@ namespace Microsoft.Extensions.Logging.Console
 
         public string Name => ConsoleLogFormatterNames.Default;
 
-        internal ColoredConsoleLogFormatterOptions FormatterOptions { get; set; }
+        internal DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
+                if (!FormatterOptions.MultiLine)
+                {
+                    return FormatHelperCompact(logLevel, logName, eventId, message, exception, scopeProvider, state);
+                }
                 return Format(logLevel, logName, eventId, message, exception, scopeProvider);
             }
+            // TODO: test use case:
             return default;
+        }
+
+        private LogMessageEntry FormatHelperCompact<TState>(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope)
+        {
+            var messages = new List<ConsoleMessage>();
+
+            var logLevelColors = GetLogLevelConsoleColors(logLevel);
+            var logLevelString = GetLogLevelString(logLevel);
+
+            string timestamp = null;
+            var timestampFormat = FormatterOptions.TimestampFormat;
+            if (timestampFormat != null)
+            {
+                var dateTime = GetCurrentDateTime();
+                timestamp = dateTime.ToString(timestampFormat);
+            }
+            if (timestamp != null)
+            {
+                messages.Add(new ConsoleMessage(timestamp + " ", null, null));
+            }
+            if (logLevelString != null)
+            {
+                messages.Add(new ConsoleMessage(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground));
+            }
+
+            messages.Add(new ConsoleMessage($"{logName}[{eventId}] ", null, null));
+            string originalFormat = null;
+            int count = 0;
+
+            if (scope != null)
+            {
+                if (scope is IReadOnlyList<KeyValuePair<string, object>> kvpsx)
+                {
+                    var strings = new List<KeyValuePair<string, object>>();
+                    foreach (var kvp in kvpsx)
+                    {
+                        if (kvp.Key.Contains("{OriginalFormat}"))
+                        {
+                            originalFormat = kvp.Value.ToString();
+                        }
+                        else
+                        {
+                            strings.Add(kvp);
+                        }
+                    }
+                    int prevIndex = 0;
+                    if (originalFormat != null)
+                    {
+                        foreach (var kvp in kvpsx)
+                        {
+                            if (!kvp.Key.Contains("{OriginalFormat}"))
+                            {
+                                var curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
+                                if (curIndex != -1)
+                                {
+                                    var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
+                                    messages.Add(new ConsoleMessage(curString, null, null));
+                                    // TODO: when DisableColors is true, also uncolor the inner var colors
+                                    messages.Add(new ConsoleMessage(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan));
+                                    prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (scope is IReadOnlyList<KeyValuePair<string, string>> kvps)
+                {
+                    var strings = new List<KeyValuePair<string, string>>();
+                    foreach (var kvp in kvps)
+                    {
+                        if (kvp.Key.Contains("{OriginalFormat}"))
+                        {
+                            originalFormat = kvp.Value;
+                        }
+                        else
+                        {
+                            strings.Add(kvp);
+                        }
+                    }
+                    int prevIndex = 0;
+                    if (originalFormat != null)
+                    {
+                        foreach (var kvp in kvps)
+                        {
+                            if (!kvp.Key.Contains("{OriginalFormat}"))
+                            {
+                                var curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
+                                if (curIndex != -1)
+                                {
+                                    var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
+                                    messages.Add(new ConsoleMessage(curString, null, null));
+                                    messages.Add(new ConsoleMessage(strings.ElementAt(count).Value, null, ConsoleColor.Cyan));
+                                    prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                if (originalFormat == null)
+                {
+                    messages.Add(new ConsoleMessage(message, null, null));
+                }
+                else if (count == 0)
+                {
+                    messages.Add(new ConsoleMessage(originalFormat, null, null));
+                }
+            }
+
+            messages.Add(new ConsoleMessage(" ", null, null));
+            GetScopeInformation(scopeProvider, messages);
+
+            if (exception != null)
+            {
+                // exception message
+                messages.Add(new ConsoleMessage(" ", null, null));
+                messages.Add(new ConsoleMessage(exception.ToString().Replace(Environment.NewLine, " "), null, null));
+                // TODO: try to improve readability for exception message.
+                // TODO: maybe use Compact as default?
+            }
+            messages.Add(new ConsoleMessage(Environment.NewLine, null, null));
+
+            return new LogMessageEntry(
+                messages: messages.ToArray(),
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
+            );
         }
 
         private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
@@ -189,6 +327,20 @@ namespace Microsoft.Extensions.Logging.Console
                     return new ConsoleColors(ConsoleColor.Gray, ConsoleColor.Black);
                 default:
                     return new ConsoleColors(DefaultConsoleColor, DefaultConsoleColor);
+            }
+        }
+
+        private void GetScopeInformation(IExternalScopeProvider scopeProvider, List<ConsoleMessage> messages)
+        {
+            if (FormatterOptions.IncludeScopes && scopeProvider != null)
+            {
+                scopeProvider.ForEachScope((scope, state) =>
+                {
+                    state.Add(new ConsoleMessage("=> ", null, null));
+                    state.Add(new ConsoleMessage(scope.ToString(), null, ConsoleColor.DarkGray));
+                    state.Add(new ConsoleMessage(" ", null, null));
+
+                }, messages);
             }
         }
 
