@@ -22,11 +22,11 @@ namespace Microsoft.Extensions.Logging.Console
     {
         public ConsoleMessage(string message, ConsoleColor? background = null, ConsoleColor? foreground = null)
         {
-            Content = message;
+            Message = message;
             Background = background;
             Foreground = foreground;
         }
-        public readonly string Content;
+        public readonly string Message;
         public readonly ConsoleColor? Background;
         public readonly ConsoleColor? Foreground;
     }
