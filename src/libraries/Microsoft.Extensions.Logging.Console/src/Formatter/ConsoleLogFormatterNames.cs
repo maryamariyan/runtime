@@ -6,9 +6,8 @@ namespace Microsoft.Extensions.Logging.Console
 {
     public static class ConsoleLogFormatterNames
     {
-        public const string Compact = nameof(Compact);
-        public const string Default = nameof(Default);
-        public const string Json = nameof(Json);
-        public const string Systemd = nameof(Systemd);
+        public const string Default = "default";
+        public const string Json = "json";
+        public const string Systemd = "systemd";
     }
 }

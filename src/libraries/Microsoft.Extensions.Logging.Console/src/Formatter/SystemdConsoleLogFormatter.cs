@@ -24,14 +24,14 @@ namespace Microsoft.Extensions.Logging.Console
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
         }
 
-        public SystemdConsoleLogFormatter(IOptionsMonitor<BasicConsoleLogFormatterOptions> options)
+        public SystemdConsoleLogFormatter(IOptionsMonitor<SystemdConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(BasicConsoleLogFormatterOptions options)
+        private void ReloadLoggerOptions(SystemdConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -43,7 +43,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public string Name => ConsoleLogFormatterNames.Systemd;
 
-        internal BasicConsoleLogFormatterOptions FormatterOptions { get; set; }
+        internal SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
