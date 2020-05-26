@@ -33,6 +33,7 @@ namespace Microsoft.Extensions.Logging.Console
         public const string Json = "json";
         public const string Systemd = "systemd";
     }
+    [System.ObsoleteAttribute("ConsoleLoggerFormat has been deprecated.", false)]
     public enum ConsoleLoggerFormat
     {
         Default = 0,
