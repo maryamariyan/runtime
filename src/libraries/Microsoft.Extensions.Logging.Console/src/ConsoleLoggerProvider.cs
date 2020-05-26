@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.Logging.Console
             //}
             if (logFormatter == null)
             {
-                logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+                logFormatter = _formatters[ConsoleLogFormatterNames.Colored];
             }
 
             foreach (var logger in _loggers)
@@ -89,7 +89,7 @@ namespace Microsoft.Extensions.Logging.Console
             if (deprecatedFromOptions.FormatterName != null)
                 return;
             // kept for deprecated apis:
-            if (formatter is DefaultConsoleLogFormatter defaultFormatter)
+            if (formatter is ColoredConsoleLogFormatter defaultFormatter)
             {
                 defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
                 defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
