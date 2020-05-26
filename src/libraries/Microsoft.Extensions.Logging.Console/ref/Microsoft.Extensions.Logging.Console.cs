@@ -69,8 +69,8 @@ namespace Microsoft.Extensions.Logging.Console
     public readonly partial struct ConsoleMessage
     {
         public readonly System.ConsoleColor? Background;
-        public readonly string Content;
         public readonly System.ConsoleColor? Foreground;
+        public readonly string Message;
         public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
     }
     public partial interface IConsoleLogFormatter
