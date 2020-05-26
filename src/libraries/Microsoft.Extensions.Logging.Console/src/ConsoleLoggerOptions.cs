@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.Logging.Console
     /// </summary>
     public class ConsoleLoggerOptions
     {
-        [System.ObsoleteAttribute("ConsoleLoggerOptions.DisableColors has been deprecated. Please use DefaultConsoleLogFormatterOptions.DisableColors instead.", false)]
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.DisableColors has been deprecated. Please use ColoredConsoleLogFormatterOptions.DisableColors instead.", false)]
         public bool DisableColors { get; set; }
         
         /// <summary>
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.Logging.Console
                 }
                 else
                 {
-                    FormatterName = ConsoleLogFormatterNames.Default;
+                    FormatterName = ConsoleLogFormatterNames.Colored;
                 }
             }
         }

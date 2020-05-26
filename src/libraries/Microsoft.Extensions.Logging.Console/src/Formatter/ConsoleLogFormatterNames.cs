@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.Logging.Console
 {
     public static class ConsoleLogFormatterNames
     {
-        public const string Default = "default";
+        public const string Colored = "colored";
         public const string Json = "json";
         public const string Systemd = "systemd";
     }

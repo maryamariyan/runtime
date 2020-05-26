@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    internal class DefaultConsoleLogFormatter : IConsoleLogFormatter, IDisposable
+    internal class ColoredConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -24,21 +24,21 @@ namespace Microsoft.Extensions.Logging.Console
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static DefaultConsoleLogFormatter()
+        static ColoredConsoleLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options)
+        public ColoredConsoleLogFormatter(IOptionsMonitor<ColoredConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(DefaultConsoleLogFormatterOptions options)
+        private void ReloadLoggerOptions(ColoredConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -48,9 +48,9 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken?.Dispose();
         }
 
-        public string Name => ConsoleLogFormatterNames.Default;
+        public string Name => ConsoleLogFormatterNames.Colored;
 
-        internal DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
+        internal ColoredConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
