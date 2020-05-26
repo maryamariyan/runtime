@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.Logging
 
             builder.AddConsoleLogFormatter<JsonConsoleLogFormatter, JsonConsoleLogFormatterOptions>();
             builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, SystemdConsoleLogFormatterOptions>();
-            builder.AddConsoleLogFormatter<DefaultConsoleLogFormatter, DefaultConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<ColoredConsoleLogFormatter, ColoredConsoleLogFormatterOptions>();
 
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
@@ -73,7 +73,7 @@ namespace Microsoft.Extensions.Logging
             return builder.AddConsole(configure);
         }
         
-        public static ILoggingBuilder UseDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
+        public static ILoggingBuilder UseColoredConsoleLogFormatter(this ILoggingBuilder builder, Action<ColoredConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -83,7 +83,7 @@ namespace Microsoft.Extensions.Logging
             builder.AddConsole();
             builder.Services.Configure(configure);
 
-            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Default; };
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Colored; };
             builder.Services.Configure(configureFormatter);
 
             return builder;
