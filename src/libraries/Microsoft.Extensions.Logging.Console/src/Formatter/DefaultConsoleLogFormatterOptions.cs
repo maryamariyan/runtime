@@ -8,9 +8,9 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class ColoredConsoleLogFormatterOptions : SystemdConsoleLogFormatterOptions
+    public class DefaultConsoleLogFormatterOptions : SystemdConsoleLogFormatterOptions
     {
-        public ColoredConsoleLogFormatterOptions() { }
+        public DefaultConsoleLogFormatterOptions() { }
         
         /// <summary>
         /// Disables colors when <see langword="true" />.
