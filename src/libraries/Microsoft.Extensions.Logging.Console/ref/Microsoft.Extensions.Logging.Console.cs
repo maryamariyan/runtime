@@ -14,22 +14,16 @@ namespace Microsoft.Extensions.Logging
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string formatterName) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<TOptions> configure) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder UseColoredConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.ColoredConsoleLogFormatterOptions> configure) { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder UseColoredConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder UseJsonConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder UseSystemdConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> configure) { throw null; }
     }
 }
 namespace Microsoft.Extensions.Logging.Console
 {
-    public partial class ColoredConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
-    {
-        public ColoredConsoleLogFormatterOptions() { }
-        public bool DisableColors { get { throw null; } set { } }
-        public bool MultiLine { get { throw null; } set { } }
-    }
     public static partial class ConsoleLogFormatterNames
     {
-        public const string Colored = "colored";
+        public const string Default = "default";
         public const string Json = "json";
         public const string Systemd = "systemd";
     }
@@ -72,6 +66,12 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly System.ConsoleColor? Foreground;
         public readonly string Message;
         public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
+    }
+    public partial class DefaultConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
+    {
+        public DefaultConsoleLogFormatterOptions() { }
+        public bool DisableColors { get { throw null; } set { } }
+        public bool MultiLine { get { throw null; } set { } }
     }
     public partial interface IConsoleLogFormatter
     {

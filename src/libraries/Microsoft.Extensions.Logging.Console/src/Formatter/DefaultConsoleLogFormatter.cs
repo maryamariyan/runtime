@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    internal class ColoredConsoleLogFormatter : IConsoleLogFormatter, IDisposable
+    internal class DefaultConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
@@ -24,21 +24,21 @@ namespace Microsoft.Extensions.Logging.Console
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static ColoredConsoleLogFormatter()
+        static DefaultConsoleLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
-        public ColoredConsoleLogFormatter(IOptionsMonitor<ColoredConsoleLogFormatterOptions> options)
+        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
         }
 
-        private void ReloadLoggerOptions(ColoredConsoleLogFormatterOptions options)
+        private void ReloadLoggerOptions(DefaultConsoleLogFormatterOptions options)
         {
             FormatterOptions = options;
         }
@@ -48,9 +48,9 @@ namespace Microsoft.Extensions.Logging.Console
             _optionsReloadToken?.Dispose();
         }
 
-        public string Name => ConsoleLogFormatterNames.Colored;
+        public string Name => ConsoleLogFormatterNames.Default;
 
-        internal ColoredConsoleLogFormatterOptions FormatterOptions { get; set; }
+        internal DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
         public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
@@ -197,6 +197,11 @@ namespace Microsoft.Extensions.Logging.Console
                 logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
             );
         }
+
+        // IConsoleMessageBuilder // allocates a string 
+        // Append(string messagee)
+        // SetColor(xx)
+        // ToString()
 
         private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
         {
