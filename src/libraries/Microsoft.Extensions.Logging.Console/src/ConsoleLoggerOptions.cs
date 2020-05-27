@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.Logging.Console
                 }
                 else
                 {
-                    FormatterName = ConsoleLogFormatterNames.Colored;
+                    FormatterName = ConsoleLogFormatterNames.Default;
                 }
             }
         }
