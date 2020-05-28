@@ -25,18 +25,23 @@ namespace Microsoft.Extensions.Logging.Console
         private IDisposable _optionsReloadToken;
         private IExternalScopeProvider _scopeProvider = NullExternalScopeProvider.Instance;
 
-        [System.ObsoleteAttribute("ConsoleLoggerProvider.ctor has been deprecated.", false)]
+        /// <summary>
+        /// Creates an instance of <see cref="ConsoleLoggerProvider"/>.
+        /// </summary>
+        /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
         public ConsoleLoggerProvider(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> options) 
             : this(options, Enumerable.Empty<IConsoleLogFormatter>())
         {
             ; // todo: check workflow. maybe we should always have 4 formatters prepped instead?
+            // current implementation wont work well with empty formatters.
+            // use IServiceLocator or IServiceCollection? to locate Default formatter and add as formatters?
         }
 
         /// <summary>
         /// Creates an instance of <see cref="ConsoleLoggerProvider"/>.
         /// </summary>
         /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
-        /// <param name="formatters"></param>
+        /// <param name="formatters">Log formatters added for <see cref="ConsoleLogger"/> insteaces.</param>
         public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<IConsoleLogFormatter> formatters)
         {
             _options = options;
