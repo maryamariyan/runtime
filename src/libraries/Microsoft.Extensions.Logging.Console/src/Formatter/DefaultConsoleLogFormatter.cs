@@ -52,16 +52,16 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
                 if (!FormatterOptions.MultiLine)
                 {
-                    return FormatHelperCompact(logLevel, logName, eventId, message, exception, scopeProvider, state);
+                    return FormatHelperCompact(logLevel, logName, eventId.Id, message, exception, scopeProvider, state);
                 }
-                return Format(logLevel, logName, eventId, message, exception, scopeProvider);
+                return Format(logLevel, logName, eventId.Id, message, exception, scopeProvider);
             }
             // TODO: test use case:
             return default;
