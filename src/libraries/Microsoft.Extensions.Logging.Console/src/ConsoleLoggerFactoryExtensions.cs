@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.Logging
         /// Adds a console logger named 'Console' to the factory.
         /// </summary>
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
-        /// <param name="formatterName"></param>
+        /// <param name="formatterName">Formatter name selected for the <see cref="ConsoleLogger"/>.</param>
         public static ILoggingBuilder AddConsole(this ILoggingBuilder builder, string formatterName)
         {
             if (formatterName == null)
@@ -73,7 +73,12 @@ namespace Microsoft.Extensions.Logging
             return builder.AddConsole(configure);
         }
         
-        public static ILoggingBuilder UseColoredConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
+        /// <summary>
+        /// Add and configure a console log formatter named 'json' to the factory.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="configure">A delegate to configure the <see cref="ConsoleLogger"/> options for the built-in default log formatter.</param>
+        public static ILoggingBuilder AddDefaultConsoleLogFormatter(this ILoggingBuilder builder, Action<DefaultConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -89,7 +94,12 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
-        public static ILoggingBuilder UseJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
+        /// <summary>
+        /// Add and configure a console log formatter named 'json' to the factory.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="configure">A delegate to configure the <see cref="ConsoleLogger"/> options for the built-in json log formatter.</param>
+        public static ILoggingBuilder AddJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
         {
             if (configure == null)
             {
@@ -105,7 +115,12 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
         
-        public static ILoggingBuilder UseSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
+        /// <summary>
+        /// Add and configure a console log formatter named 'systemd' to the factory.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="configure">A delegate to configure the <see cref="ConsoleLogger"/> options for the built-in systemd log formatter.</param>
+        public static ILoggingBuilder AddSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
          {
             if (configure == null)
             {
@@ -121,6 +136,10 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
+        /// <summary>
+        /// Adds a custom console logger formatter 'TFormatter' to be configured with options 'TOptions'.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
             where TOptions : class
             where TFormatter : class, IConsoleLogFormatter
@@ -140,6 +159,11 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
+        /// <summary>
+        /// Adds a custom console logger formatter 'TFormatter' to be configured with options 'TOptions'.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="configure">A delegate to configure options 'TOptions' for custom formatter 'TFormatter'.</param>
         public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
             where TOptions : class
             where TFormatter : class, IConsoleLogFormatter
