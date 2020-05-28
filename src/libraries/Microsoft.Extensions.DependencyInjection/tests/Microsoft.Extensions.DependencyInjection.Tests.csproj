@@ -12,6 +12,7 @@
     <Compile Include="..\..\Common\tests\Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\CultureReplacer.cs">
       <Link>Common\tests\Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\CultureReplacer.cs</Link>
     </Compile>
+    <Compile Remove="DI.External.Tests/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>
