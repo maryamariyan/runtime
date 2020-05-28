@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\ExceptionAssertions.cs">
-      <Link>Common\tests\Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\ExceptionAssertions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\CultureReplacer.cs">
-      <Link>Common\tests\Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\CultureReplacer.cs</Link>
-    </Compile>
-    <Compile Include="..\DI.Specification.Tests\**\*.cs" /> 
+    <Compile Include="$(CommonTestPath)Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\ExceptionAssertions.cs"
+             Link="Common\tests\Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\ExceptionAssertions.cs" />
+    <Compile Include="$(CommonTestPath)Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\CultureReplacer.cs"
+             Link="Common\tests\Extensions\TestingUtils\Microsoft.AspNetCore.Testing\src\CultureReplacer.cs" />
+    <Compile Include="..\DI.Specification.Tests\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
