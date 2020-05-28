@@ -45,12 +45,12 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
         {
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                return Format(logLevel, logName, eventId, message, exception, scopeProvider);
+                return Format(logLevel, logName, eventId.Id, message, exception, scopeProvider);
             }
             return default;
         }

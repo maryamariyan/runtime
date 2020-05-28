@@ -8,6 +8,9 @@ using System.Text;
 
 namespace Microsoft.Extensions.Logging.Console
 {
+    /// <summary>
+    /// Options for the built-in default console log formatter.
+    /// </summary>
     public class DefaultConsoleLogFormatterOptions : SystemdConsoleLogFormatterOptions
     {
         public DefaultConsoleLogFormatterOptions() { }
@@ -16,6 +19,10 @@ namespace Microsoft.Extensions.Logging.Console
         /// Disables colors when <see langword="true" />.
         /// </summary>
         public bool DisableColors { get; set; }
+        
+        /// <summary>
+        /// When <see langword="false" />, the entire message gets logged in a single line.
+        /// </summary>
         public bool MultiLine { get; set; }
     }
 }
