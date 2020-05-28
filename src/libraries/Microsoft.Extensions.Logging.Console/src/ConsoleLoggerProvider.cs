@@ -62,26 +62,34 @@ namespace Microsoft.Extensions.Logging.Console
         // warning:  ReloadLoggerOptions can be called before the ctor completed,... before registering all of the state used in this method need to be initialized
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
-            IConsoleLogFormatter logFormatter = null;
-            if (options.FormatterName != null)
+            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options.Format);
+            if (!_formatters.TryGetValue(options.FormatterName?.ToLower(), out IConsoleLogFormatter logFormatter))
             {
-                _formatters.TryGetValue(options.FormatterName.ToLower(), out logFormatter);
+                logFormatter = _formatters[nameFromFormat];
             }
-            //else
-            //{
-            //    string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options?.Format);
-            //    _formatters.TryGetValue(nameFromFormat, out IConsoleLogFormatter logFormatter);
-            //    UpdateFormatterOptions(logFormatter, options);
-            //}
-            if (logFormatter == null)
-            {
-                logFormatter = _formatters[ConsoleLogFormatterNames.Default];
-            }
+            UpdateFormatterOptions(logFormatter, options);
 
             foreach (var logger in _loggers)
             {
                 logger.Value.Formatter = logFormatter;
             }
+        }
+
+        /// <inheritdoc />
+        public ILogger CreateLogger(string name)
+        {
+            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), _options.CurrentValue.Format);
+            if (!_formatters.TryGetValue(_options.CurrentValue.FormatterName?.ToLower(), out IConsoleLogFormatter logFormatter))
+            {
+                logFormatter = _formatters[nameFromFormat];
+            }
+            UpdateFormatterOptions(logFormatter, _options.CurrentValue);
+
+            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
+            {
+                ScopeProvider = _scopeProvider,
+                Formatter = logFormatter
+            });
         }
 
         private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions deprecatedFromOptions)
@@ -105,24 +113,6 @@ namespace Microsoft.Extensions.Logging.Console
                 systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
                 systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
             }
-        }
-
-        /// <inheritdoc />
-        public ILogger CreateLogger(string name)
-        {
-            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), _options.CurrentValue.Format);
-            _formatters.TryGetValue(_options.CurrentValue.FormatterName ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
-            if (logFormatter == null)
-            {
-                logFormatter = _formatters[nameFromFormat];
-            }
-            UpdateFormatterOptions(logFormatter, _options.CurrentValue);
-
-            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
-            {
-                ScopeProvider = _scopeProvider,
-                Formatter = logFormatter
-            });
         }
 
         /// <inheritdoc />
