@@ -56,6 +56,7 @@ namespace Microsoft.Extensions.DependencyInjection.Specification
 
         [Theory]
         [MemberData(nameof(CreateInstanceFuncs))]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/33894", TestRuntimes.Mono)]
         public void TypeActivatorAcceptsAnyNumberOfAdditionalConstructorParametersToProvide(CreateInstanceFunc createFunc)
         {
             // Arrange
@@ -269,6 +270,7 @@ namespace Microsoft.Extensions.DependencyInjection.Specification
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/33894", TestRuntimes.Mono)]
         public void GetServiceOrCreateInstanceRegisteredServiceTransient()
         {
             // Reset the count because test order is not guaranteed
@@ -295,6 +297,7 @@ namespace Microsoft.Extensions.DependencyInjection.Specification
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/33894", TestRuntimes.Mono)]
         public void GetServiceOrCreateInstanceRegisteredServiceSingleton()
         {
             lock (CreationCountFakeService.InstanceLock)
@@ -322,6 +325,7 @@ namespace Microsoft.Extensions.DependencyInjection.Specification
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/33894", TestRuntimes.Mono)]
         public void GetServiceOrCreateInstanceUnregisteredService()
         {
             lock (CreationCountFakeService.InstanceLock)

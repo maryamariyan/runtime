@@ -85,6 +85,7 @@ namespace Microsoft.Extensions.DependencyInjection.Specification
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/33894", TestRuntimes.Mono)]
         public void TransientServiceCanBeResolvedFromProvider()
         {
             // Arrange
@@ -408,6 +409,7 @@ namespace Microsoft.Extensions.DependencyInjection.Specification
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/33894", TestRuntimes.Mono)]
         public void ScopedServices_FromCachedScopeFactory_CanBeResolvedAndDisposed()
         {
             // Arrange
