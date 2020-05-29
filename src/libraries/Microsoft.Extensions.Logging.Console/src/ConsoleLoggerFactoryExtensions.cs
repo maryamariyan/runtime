@@ -5,8 +5,17 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -20,10 +29,13 @@ namespace Microsoft.Extensions.Logging
         {
             builder.AddConfiguration();
 
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, DefaultLogFormatter>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILogFormatter, SystemdLogFormatter>());
+            builder.AddConsoleLogFormatter<JsonConsoleLogFormatter, JsonConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<SystemdConsoleLogFormatter, SystemdConsoleLogFormatterOptions>();
+            builder.AddConsoleLogFormatter<ColoredConsoleLogFormatter, ColoredConsoleLogFormatterOptions>();
+
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(builder.Services);
+
             return builder;
         }
 
@@ -43,6 +55,115 @@ namespace Microsoft.Extensions.Logging
             builder.Services.Configure(configure);
 
             return builder;
+        }
+
+        /// <summary>
+        /// Adds a console logger named 'Console' to the factory.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="formatterName"></param>
+        public static ILoggingBuilder AddConsole(this ILoggingBuilder builder, string formatterName)
+        {
+            if (formatterName == null)
+            {
+                throw new ArgumentNullException(nameof(formatterName));
+            }
+
+            Action<ConsoleLoggerOptions> configure = (options) => { options.FormatterName = formatterName; };
+            return builder.AddConsole(configure);
+        }
+        
+        public static ILoggingBuilder UseColoredConsoleLogFormatter(this ILoggingBuilder builder, Action<ColoredConsoleLogFormatterOptions> configure)
+        {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Colored; };
+            builder.Services.Configure(configureFormatter);
+
+            return builder;
+        }
+
+        public static ILoggingBuilder UseJsonConsoleLogFormatter(this ILoggingBuilder builder, Action<JsonConsoleLogFormatterOptions> configure)
+        {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Json; };
+            builder.Services.Configure(configureFormatter);
+
+            return builder;
+        }
+        
+        public static ILoggingBuilder UseSystemdConsoleLogFormatter(this ILoggingBuilder builder, Action<SystemdConsoleLogFormatterOptions> configure)
+         {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsole();
+            builder.Services.Configure(configure);
+
+            Action<ConsoleLoggerOptions> configureFormatter = (options) => { options.FormatterName = ConsoleLogFormatterNames.Systemd; };
+            builder.Services.Configure(configureFormatter);
+
+            return builder;
+        }
+
+        public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
+            where TOptions : class
+            where TFormatter : class, IConsoleLogFormatter
+        {
+            builder.AddConfiguration();
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConsoleLogFormatter, TFormatter>());
+            builder.Services.AddSingleton<IConfigureOptions<TOptions>, LogFormatterOptionsSetup<TFormatter, TOptions>>();
+            builder.Services.AddSingleton<IOptionsChangeTokenSource<TOptions>, LoggerProviderOptionsChangeTokenSource<TOptions, TFormatter>>();
+
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+            builder.Services.AddOptions<TOptions>().Bind(configuration.GetSection("Logging:Console:FormatterOptions"));
+            builder.Services.Configure<TOptions>(configuration.GetSection("Logging:Console:FormatterOptions"));
+
+            return builder;
+        }
+
+        public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
+            where TOptions : class
+            where TFormatter : class, IConsoleLogFormatter
+        {
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
+
+            builder.AddConsoleLogFormatter<TFormatter, TOptions>();
+
+            builder.Services.Configure(configure);
+
+            return builder;
+        }
+    }
+
+    internal class LogFormatterOptionsSetup<TFormatter, TOptions> : ConfigureFromConfigurationOptions<TOptions> 
+            where TOptions : class
+            where TFormatter : class, IConsoleLogFormatter
+    {
+        public LogFormatterOptionsSetup(ILoggerProviderConfiguration<TFormatter> providerConfiguration)
+            : base(providerConfiguration.Configuration)
+        {
         }
     }
 }

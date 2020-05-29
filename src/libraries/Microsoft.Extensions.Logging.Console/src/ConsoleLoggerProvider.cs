@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
 
@@ -18,22 +19,29 @@ namespace Microsoft.Extensions.Logging.Console
     {
         private readonly IOptionsMonitor<ConsoleLoggerOptions> _options;
         private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers;
+        private readonly ConcurrentDictionary<string, IConsoleLogFormatter> _formatters;
         private readonly ConsoleLoggerProcessor _messageQueue;
-        private readonly IEnumerable<ILogFormatter> _formatters;
 
         private IDisposable _optionsReloadToken;
         private IExternalScopeProvider _scopeProvider = NullExternalScopeProvider.Instance;
+
+        [System.ObsoleteAttribute("ConsoleLoggerProvider.ctor has been deprecated.", false)]
+        public ConsoleLoggerProvider(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> options) 
+            : this(options, Enumerable.Empty<IConsoleLogFormatter>())
+        {
+            ; // todo: check workflow. maybe we should always have 4 formatters prepped instead?
+        }
 
         /// <summary>
         /// Creates an instance of <see cref="ConsoleLoggerProvider"/>.
         /// </summary>
         /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
         /// <param name="formatters"></param>
-        public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<ILogFormatter> formatters)
+        public ConsoleLoggerProvider(IOptionsMonitor<ConsoleLoggerOptions> options, IEnumerable<IConsoleLogFormatter> formatters)
         {
             _options = options;
             _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
-            _formatters = formatters;
+            _formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(formatters.ToDictionary(f => f.Name)); 
 
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = _options.OnChange(ReloadLoggerOptions);
@@ -51,21 +59,69 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        // warning:  ReloadLoggerOptions can be called before the ctor completed,... before registering all of the state used in this method need to be initialized
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
+            IConsoleLogFormatter logFormatter = null;
+            if (options.FormatterName != null)
+            {
+                _formatters.TryGetValue(options.FormatterName.ToLower(), out logFormatter);
+            }
+            //else
+            //{
+            //    string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options?.Format);
+            //    _formatters.TryGetValue(nameFromFormat, out IConsoleLogFormatter logFormatter);
+            //    UpdateFormatterOptions(logFormatter, options);
+            //}
+            if (logFormatter == null)
+            {
+                logFormatter = _formatters[ConsoleLogFormatterNames.Colored];
+            }
+
             foreach (var logger in _loggers)
             {
-                logger.Value.Options = options;
+                logger.Value.Formatter = logFormatter;
+            }
+        }
+
+        private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions deprecatedFromOptions)
+        {
+            if (deprecatedFromOptions.FormatterName != null)
+                return;
+            // kept for deprecated apis:
+            if (formatter is ColoredConsoleLogFormatter defaultFormatter)
+            {
+                defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
+                defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
+                defaultFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
+                defaultFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
+                defaultFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
+            }
+            else 
+            if (formatter is SystemdConsoleLogFormatter systemdFormatter)
+            {
+                systemdFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
+                systemdFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
+                systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
+                systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
             }
         }
 
         /// <inheritdoc />
         public ILogger CreateLogger(string name)
         {
-            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue, _formatters)
+            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), _options.CurrentValue.Format);
+            _formatters.TryGetValue(_options.CurrentValue.FormatterName ?? nameFromFormat, out IConsoleLogFormatter logFormatter);
+            if (logFormatter == null)
             {
-                Options = _options.CurrentValue,
-                ScopeProvider = _scopeProvider
+                logFormatter = _formatters[nameFromFormat];
+            }
+            UpdateFormatterOptions(logFormatter, _options.CurrentValue);
+
+            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
+            {
+                ScopeProvider = _scopeProvider,
+                Formatter = logFormatter
             });
         }
 

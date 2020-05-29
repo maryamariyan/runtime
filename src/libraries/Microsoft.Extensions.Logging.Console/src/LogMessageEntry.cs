@@ -8,23 +8,26 @@ namespace Microsoft.Extensions.Logging.Console
 {
     public readonly struct LogMessageEntry
     {
-        public LogMessageEntry(string message, string timeStamp = null, string levelString = null, ConsoleColor? levelBackground = null, ConsoleColor? levelForeground = null, ConsoleColor? messageColor = null, bool logAsError = false)
+        public LogMessageEntry(ConsoleMessage[] messages, bool logAsError = false)
         {
-            TimeStamp = timeStamp;
-            LevelString = levelString;
-            LevelBackground = levelBackground;
-            LevelForeground = levelForeground;
-            MessageColor = messageColor;
-            Message = message;
+            Messages = messages;
             LogAsError = logAsError;
         }
 
-        public readonly string TimeStamp;
-        public readonly string LevelString;
-        public readonly ConsoleColor? LevelBackground;
-        public readonly ConsoleColor? LevelForeground;
-        public readonly ConsoleColor? MessageColor;
-        public readonly string Message;
+        public readonly ConsoleMessage[] Messages;
         public readonly bool LogAsError;
+    }
+
+    public readonly struct ConsoleMessage
+    {
+        public ConsoleMessage(string message, ConsoleColor? background = null, ConsoleColor? foreground = null)
+        {
+            Content = message;
+            Background = background;
+            Foreground = foreground;
+        }
+        public readonly string Content;
+        public readonly ConsoleColor? Background;
+        public readonly ConsoleColor? Foreground;
     }
 }

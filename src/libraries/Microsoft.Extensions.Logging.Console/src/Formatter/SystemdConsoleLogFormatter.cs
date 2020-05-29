@@ -1,29 +1,61 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public class SystemdLogFormatter : ILogFormatter
+    internal class SystemdConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
+        private IDisposable _optionsReloadToken;
+
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
 
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        static SystemdLogFormatter()
+        static SystemdConsoleLogFormatter()
         {
             var logLevelString = GetSyslogSeverityString(LogLevel.Information);
             _messagePadding = new string(' ', logLevelString.Length + _loglevelPadding.Length);
         }
 
-        public string Name => "Systemd";
+        public SystemdConsoleLogFormatter(IOptionsMonitor<SystemdConsoleLogFormatterOptions> options)
+        {
+            FormatterOptions = options.CurrentValue;
+            ReloadLoggerOptions(options.CurrentValue);
+            _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+        }
 
-        internal IExternalScopeProvider ScopeProvider { get; set; }
+        private void ReloadLoggerOptions(SystemdConsoleLogFormatterOptions options)
+        {
+            FormatterOptions = options;
+        }
 
-        internal ConsoleLoggerOptions Options { get; set; }
+        public void Dispose()
+        {
+            _optionsReloadToken?.Dispose();
+        }
 
-        public LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        public string Name => ConsoleLogFormatterNames.Systemd;
+
+        internal SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
+
+        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, int eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        {
+            var message = formatter(state, exception);
+            if (!string.IsNullOrEmpty(message) || exception != null)
+            {
+                return Format(logLevel, logName, eventId, message, exception, scopeProvider);
+            }
+            return default;
+        }
+
+        private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -44,7 +76,7 @@ namespace Microsoft.Extensions.Logging.Console
             logBuilder.Append(logLevelString);
 
             // timestamp
-            var timestampFormat = Options.TimestampFormat;
+            var timestampFormat = FormatterOptions.TimestampFormat;
             if (timestampFormat != null)
             {
                 var dateTime = GetCurrentDateTime();
@@ -58,7 +90,7 @@ namespace Microsoft.Extensions.Logging.Console
             logBuilder.Append("]");
 
             // scope information
-            GetScopeInformation(logBuilder);
+            GetScopeInformation(logBuilder, scopeProvider);
 
             // message
             if (!string.IsNullOrEmpty(message))
@@ -87,10 +119,12 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder.Capacity = 1024;
             }
             _logBuilder = logBuilder;
+            
+            var messages = new ConsoleMessage[1] { new ConsoleMessage(formattedMessage, null, null) };
 
             return new LogMessageEntry(
-                message: formattedMessage,
-                logAsError: logLevel >= Options.LogToStandardErrorThreshold
+                messages: messages,
+                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
             );
 
             static void AppendAndReplaceNewLine(StringBuilder sb, string message)
@@ -103,7 +137,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         private DateTime GetCurrentDateTime()
         {
-            return Options.UseUtcTimestamp ? DateTime.UtcNow : DateTime.Now;
+            return FormatterOptions.UseUtcTimestamp ? DateTime.UtcNow : DateTime.Now;
         }
 
         private static string GetSyslogSeverityString(LogLevel logLevel)
@@ -127,10 +161,9 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringBuilder stringBuilder)
+        private void GetScopeInformation(StringBuilder stringBuilder, IExternalScopeProvider scopeProvider)
         {
-            var scopeProvider = ScopeProvider;
-            if (Options.IncludeScopes && scopeProvider != null)
+            if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
                 var initialLength = stringBuilder.Length;
 

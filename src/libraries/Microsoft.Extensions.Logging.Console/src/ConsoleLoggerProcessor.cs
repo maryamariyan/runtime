@@ -50,21 +50,13 @@ namespace Microsoft.Extensions.Logging.Console
         }
 
         // for testing
-        internal virtual void WriteMessage(LogMessageEntry message)
+        internal virtual void WriteMessage(LogMessageEntry entry)
         {
-            var console = message.LogAsError ? ErrorConsole : Console;
-
-            if (message.TimeStamp != null)
+            var console = entry.LogAsError ? ErrorConsole : Console;
+            foreach (var message in entry.Messages)
             {
-                console.Write(message.TimeStamp, message.MessageColor, message.MessageColor);
+                console.Write(message.Content, message.Background, message.Foreground);
             }
-
-            if (message.LevelString != null)
-            {
-                console.Write(message.LevelString, message.LevelBackground, message.LevelForeground);
-            }
-
-            console.Write(message.Message, message.MessageColor, message.MessageColor);
             console.Flush();
         }
 

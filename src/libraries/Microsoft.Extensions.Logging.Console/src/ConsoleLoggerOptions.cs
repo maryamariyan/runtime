@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Text.Json;
 
 namespace Microsoft.Extensions.Logging.Console
 {
@@ -11,52 +12,49 @@ namespace Microsoft.Extensions.Logging.Console
     /// </summary>
     public class ConsoleLoggerOptions
     {
-        private ConsoleLoggerFormat _format = ConsoleLoggerFormat.Default;
-
-        /// <summary>
-        /// Includes scopes when <see langword="true" />.
-        /// </summary>
-        public bool IncludeScopes { get; set; }
-
-        /// <summary>
-        /// Disables colors when <see langword="true" />.
-        /// </summary>
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.DisableColors has been deprecated. Please use ColoredConsoleLogFormatterOptions.DisableColors instead.", false)]
         public bool DisableColors { get; set; }
-
+        
         /// <summary>
         /// Gets or sets log message format. Defaults to <see cref="ConsoleLoggerFormat.Default" />.
         /// </summary>
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.Format has been deprecated. Please use ConsoleLoggerOptions.FormatterName instead.", false)]
         public ConsoleLoggerFormat Format
         {
-            get => _format;
+            get
+            {
+                if (FormatterName != null && FormatterName.Equals(ConsoleLogFormatterNames.Systemd, StringComparison.OrdinalIgnoreCase))
+                    return ConsoleLoggerFormat.Systemd;
+                return ConsoleLoggerFormat.Default;
+            }
             set
             {
-                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Systemd)
+                if (value == ConsoleLoggerFormat.Systemd)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    FormatterName = ConsoleLogFormatterNames.Systemd;
                 }
-                _format = value;
+                else
+                {
+                    FormatterName = ConsoleLogFormatterNames.Colored;
+                }
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Formatter { get; set; }
+        public string FormatterName { get; set; }
+        
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.IncludeScopes has been deprecated..", false)]
+        public bool IncludeScopes { get; set; }
 
-        /// <summary>
-        /// Gets or sets value indicating the minimum level of messaged that would get written to <c>Console.Error</c>.
-        /// </summary>
-        public LogLevel LogToStandardErrorThreshold { get; set; } = LogLevel.None;
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.LogToStandardErrorThreshold has been deprecated..", false)]
+        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get; set; }
 
-        /// <summary>
-        /// Gets or sets format string used to format timestamp in logging messages. Defaults to <c>null</c>.
-        /// </summary>
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.TimestampFormat has been deprecated..", false)]
         public string TimestampFormat { get; set; }
 
-        /// <summary>
-        /// Gets or sets indication whether or not UTC timezone should be used to for timestamps in logging messages. Defaults to <c>false</c>.
-        /// </summary>
+        [System.ObsoleteAttribute("ConsoleLoggerOptions.UseUtcTimestamp has been deprecated..", false)]
         public bool UseUtcTimestamp { get; set; }
     }
 }

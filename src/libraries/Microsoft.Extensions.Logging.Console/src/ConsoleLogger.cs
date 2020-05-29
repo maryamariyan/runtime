@@ -3,19 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Extensions.Logging.Console
 {
     internal class ConsoleLogger : ILogger
     {
-        private readonly IEnumerable<ILogFormatter> _formatters;
 
         private readonly string _name;
         private readonly ConsoleLoggerProcessor _queueProcessor;
 
-        internal ConsoleLogger(string name, ConsoleLoggerProcessor loggerProcessor, IEnumerable<ILogFormatter> formatters)
+        internal ConsoleLogger(string name, ConsoleLoggerProcessor loggerProcessor)
         {
             if (name == null)
             {
@@ -24,12 +25,11 @@ namespace Microsoft.Extensions.Logging.Console
 
             _name = name;
             _queueProcessor = loggerProcessor;
-            _formatters = formatters;
         }
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
 
-        internal ConsoleLoggerOptions Options { get; set; }
+        internal IConsoleLogFormatter Formatter { get; set; }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
@@ -44,20 +44,12 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             var message = formatter(state, exception);
-
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                WriteMessage(logLevel, _name, eventId.Id, message, exception);
+                var entry = Formatter.Format(logLevel, _name, eventId.Id, state, exception, formatter, ScopeProvider);
+                _queueProcessor.EnqueueMessage(entry);
             }
         }
-
-        public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
-        {
-            var formatter = _formatters.Single(f => f.Name == (Options.Formatter ?? Options.Format.ToString()));
-            var entry = formatter.Format(logLevel, logName, eventId, message, exception);
-            _queueProcessor.EnqueueMessage(entry);
-        }
-
 
         public bool IsEnabled(LogLevel logLevel)
         {
