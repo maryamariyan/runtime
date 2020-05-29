@@ -155,6 +155,8 @@ namespace Microsoft.Extensions.Logging
                 .Build();
             builder.Services.AddOptions<TOptions>().Bind(configuration.GetSection("Logging:Console:FormatterOptions"));
             builder.Services.Configure<TOptions>(configuration.GetSection("Logging:Console:FormatterOptions"));
+            
+             // todo: configure and bind Console:Loggimg:FormatterName
 
             return builder;
         }

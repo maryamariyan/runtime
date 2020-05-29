@@ -67,10 +67,21 @@ namespace Microsoft.Extensions.Logging.Console
         // warning:  ReloadLoggerOptions can be called before the ctor completed,... before registering all of the state used in this method need to be initialized
         private void ReloadLoggerOptions(ConsoleLoggerOptions options)
         {
-            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), options.Format);
-            if (!_formatters.TryGetValue(options.FormatterName?.ToLower(), out IConsoleLogFormatter logFormatter))
+            if (
+                options.FormatterName == null ||
+                !_formatters.TryGetValue(options.FormatterName, out IConsoleLogFormatter logFormatter) ||
+                !_formatters.TryGetValue(options.FormatterName?.ToLower(), out logFormatter)
+                )
             {
-                logFormatter = _formatters[nameFromFormat];
+                switch (options.Format)
+                {
+                    case ConsoleLoggerFormat.Systemd:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Systemd];
+                        break;
+                    default:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+                        break;
+                }
             }
             UpdateFormatterOptions(logFormatter, options);
 
@@ -83,10 +94,21 @@ namespace Microsoft.Extensions.Logging.Console
         /// <inheritdoc />
         public ILogger CreateLogger(string name)
         {
-            string nameFromFormat = Enum.GetName(typeof(ConsoleLoggerFormat), _options.CurrentValue.Format);
-            if (!_formatters.TryGetValue(_options.CurrentValue.FormatterName?.ToLower(), out IConsoleLogFormatter logFormatter))
+            if (
+                _options.CurrentValue.FormatterName == null ||
+                !_formatters.TryGetValue(_options.CurrentValue.FormatterName, out IConsoleLogFormatter logFormatter) ||
+                !_formatters.TryGetValue(_options.CurrentValue.FormatterName?.ToLower(), out logFormatter)
+                )
             {
-                logFormatter = _formatters[nameFromFormat];
+                switch (_options.CurrentValue.Format)
+                {
+                    case ConsoleLoggerFormat.Systemd:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Systemd];
+                        break;
+                    default:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+                        break;
+                }
             }
             UpdateFormatterOptions(logFormatter, _options.CurrentValue);
 
