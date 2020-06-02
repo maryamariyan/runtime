@@ -27,4 +27,30 @@ namespace Microsoft.Extensions.Logging.Console
         public readonly string Message;
         public readonly bool LogAsError;
     }
+    internal readonly struct LogMessageEntry2
+    {
+        public LogMessageEntry2(ConsoleMessage[] messages, bool logAsError = false)
+        {
+            Messages = messages;
+            LogAsError = logAsError;
+        }
+
+        public readonly ConsoleMessage[] Messages;
+        public readonly bool LogAsError;
+    }
+
+    internal readonly struct ConsoleMessage
+    {
+        public ConsoleMessage(string message, ConsoleColor? background = null, ConsoleColor? foreground = null, bool logAsError = false)
+        {
+            Message = message;
+            Background = background;
+            Foreground = foreground;
+            LogAsError = logAsError;
+        }
+        public readonly string Message;
+        public readonly ConsoleColor? Background;
+        public readonly ConsoleColor? Foreground;
+        public readonly bool LogAsError;
+    }
 }

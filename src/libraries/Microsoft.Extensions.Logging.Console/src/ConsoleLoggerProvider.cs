@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.Logging.Console
     /// A provider of <see cref="ConsoleLogger"/> instances.
     /// </summary>
     [ProviderAlias("Console")]
+    [System.ObsoleteAttribute("deprecated.", false)]
     public class ConsoleLoggerProvider : ILoggerProvider, ISupportExternalScope
     {
         private readonly IOptionsMonitor<ConsoleLoggerOptions> _options;

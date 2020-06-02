@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.Logging.Console
     /// <summary>
     /// Options for a <see cref="ConsoleLogger"/>.
     /// </summary>
+    [System.ObsoleteAttribute("deprecated.", false)]
     public class ConsoleLoggerOptions
     {
         private ConsoleLoggerFormat _format = ConsoleLoggerFormat.Default;
@@ -22,7 +23,7 @@ namespace Microsoft.Extensions.Logging.Console
         /// Disables colors when <see langword="true" />.
         /// </summary>
         public bool DisableColors { get; set; }
-
+        
         /// <summary>
         /// Gets or sets log message format. Defaults to <see cref="ConsoleLoggerFormat.Default" />.
         /// </summary>
@@ -54,4 +55,25 @@ namespace Microsoft.Extensions.Logging.Console
         /// </summary>
         public bool UseUtcTimestamp { get; set; }
     }
+
+    public class FormattedConsoleLoggerOptions
+    {
+        private string _format = ConsoleLogFormatterNames.Default;
+        private IConsoleLogFormatterOptions _options = new DefaultConsoleLogFormatterOptions();
+        public FormattedConsoleLoggerOptions() { }
+        public string FormatterName { 
+            get => _format;
+            set
+            {
+                _format = value;
+            }
+        }
+        public IConsoleLogFormatterOptions FormatterOptions { 
+            get => _options;
+            set
+            {
+                _options = value;
+            }
+        }
+    } 
 }
