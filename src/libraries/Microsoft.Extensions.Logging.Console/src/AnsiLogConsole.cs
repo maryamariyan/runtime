@@ -12,6 +12,9 @@ namespace Microsoft.Extensions.Logging.Console
     /// </summary>
     internal class AnsiLogConsole : IConsole
     {
+        private const string DefaultForegroundColor = "\x1B[39m\x1B[22m";
+        private const string DefaultBackgroundColor = "\x1B[49m";
+
         private readonly StringBuilder _outputBuilder;
         private readonly IAnsiSystemConsole _systemConsole;
 
@@ -94,7 +97,7 @@ namespace Microsoft.Extensions.Logging.Console
                 case ConsoleColor.White:
                     return "\x1B[1m\x1B[37m";
                 default:
-                    return "\x1B[39m\x1B[22m"; // default foreground color
+                    return DefaultForegroundColor; // default foreground color
             }
         }
 
@@ -119,7 +122,7 @@ namespace Microsoft.Extensions.Logging.Console
                 case ConsoleColor.White:
                     return "\x1B[47m";
                 default:
-                    return "\x1B[49m"; // Use default background color
+                    return DefaultBackgroundColor; // Use default background color
             }
         }
     }

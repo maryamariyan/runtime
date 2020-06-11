@@ -4,6 +4,7 @@
 
 using System;
 using System.CodeDom;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -14,9 +15,9 @@ namespace Microsoft.Extensions.Logging.Console
     {
 
         private readonly string _name;
-        private readonly ConsoleLoggerProcessor _queueProcessor;
+        private readonly IConsoleMessageBuilder _consoleMessageBuilder;
 
-        internal ConsoleLogger(string name, ConsoleLoggerProcessor loggerProcessor)
+        internal ConsoleLogger(string name, IConsoleMessageBuilder consoleMessageBuilder)
         {
             if (name == null)
             {
@@ -24,7 +25,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             _name = name;
-            _queueProcessor = loggerProcessor;
+            _consoleMessageBuilder = consoleMessageBuilder;
         }
 
         internal IExternalScopeProvider ScopeProvider { get; set; }
@@ -46,8 +47,8 @@ namespace Microsoft.Extensions.Logging.Console
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                var entry = Formatter.Format(logLevel, _name, eventId.Id, state, exception, formatter, ScopeProvider);
-                _queueProcessor.EnqueueMessage(entry);
+                Formatter.Format(logLevel, _name, eventId.Id, state, exception, formatter, ScopeProvider, _consoleMessageBuilder);
+                _consoleMessageBuilder.Clear();
             }
         }
 

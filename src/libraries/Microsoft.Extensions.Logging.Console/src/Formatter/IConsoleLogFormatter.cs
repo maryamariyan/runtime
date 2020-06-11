@@ -24,7 +24,31 @@ namespace Microsoft.Extensions.Logging.Console
         /// <param name="exception">The exception related to this entry.</param>
         /// <param name="formatter">Function to create a <see cref="string"/> message of the <paramref name="state"/> and <paramref name="exception"/>.</param>
         /// <param name="scopeProvider">The provider of scope data.</param>
+        /// <param name="consoleMessageBuilder">The provider of scope data.</param>
         /// <typeparam name="TState">The type of the object to be written.</typeparam>
-        LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider);
+        void Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, IConsoleMessageBuilder consoleMessageBuilder);
+    }
+
+    public interface IConsoleLogFormatterOptions
+    {
+        /// <summary>
+        /// Includes scopes when <see langword="true" />.
+        /// </summary>
+        bool IncludeScopes { get; set; }
+
+        /// <summary>
+        /// Gets or sets value indicating the minimum level of messages that would get written to <c>Console.Error</c>.
+        /// </summary>
+        Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get; set; }
+        
+        /// <summary>
+        /// Gets or sets format string used to format timestamp in logging messages. Defaults to <c>null</c>.
+        /// </summary>
+        string TimestampFormat { get; set; }
+        
+        /// <summary>
+        /// Gets or sets indication whether or not UTC timezone should be used to for timestamps in logging messages. Defaults to <c>false</c>.
+        /// </summary>
+        bool UseUtcTimestamp { get; set; }
     }
 }

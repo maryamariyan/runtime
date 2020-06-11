@@ -24,6 +24,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         private IDisposable _optionsReloadToken;
         private IExternalScopeProvider _scopeProvider = NullExternalScopeProvider.Instance;
+        private readonly IConsoleMessageBuilder _consoleMessageBuilder;
 
         /// <summary>
         /// Creates an instance of <see cref="ConsoleLoggerProvider"/>.
@@ -62,6 +63,7 @@ namespace Microsoft.Extensions.Logging.Console
                 _messageQueue.Console = new AnsiLogConsole(new AnsiSystemConsole());
                 _messageQueue.ErrorConsole = new AnsiLogConsole(new AnsiSystemConsole(stdErr: true));
             }
+            _consoleMessageBuilder = new ConsoleMessageBuilder(_messageQueue);
         }
 
         // warning:  ReloadLoggerOptions can be called before the ctor completed,... before registering all of the state used in this method need to be initialized
@@ -112,7 +114,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
             UpdateFormatterOptions(logFormatter, _options.CurrentValue);
 
-            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
+            return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _consoleMessageBuilder)
             {
                 ScopeProvider = _scopeProvider,
                 Formatter = logFormatter

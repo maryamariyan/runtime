@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.Logging.Console
     /// <summary>
     /// Options for the built-in systemd console log formatter.
     /// </summary>
-    public class SystemdConsoleLogFormatterOptions
+    public class SystemdConsoleLogFormatterOptions : IConsoleLogFormatterOptions
     {
         public SystemdConsoleLogFormatterOptions() { }
 

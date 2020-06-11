@@ -141,7 +141,7 @@ namespace Microsoft.Extensions.Logging
         /// </summary>
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
-            where TOptions : class
+            where TOptions : class, IConsoleLogFormatterOptions
             where TFormatter : class, IConsoleLogFormatter
         {
             builder.AddConfiguration();
@@ -155,8 +155,8 @@ namespace Microsoft.Extensions.Logging
                 .Build();
             builder.Services.AddOptions<TOptions>().Bind(configuration.GetSection("Logging:Console:FormatterOptions"));
             builder.Services.Configure<TOptions>(configuration.GetSection("Logging:Console:FormatterOptions"));
-            
-             // todo: configure and bind Console:Loggimg:FormatterName
+
+            // todo: configure and bind Console:Logging:FormatterName
 
             return builder;
         }
@@ -167,7 +167,7 @@ namespace Microsoft.Extensions.Logging
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         /// <param name="configure">A delegate to configure options 'TOptions' for custom formatter 'TFormatter'.</param>
         public static ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
-            where TOptions : class
+            where TOptions : class, IConsoleLogFormatterOptions
             where TFormatter : class, IConsoleLogFormatter
         {
             if (configure == null)

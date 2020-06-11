@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         private const int _maxQueuedMessages = 1024;
 
-        private readonly BlockingCollection<LogMessageEntry> _messageQueue = new BlockingCollection<LogMessageEntry>(_maxQueuedMessages);
+        private readonly BlockingCollection<ConsoleMessage> _messageQueue = new BlockingCollection<ConsoleMessage>(_maxQueuedMessages);
         private readonly Thread _outputThread;
 
         public IConsole Console;
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.Logging.Console
             _outputThread.Start();
         }
 
-        public virtual void EnqueueMessage(LogMessageEntry message)
+        public virtual void EnqueueMessage(ConsoleMessage message)
         {
             if (!_messageQueue.IsAddingCompleted)
             {
@@ -50,13 +50,10 @@ namespace Microsoft.Extensions.Logging.Console
         }
 
         // for testing
-        internal virtual void WriteMessage(LogMessageEntry entry)
+        internal virtual void WriteMessage(ConsoleMessage message)
         {
-            var console = entry.LogAsError ? ErrorConsole : Console;
-            foreach (var message in entry.Messages)
-            {
-                console.Write(message.Message, message.Background, message.Foreground);
-            }
+            var console = message.LogAsError ? ErrorConsole : Console;
+            console.Write(message.Message, message.Background, message.Foreground);
             console.Flush();
         }
 

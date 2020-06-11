@@ -12,8 +12,8 @@ namespace Microsoft.Extensions.Logging
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsole(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string formatterName) { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
-        public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<TOptions> configure) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatterOptions { throw null; }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddConsoleLogFormatter<TFormatter, TOptions>(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<TOptions> configure) where TFormatter : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatter where TOptions : class, Microsoft.Extensions.Logging.Console.IConsoleLogFormatterOptions { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddDefaultConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.DefaultConsoleLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddJsonConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.JsonConsoleLogFormatterOptions> configure) { throw null; }
         public static Microsoft.Extensions.Logging.ILoggingBuilder AddSystemdConsoleLogFormatter(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions> configure) { throw null; }
@@ -59,36 +59,47 @@ namespace Microsoft.Extensions.Logging.Console
         public void Dispose() { }
         public void SetScopeProvider(Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider) { }
     }
-    public readonly partial struct ConsoleMessage
-    {
-        public readonly System.ConsoleColor? Background;
-        public readonly System.ConsoleColor? Foreground;
-        public readonly string Message;
-        public ConsoleMessage(string message, System.ConsoleColor? background = default(System.ConsoleColor?), System.ConsoleColor? foreground = default(System.ConsoleColor?)) { throw null; }
-    }
-    public partial class DefaultConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
+    public partial class DefaultConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.IConsoleLogFormatterOptions
     {
         public DefaultConsoleLogFormatterOptions() { }
         public bool DisableColors { get { throw null; } set { } }
+        public bool IncludeScopes { get { throw null; } set { } }
+        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
         public bool MultiLine { get { throw null; } set { } }
+        public string TimestampFormat { get { throw null; } set { } }
+        public bool UseUtcTimestamp { get { throw null; } set { } }
     }
     public partial interface IConsoleLogFormatter
     {
         string Name { get; }
-        Microsoft.Extensions.Logging.Console.LogMessageEntry Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, Microsoft.Extensions.Logging.EventId eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider);
+        void Format<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string logName, Microsoft.Extensions.Logging.EventId eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider, Microsoft.Extensions.Logging.Console.IConsoleMessageBuilder consoleMessageBuilder);
     }
-    public partial class JsonConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
+    public partial interface IConsoleLogFormatterOptions
+    {
+        bool IncludeScopes { get; set; }
+        Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get; set; }
+        string TimestampFormat { get; set; }
+        bool UseUtcTimestamp { get; set; }
+    }
+    public partial interface IConsoleMessageBuilder
+    {
+        bool LogAsError { get; set; }
+        Microsoft.Extensions.Logging.Console.IConsoleMessageBuilder Append(string message);
+        Microsoft.Extensions.Logging.Console.IConsoleMessageBuilder Build();
+        void Clear();
+        Microsoft.Extensions.Logging.Console.IConsoleMessageBuilder ResetColor();
+        Microsoft.Extensions.Logging.Console.IConsoleMessageBuilder SetColor(System.ConsoleColor? background, System.ConsoleColor? foreground);
+    }
+    public partial class JsonConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.IConsoleLogFormatterOptions
     {
         public JsonConsoleLogFormatterOptions() { }
+        public bool IncludeScopes { get { throw null; } set { } }
         public System.Text.Json.JsonWriterOptions JsonWriterOptions { get { throw null; } set { } }
+        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
+        public string TimestampFormat { get { throw null; } set { } }
+        public bool UseUtcTimestamp { get { throw null; } set { } }
     }
-    public readonly partial struct LogMessageEntry
-    {
-        public readonly bool LogAsError;
-        public readonly Microsoft.Extensions.Logging.Console.ConsoleMessage[] Messages;
-        public LogMessageEntry(Microsoft.Extensions.Logging.Console.ConsoleMessage[] messages, bool logAsError = false) { throw null; }
-    }
-    public partial class SystemdConsoleLogFormatterOptions
+    public partial class SystemdConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.IConsoleLogFormatterOptions
     {
         public SystemdConsoleLogFormatterOptions() { }
         public bool IncludeScopes { get { throw null; } set { } }

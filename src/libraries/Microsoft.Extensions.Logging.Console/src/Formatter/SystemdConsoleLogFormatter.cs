@@ -45,18 +45,13 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        public void Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, IConsoleMessageBuilder consoleMessageBuilder)
         {
             var message = formatter(state, exception);
-            if (!string.IsNullOrEmpty(message) || exception != null)
+            if (string.IsNullOrEmpty(message) && exception == null)
             {
-                return Format(logLevel, logName, eventId.Id, message, exception, scopeProvider);
+                return;
             }
-            return default;
-        }
-
-        private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
-        {
             var logBuilder = _logBuilder;
             _logBuilder = null;
 
@@ -86,7 +81,7 @@ namespace Microsoft.Extensions.Logging.Console
             // category and event id
             logBuilder.Append(logName);
             logBuilder.Append("[");
-            logBuilder.Append(eventId);
+            logBuilder.Append(eventId.Id);
             logBuilder.Append("]");
 
             // scope information
@@ -111,7 +106,6 @@ namespace Microsoft.Extensions.Logging.Console
             // newline delimiter
             logBuilder.Append(Environment.NewLine);
 
-
             var formattedMessage = logBuilder.ToString();
             logBuilder.Clear();
             if (logBuilder.Capacity > 1024)
@@ -120,12 +114,10 @@ namespace Microsoft.Extensions.Logging.Console
             }
             _logBuilder = logBuilder;
             
-            var messages = new ConsoleMessage[1] { new ConsoleMessage(formattedMessage, null, null) };
-
-            return new LogMessageEntry(
-                messages: messages,
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
-            );
+            consoleMessageBuilder.LogAsError =  logLevel >= FormatterOptions.LogToStandardErrorThreshold;
+            consoleMessageBuilder
+                .Append(formattedMessage)
+                .Build();
 
             static void AppendAndReplaceNewLine(StringBuilder sb, string message)
             {
