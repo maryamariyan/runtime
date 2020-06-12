@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public static class XmlConfigurationExtensions
     {
+        // Train for PR
         /// <summary>
         /// Adds the XML configuration provider at <paramref name="path"/> to <paramref name="builder"/>.
         /// </summary>
