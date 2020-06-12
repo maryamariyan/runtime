@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.Caching.Memory
     /// </summary>
     public class MemoryCacheEntryOptions
     {
+        // Train for PR
         private DateTimeOffset? _absoluteExpiration;
         private TimeSpan? _absoluteExpirationRelativeToNow;
         private TimeSpan? _slidingExpiration;

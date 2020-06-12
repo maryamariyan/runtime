@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Caching.Memory
         [Fact]
         public void MemoryDistributedCacheOptionsDefaultsTo200MBSizeLimit()
         {
+            // Train for PR
             Assert.Equal(200 * 1024 * 1024, new MemoryDistributedCacheOptions().SizeLimit);
         }
 

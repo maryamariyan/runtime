@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Caching.Memory
             this ICacheEntry entry,
             CacheItemPriority priority)
         {
+            // Train for PR
             entry.Priority = priority;
             return entry;
         }

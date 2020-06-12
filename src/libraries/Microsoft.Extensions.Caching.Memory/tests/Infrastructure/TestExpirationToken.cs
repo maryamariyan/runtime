@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.Caching.Memory.Infrastructure
 {
     internal class TestExpirationToken : IChangeToken
     {
+        // Train for PR
         private bool _hasChanged;
         private bool _activeChangeCallbacks;
 

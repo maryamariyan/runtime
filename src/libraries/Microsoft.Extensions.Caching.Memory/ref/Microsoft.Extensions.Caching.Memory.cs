@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.Caching.Distributed
 {
     public partial class MemoryDistributedCache : Microsoft.Extensions.Caching.Distributed.IDistributedCache
     {
+        // Train for PR
         public MemoryDistributedCache(Microsoft.Extensions.Options.IOptions<Microsoft.Extensions.Caching.Memory.MemoryDistributedCacheOptions> optionsAccessor) { }
         public MemoryDistributedCache(Microsoft.Extensions.Options.IOptions<Microsoft.Extensions.Caching.Memory.MemoryDistributedCacheOptions> optionsAccessor, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
         public byte[] Get(string key) { throw null; }

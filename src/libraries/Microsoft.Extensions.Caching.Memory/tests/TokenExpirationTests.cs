@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Caching.Memory
     {
         private IMemoryCache CreateCache()
         {
+            // Train for PR
             return CreateCache(new SystemClock());
         }
 
