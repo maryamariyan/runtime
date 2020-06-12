@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.FileSystemGlobbing
 {
     public static class MatcherExtensions
     {
+        // Train
         /// <summary>
         /// Adds multiple exclude patterns to <see cref="Matcher" />. <seealso cref="Matcher.AddExclude(string)" />
         /// </summary>

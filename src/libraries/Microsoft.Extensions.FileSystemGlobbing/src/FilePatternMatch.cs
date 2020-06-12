@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.FileSystemGlobbing
     /// </summary>
     public struct FilePatternMatch : IEquatable<FilePatternMatch>
     {
+        // Train for PR
         /// <summary>
         /// The path to the file matched
         /// </summary>

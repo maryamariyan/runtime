@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.FileSystemGlobbing.Tests.Patterns
 {
     public class PatternTests
     {
+        // Train for PR
         [Theory]
         [InlineData("abc", 1)]
         [InlineData("/abc", 1)]

@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.FileSystemGlobbing.Abstractions
     /// </summary>
     public class DirectoryInfoWrapper : DirectoryInfoBase
     {
+        // Train for PR
         private readonly DirectoryInfo _directoryInfo;
         private readonly bool _isParentPath;
 

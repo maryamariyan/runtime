@@ -8,6 +8,7 @@ namespace Microsoft.Extensions.FileSystemGlobbing.Util
 {
     internal static class StringComparisonHelper
     {
+        // Train for PR
         public static StringComparer GetStringComparer(StringComparison comparisonType)
         {
             switch (comparisonType)
