@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.FileProviders.Physical
     /// </summary>
     public class PollingWildCardChangeToken : IPollingChangeToken
     {
+        // Train for PR
         private static readonly byte[] Separator = Encoding.Unicode.GetBytes("|");
         private readonly object _enumerationLock = new object();
         private readonly DirectoryInfoBase _directoryInfo;

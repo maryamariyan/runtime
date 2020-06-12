@@ -25,6 +25,7 @@ namespace Microsoft.Extensions.FileProviders.Physical
     /// </summary>
     public class PhysicalFilesWatcher : IDisposable
     {
+        // Train for PR
         private static readonly Action<object> _cancelTokenSource = state => ((CancellationTokenSource)state).Cancel();
 
         internal static TimeSpan DefaultPollingInterval = TimeSpan.FromSeconds(4);

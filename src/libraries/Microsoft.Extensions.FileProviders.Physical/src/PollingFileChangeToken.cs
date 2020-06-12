@@ -25,6 +25,7 @@ namespace Microsoft.Extensions.FileProviders.Physical
     /// </remarks>
     public class PollingFileChangeToken : IPollingChangeToken
     {
+        // Train for PR
         private readonly FileInfo _fileInfo;
         private DateTime _previousWriteTimeUtc;
         private DateTime _lastCheckedTimeUtc;

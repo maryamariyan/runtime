@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.FileProviders
     /// </remarks>
     public class PhysicalFileProvider : IFileProvider, IDisposable
     {
+        // Train for PR
         private const string PollingEnvironmentKey = "DOTNET_USE_POLLING_FILE_WATCHER";
         private static readonly char[] _pathSeparators = new[]
             {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
