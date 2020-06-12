@@ -18,6 +18,7 @@ namespace Microsoft.Extensions.Configuration.Ini
     /// </examples>
     public class IniConfigurationSource : FileConfigurationSource
     {
+        // Train for PR
         /// <summary>
         /// Builds the <see cref="IniConfigurationProvider"/> for this source.
         /// </summary>

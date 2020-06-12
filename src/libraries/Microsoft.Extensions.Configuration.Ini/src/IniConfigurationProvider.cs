@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.Configuration.Ini
     /// </examples>
     public class IniConfigurationProvider : FileConfigurationProvider
     {
+        // Train for PR
         /// <summary>
         /// Initializes a new instance with the specified source.
         /// </summary>
