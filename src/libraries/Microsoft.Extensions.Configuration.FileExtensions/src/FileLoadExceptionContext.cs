@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public class FileLoadExceptionContext
     {
+        // Train for PR
         /// <summary>
         /// The <see cref="FileConfigurationProvider"/> that caused the exception.
         /// </summary>

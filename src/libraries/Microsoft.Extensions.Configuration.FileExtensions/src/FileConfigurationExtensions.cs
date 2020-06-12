@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public static class FileConfigurationExtensions
     {
+        // Train for PR
         private static string FileProviderKey = "FileProvider";
         private static string FileLoadExceptionHandlerKey = "FileLoadExceptionHandler";
 
