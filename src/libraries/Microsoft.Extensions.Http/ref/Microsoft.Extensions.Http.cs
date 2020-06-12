@@ -73,6 +73,7 @@ namespace Microsoft.Extensions.Http
         public abstract System.Net.Http.HttpMessageHandler Build();
         protected internal static System.Net.Http.HttpMessageHandler CreateHandlerPipeline(System.Net.Http.HttpMessageHandler primaryHandler, System.Collections.Generic.IEnumerable<System.Net.Http.DelegatingHandler> additionalHandlers) { throw null; }
     }
+    // Train for PR
     public partial interface IHttpMessageHandlerBuilderFilter
     {
         System.Action<Microsoft.Extensions.Http.HttpMessageHandlerBuilder> Configure(System.Action<Microsoft.Extensions.Http.HttpMessageHandlerBuilder> next);

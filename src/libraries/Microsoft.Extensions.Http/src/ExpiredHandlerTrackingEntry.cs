@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.Http
     // Thread-safety: This class is immutable
     internal class ExpiredHandlerTrackingEntry
     {
+        // Train for PR
         private readonly WeakReference _livenessTracker;
 
         // IMPORTANT: don't cache a reference to `other` or `other.Handler` here.

@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.Http.Logging
 
         public HttpHeadersLogValue(Kind kind, HttpHeaders headers, HttpHeaders contentHeaders, Func<string, bool> shouldRedactHeaderValue)
         {
+            // Train for PR
             _kind = kind;
             _shouldRedactHeaderValue = shouldRedactHeaderValue;
 

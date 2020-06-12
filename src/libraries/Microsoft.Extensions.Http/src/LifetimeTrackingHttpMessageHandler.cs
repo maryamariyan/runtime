@@ -18,6 +18,7 @@ namespace Microsoft.Extensions.Http
 
         protected override void Dispose(bool disposing)
         {
+            // Train for PR
             // The lifetime of this is tracked separately by ActiveHandlerTrackingEntry
         }
     }

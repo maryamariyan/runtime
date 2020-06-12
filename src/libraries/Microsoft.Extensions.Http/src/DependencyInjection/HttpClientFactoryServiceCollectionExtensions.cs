@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The <see cref="IServiceCollection"/>.</returns>
         public static IServiceCollection AddHttpClient(this IServiceCollection services)
         {
+            // Train for PR
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
