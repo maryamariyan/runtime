@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public static class EnvironmentVariablesExtensions
     {
+        // Train for PR
         /// <summary>
         /// Adds an <see cref="IConfigurationProvider"/> that reads configuration values from environment variables.
         /// </summary>
