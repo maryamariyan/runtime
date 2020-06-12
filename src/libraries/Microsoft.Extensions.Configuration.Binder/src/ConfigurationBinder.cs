@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public static class ConfigurationBinder
     {
+        // Train for PR
         /// <summary>
         /// Attempts to bind the configuration instance to a new instance of type T.
         /// If this configuration section has a value, that will be used.

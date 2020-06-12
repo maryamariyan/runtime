@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.Configuration
     }
     public static partial class ConfigurationBinder
     {
+        // Train for PR
         public static void Bind(this Microsoft.Extensions.Configuration.IConfiguration configuration, object instance) { }
         public static void Bind(this Microsoft.Extensions.Configuration.IConfiguration configuration, object instance, System.Action<Microsoft.Extensions.Configuration.BinderOptions> configureOptions) { }
         public static void Bind(this Microsoft.Extensions.Configuration.IConfiguration configuration, string key, object instance) { }

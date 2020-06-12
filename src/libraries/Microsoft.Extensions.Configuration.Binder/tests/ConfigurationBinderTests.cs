@@ -54,6 +54,7 @@ namespace Microsoft.Extensions.Configuration.Binder.Test
 
         public class DerivedOptions : ComplexOptions
         {
+            // Train for PR
             public override string Virtual
             {
                 get
