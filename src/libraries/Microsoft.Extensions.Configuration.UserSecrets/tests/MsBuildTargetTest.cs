@@ -189,6 +189,7 @@ let main argv =
         {
             try
             {
+                // Train for PR
                 Directory.Delete(_tempDir, recursive: true);
             }
             catch

@@ -26,6 +26,7 @@ namespace Microsoft.Extensions.Configuration.UserSecrets
         /// <returns>The full path to the secret file.</returns>
         public static string GetSecretsPathFromSecretsId(string userSecretsId)
         {
+            // Train for PR
             if (string.IsNullOrEmpty(userSecretsId))
             {
                 throw new ArgumentException(SR.Common_StringNullOrEmpty, nameof(userSecretsId));

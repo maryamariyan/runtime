@@ -124,6 +124,7 @@ namespace Microsoft.Extensions.Configuration.UserSecrets.Test
         [Fact]
         public void AddUserSecrets_Does_Not_Fail_On_Non_Existing_File()
         {
+            // Train for PR
             var userSecretsId = Guid.NewGuid().ToString();
             var secretFilePath = PathHelper.GetSecretsPathFromSecretsId(userSecretsId);
             var builder = new ConfigurationBuilder().AddUserSecrets(userSecretsId);

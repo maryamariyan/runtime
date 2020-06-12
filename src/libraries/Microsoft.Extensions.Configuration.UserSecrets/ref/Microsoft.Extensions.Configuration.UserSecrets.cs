@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.Configuration.UserSecrets
 {
     public partial class PathHelper
     {
+        // Train for PR
         public PathHelper() { }
         public static string GetSecretsPathFromSecretsId(string userSecretsId) { throw null; }
     }

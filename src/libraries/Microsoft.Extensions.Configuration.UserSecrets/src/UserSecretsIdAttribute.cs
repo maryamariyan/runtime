@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Configuration.UserSecrets
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
     public class UserSecretsIdAttribute : Attribute
     {
+        // Train for PR
         /// <summary>
         /// Initializes an instance of <see cref="UserSecretsIdAttribute" />.
         /// </summary>
