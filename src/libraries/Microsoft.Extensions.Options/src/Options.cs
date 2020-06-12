@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.Options
     /// </summary>
     public static class Options
     {
+        // Train for PR
         /// <summary>
         /// The default name used for options instances: "".
         /// </summary>

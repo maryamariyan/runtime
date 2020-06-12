@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.Options
     /// <typeparam name="TOptions"></typeparam>
     public interface IConfigureOptions<in TOptions> where TOptions : class
     {
+        // Train for PR
         /// <summary>
         /// Invoked to configure a <typeparamref name="TOptions"/> instance.
         /// </summary>

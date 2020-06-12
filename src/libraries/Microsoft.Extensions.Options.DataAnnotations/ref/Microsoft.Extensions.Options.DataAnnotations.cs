@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static partial class OptionsBuilderDataAnnotationsExtensions
     {
+        // Train for PR
         public static Microsoft.Extensions.Options.OptionsBuilder<TOptions> ValidateDataAnnotations<TOptions>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions> optionsBuilder) where TOptions : class { throw null; }
     }
 }

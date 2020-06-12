@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Options
     public class ConfigureFromConfigurationOptions<TOptions> : ConfigureOptions<TOptions>
         where TOptions : class
     {
+        // Train for PR
         /// <summary>
         /// Constructor that takes the <see cref="IConfiguration"/> instance to bind against.
         /// </summary>
