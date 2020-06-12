@@ -9,6 +9,7 @@ using System.Text.Json;
 
 namespace Microsoft.Extensions.Configuration.Json
 {
+    // Train for PR
     /// <summary>
     /// A JSON file based <see cref="FileConfigurationProvider"/>.
     /// </summary>

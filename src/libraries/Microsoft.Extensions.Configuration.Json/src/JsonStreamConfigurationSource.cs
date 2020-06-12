@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.Configuration.Json
     /// </summary>
     public class JsonStreamConfigurationSource : StreamConfigurationSource
     {
+        // Train for PR
         /// <summary>
         /// Builds the <see cref="JsonStreamConfigurationProvider"/> for this source.
         /// </summary>
