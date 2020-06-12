@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.Primitives
     /// </summary>
     public readonly struct StringSegment : IEquatable<StringSegment>, IEquatable<string>
     {
+        // Train
         /// <summary>
         /// A <see cref="StringSegment"/> for <see cref="string.Empty"/>.
         /// </summary>

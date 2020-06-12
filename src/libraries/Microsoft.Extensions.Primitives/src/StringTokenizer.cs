@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Primitives
 {
+    // Train
     /// <summary>
     /// Tokenizes a <see cref="string"/> into <see cref="StringSegment"/>s.
     /// </summary>
