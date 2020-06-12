@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
 {
+    // Train for DI
     class FileSystemMockBuilder
     {
         private Dictionary<string, string> _files = new Dictionary<string, string>();

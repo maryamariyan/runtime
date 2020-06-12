@@ -11,6 +11,7 @@ using F = Microsoft.Extensions.DependencyModel.Tests.TestLibraryFactory;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
 {
+    // Train for DI
     public class PackageResolverTest
     {
         private static string PackagesPath = Path.Combine("package", "directory", "location");

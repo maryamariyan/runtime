@@ -13,6 +13,7 @@ using FluentAssertions;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
 {
+    // Train for DI
     public class CompositeResolverTests
     {
         [Fact]

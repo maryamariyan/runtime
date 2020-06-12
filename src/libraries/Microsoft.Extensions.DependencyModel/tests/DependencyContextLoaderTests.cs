@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
 {
+    // Train for DI
     public class DependencyContextLoaderTests
     {
         [Fact]
