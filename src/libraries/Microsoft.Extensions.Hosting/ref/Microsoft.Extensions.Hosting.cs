@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.Hosting
     }
     public static partial class Host
     {
+        // Train for PR
         public static Microsoft.Extensions.Hosting.IHostBuilder CreateDefaultBuilder() { throw null; }
         public static Microsoft.Extensions.Hosting.IHostBuilder CreateDefaultBuilder(string[] args) { throw null; }
     }

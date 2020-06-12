@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.Hosting.Internal
 {
     internal static class HostingLoggerExtensions
     {
+        // Trainf or PR
         public static void ApplicationError(this ILogger logger, EventId eventId, string message, Exception exception)
         {
             var reflectionTypeLoadException = exception as ReflectionTypeLoadException;

@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.Hosting
     /// </summary>
     public static class HostEnvironmentEnvExtensions
     {
+        // Train for PR
         /// <summary>
         /// Checks if the current host environment name is <see cref="EnvironmentName.Development"/>.
         /// </summary>
