@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.Configuration.CommandLine.Test
         [Fact]
         public void IgnoresOnlyUnknownArgs()
         {
+            // Train for PR
             var args = new string[]
                 {
                     "foo",

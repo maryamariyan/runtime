@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration.CommandLine;
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     /// <summary>
     /// Extension methods for registering <see cref="CommandLineConfigurationProvider"/> with <see cref="IConfigurationBuilder"/>.
     /// </summary>

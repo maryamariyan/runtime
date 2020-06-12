@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Configuration
 }
 namespace Microsoft.Extensions.Configuration.CommandLine
 {
+    // Train for PR
     public partial class CommandLineConfigurationProvider : Microsoft.Extensions.Configuration.ConfigurationProvider
     {
         public CommandLineConfigurationProvider(System.Collections.Generic.IEnumerable<string> args, System.Collections.Generic.IDictionary<string, string> switchMappings = null) { }

@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.Configuration.CommandLine
     /// </summary>
     public class CommandLineConfigurationSource : IConfigurationSource
     {
+        // Train for PR
         /// <summary>
         /// Gets or sets the switch mappings.
         /// </summary>
