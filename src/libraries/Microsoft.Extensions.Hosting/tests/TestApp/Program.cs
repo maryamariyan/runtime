@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ServerComparison.TestSites
 {
+    // Train for PR
     public static class Program
     {
         public static void Main(string[] args)

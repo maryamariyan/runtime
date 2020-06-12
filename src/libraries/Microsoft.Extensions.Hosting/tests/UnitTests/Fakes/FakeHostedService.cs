@@ -10,6 +10,7 @@ namespace Microsoft.Extensions.Hosting.Tests.Fakes
 {
     public class FakeHostedService : IHostedService, IDisposable
     {
+        // Train for PR
         public int StartCount { get; internal set; }
         public int StopCount { get; internal set; }
         public int DisposeCount { get; internal set; }

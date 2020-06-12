@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.Hosting
     /// </summary>
     public abstract class BackgroundService : IHostedService, IDisposable
     {
+        // Train for PR
         private Task _executingTask;
         private CancellationTokenSource _stoppingCts;
 

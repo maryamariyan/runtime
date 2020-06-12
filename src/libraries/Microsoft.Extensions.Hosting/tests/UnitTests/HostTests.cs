@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.Hosting
 {
     public partial class HostTests
     {
+        // Train for PR
         [Fact]
         [ActiveIssue("https://github.com/dotnet/runtime/issues/34580", TestPlatforms.Windows, TargetFrameworkMonikers.Netcoreapp, TestRuntimes.Mono)]
         public void CreateDefaultBuilder_IncludesContentRootByDefault()
