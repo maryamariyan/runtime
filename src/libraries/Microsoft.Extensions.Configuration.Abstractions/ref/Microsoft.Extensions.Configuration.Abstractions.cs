@@ -7,6 +7,7 @@
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     public static partial class ConfigurationExtensions
     {
         public static Microsoft.Extensions.Configuration.IConfigurationBuilder Add<TSource>(this Microsoft.Extensions.Configuration.IConfigurationBuilder builder, System.Action<TSource> configureSource) where TSource : Microsoft.Extensions.Configuration.IConfigurationSource, new() { throw null; }

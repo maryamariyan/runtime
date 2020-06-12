@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public interface IConfigurationProvider
     {
+        // Train for PR
         /// <summary>
         /// Tries to get a configuration value for the specified key.
         /// </summary>

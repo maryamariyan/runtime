@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     /// <summary>
     /// Utility methods and constants for manipulating Configuration paths
     /// </summary>
