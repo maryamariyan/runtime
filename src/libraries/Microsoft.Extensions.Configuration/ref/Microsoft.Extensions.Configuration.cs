@@ -7,6 +7,7 @@
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     public static partial class ChainedBuilderExtensions
     {
         public static Microsoft.Extensions.Configuration.IConfigurationBuilder AddConfiguration(this Microsoft.Extensions.Configuration.IConfigurationBuilder configurationBuilder, Microsoft.Extensions.Configuration.IConfiguration config) { throw null; }

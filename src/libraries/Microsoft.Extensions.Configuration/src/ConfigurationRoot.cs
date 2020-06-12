@@ -10,6 +10,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     /// <summary>
     /// The root node for a configuration.
     /// </summary>

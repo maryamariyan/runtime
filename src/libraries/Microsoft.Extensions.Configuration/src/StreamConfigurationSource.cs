@@ -6,6 +6,7 @@ using System.IO;
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     /// <summary>
     /// Stream based <see cref="IConfigurationSource" />.
     /// </summary>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Configuration.Memory
 {
+    // Train for PR
     /// <summary>
     /// Represents in-memory data as an <see cref="IConfigurationSource"/>.
     /// </summary>

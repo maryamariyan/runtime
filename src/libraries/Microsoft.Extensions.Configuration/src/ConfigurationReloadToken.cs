@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.Configuration
     /// </summary>
     public class ConfigurationReloadToken : IChangeToken
     {
+        // Train for PR
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
         /// <summary>

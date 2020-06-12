@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.Configuration
 {
+    // Train for PR
     /// <summary>
     /// Used to build key/value based configuration settings for use in an application.
     /// </summary>
