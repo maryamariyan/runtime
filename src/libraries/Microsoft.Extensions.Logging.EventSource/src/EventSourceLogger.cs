@@ -100,10 +100,12 @@ namespace Microsoft.Extensions.Logging.EventSource
                         new KeyValuePair<string, string>("Message", exceptionInfo.Message),
                         new KeyValuePair<string, string>("HResult", exceptionInfo.HResult.ToString()),
                         new KeyValuePair<string, string>("VerboseMessage", exceptionInfo.VerboseMessage),
+                        new KeyValuePair<string, string>("StackTrace", exceptionInfo.StackTrace),
                     };
                     exceptionJson = ToJson(exceptionInfoData);
                 }
                 var arguments = GetProperties(state);
+                string message = formatter(state, exception);
                 _eventSource.MessageJson(
                     logLevel,
                     _factoryID,
@@ -111,7 +113,8 @@ namespace Microsoft.Extensions.Logging.EventSource
                     eventId.Id,
                     eventId.Name,
                     exceptionJson,
-                    ToJson(arguments));
+                    ToJson(arguments),
+                    message);
             }
         }
 

@@ -472,7 +472,7 @@ namespace Microsoft.Extensions.Logging.Test
                 // Write some MessageJson events with null string.
                 for (var i = 0; i < 100; i++)
                 {
-                    LoggingEventSource.Instance.MessageJson(LogLevel.Trace, 1, "MyLogger", 5, null, null, "testJson");
+                    LoggingEventSource.Instance.MessageJson(LogLevel.Trace, 1, "MyLogger", 5, null, null, "testJson", "formattedMessage");
                 }
 
                 bool containsNullEventName = false;
@@ -548,7 +548,9 @@ namespace Microsoft.Extensions.Logging.Test
 
         private static void VerifyEvents(TestEventListener eventListener, params string[] verifierIDs)
         {
+            // throw new NotImplementedException(eventListener.Events.Skip(11).Take(1).First());
             Assert.Collection(eventListener.Events, verifierIDs.Select(id => EventVerifiers[id]).ToArray());
+            // Assert.Collection(eventListener.Events.Take(11).Union(eventListener.Events.Skip(12)).ToList(), verifierIDs.Select(id => EventVerifiers[id]).ToArray());
         }
 
         private static void VerifySingleEvent(string eventJson, string loggerName, string eventName, int? eventId, string eventIdName, LogLevel? level, params string[] fragments)
@@ -791,7 +793,7 @@ namespace Microsoft.Extensions.Logging.Test
                  @"{""Key"":""stringParam"",""Value"":""bar""}",
                 @"{""Key"":""int1Param"",""Value"":""23""}",
                 @"{""Key"":""int2Param"",""Value"":""45""}",
-                @$"""Exception"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---> System.Exception: inner oops") },
+                @$"""Exception"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---> System.Exception: inner oops") },
 #else
             { "E5JS", (e) => VerifySingleEvent(e, "Logger2", EventTypes.MessageJson, 5, null, LogLevel.Critical,
                 @"""ArgumentsJson"":{""stringParam"":""bar"",""int1Param"":""23"",""int2Param"":""45""",
@@ -801,7 +803,7 @@ namespace Microsoft.Extensions.Logging.Test
                  @"{""Key"":""stringParam"",""Value"":""bar""}",
                 @"{""Key"":""int1Param"",""Value"":""23""}",
                 @"{""Key"":""int2Param"",""Value"":""45""}",
-                @"""Exception"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""VerboseMessage"":""System.Exception: oops ---> System.Exception: inner oops") },
+                @"""Exception"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops ---> System.Exception: inner oops") },
 #endif
 
             { "E6FM", (e) => VerifySingleEvent(e, "Logger2", EventTypes.FormattedMessage, 6, null, LogLevel.Warning,

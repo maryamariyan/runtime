@@ -75,7 +75,7 @@ namespace System.Buffers
         /// decreased application performance, as the pool may need to create a new buffer to replace
         /// the one lost.
         /// </remarks>
-        public abstract T[] Rent(int minimumLength);
+        public abstract T[] Rent(int minimumLength); // e.g. 1000
 
         /// <summary>
         /// Returns to the pool an array that was previously obtained via <see cref="Rent"/> on the same

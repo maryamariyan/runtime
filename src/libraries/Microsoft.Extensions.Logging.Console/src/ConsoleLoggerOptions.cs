@@ -39,12 +39,9 @@ namespace Microsoft.Extensions.Logging.Console
                 }
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string FormatterName { get; set; }
         
+        public string FormatterName { get; set; }
+
         [System.ObsoleteAttribute("ConsoleLoggerOptions.IncludeScopes has been deprecated..", false)]
         public bool IncludeScopes { get; set; }
 

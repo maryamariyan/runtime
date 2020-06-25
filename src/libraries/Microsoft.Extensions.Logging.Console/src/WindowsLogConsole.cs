@@ -37,6 +37,16 @@ namespace Microsoft.Extensions.Logging.Console
             System.Console.ResetColor();
         }
 
+        public void Write(ReadOnlySpan<char> span, ConsoleColor? background, ConsoleColor? foreground)
+        {
+            var colorChanged = SetColor(background, foreground);
+            _textWriter.Write(span);
+            if (colorChanged)
+            {
+                ResetColor();
+            }
+        }
+
         public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
         {
             var colorChanged = SetColor(background, foreground);

@@ -3,31 +3,24 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-    public readonly struct LogMessageEntry
+    internal readonly struct LogMessageEntry
     {
-        public LogMessageEntry(ConsoleMessage[] messages, bool logAsError = false)
+        public LogMessageEntry(
+            string message,
+            // char[] buffer, 
+            bool logAsError = false)
         {
-            Messages = messages;
+            Message = message;
+            // Buffer = buffer;
             LogAsError = logAsError;
         }
 
-        public readonly ConsoleMessage[] Messages;
-        public readonly bool LogAsError;
-    }
-
-    public readonly struct ConsoleMessage
-    {
-        public ConsoleMessage(string message, ConsoleColor? background = null, ConsoleColor? foreground = null)
-        {
-            Message = message;
-            Background = background;
-            Foreground = foreground;
-        }
+        // public readonly char[] Buffer;
         public readonly string Message;
-        public readonly ConsoleColor? Background;
-        public readonly ConsoleColor? Foreground;
+        public readonly bool LogAsError;
     }
 }
