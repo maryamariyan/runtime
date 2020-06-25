@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.Text;
 using Microsoft.Extensions.Options;
 
@@ -45,17 +46,20 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
         {
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                return Format(logLevel, logName, eventId.Id, message, exception, scopeProvider);
+                var writer = new StringWriter();
+                writer = Format(logLevel, category, eventId.Id, message, exception, scopeProvider, writer);
+                textWriter.Write(writer.Text);
+                writer.Clear();
+                return;
             }
-            return default;
         }
 
-        private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
+        private StringWriter Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -84,7 +88,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             // category and event id
-            logBuilder.Append(logName);
+            logBuilder.Append(category);
             logBuilder.Append("[");
             logBuilder.Append(eventId);
             logBuilder.Append("]");
@@ -120,12 +124,10 @@ namespace Microsoft.Extensions.Logging.Console
             }
             _logBuilder = logBuilder;
             
-            var messages = new ConsoleMessage[1] { new ConsoleMessage(formattedMessage, null, null) };
+            stringWriter.Clear();
+            stringWriter.Write(formattedMessage, null, null);
 
-            return new LogMessageEntry(
-                messages: messages,
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
-            );
+            return stringWriter;
 
             static void AppendAndReplaceNewLine(StringBuilder sb, string message)
             {

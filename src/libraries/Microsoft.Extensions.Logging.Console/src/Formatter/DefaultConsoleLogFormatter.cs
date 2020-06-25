@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -52,25 +53,26 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
         {
+            var stringWriter = new StringWriter();
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
                 if (!FormatterOptions.MultiLine)
                 {
-                    return FormatHelperCompact(logLevel, logName, eventId.Id, message, exception, scopeProvider, state);
+                    stringWriter = FormatHelperCompact(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter);
+                    textWriter.Write(stringWriter.Text);
+                    return;
                 }
-                return Format(logLevel, logName, eventId.Id, message, exception, scopeProvider);
+                stringWriter = Format(logLevel, category, eventId.Id, message, exception, scopeProvider, stringWriter);
+                textWriter.Write(stringWriter.Text);
             }
-            // TODO: test use case:
-            return default;
         }
 
-        private LogMessageEntry FormatHelperCompact<TState>(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope)
+        private StringWriter FormatHelperCompact<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter textWriter)
         {
-            var messages = new List<ConsoleMessage>();
-
+            var stringWriter = new StringWriter();
             var logLevelColors = GetLogLevelConsoleColors(logLevel);
             var logLevelString = GetLogLevelString(logLevel);
 
@@ -81,16 +83,17 @@ namespace Microsoft.Extensions.Logging.Console
                 var dateTime = GetCurrentDateTime();
                 timestamp = dateTime.ToString(timestampFormat);
             }
+            stringWriter.Clear();
             if (timestamp != null)
             {
-                messages.Add(new ConsoleMessage(timestamp + " ", null, null));
+                stringWriter.Write(timestamp + " ", null, null);
             }
             if (logLevelString != null)
             {
-                messages.Add(new ConsoleMessage(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground));
+                stringWriter.Write(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground);
             }
 
-            messages.Add(new ConsoleMessage($"{logName}[{eventId}] ", null, null));
+            stringWriter.Write($"{category}[{eventId}] ", null, null);
             string originalFormat = null;
             int count = 0;
 
@@ -121,9 +124,9 @@ namespace Microsoft.Extensions.Logging.Console
                                 if (curIndex != -1)
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    messages.Add(new ConsoleMessage(curString, null, null));
+                                    stringWriter.Write(curString, null, null);
                                     // TODO: when DisableColors is true, also uncolor the inner var colors
-                                    messages.Add(new ConsoleMessage(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan));
+                                    stringWriter.Write(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan);
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
                                 }
@@ -156,8 +159,8 @@ namespace Microsoft.Extensions.Logging.Console
                                 if (curIndex != -1)
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    messages.Add(new ConsoleMessage(curString, null, null));
-                                    messages.Add(new ConsoleMessage(strings.ElementAt(count).Value, null, ConsoleColor.Cyan));
+                                    stringWriter.Write(curString, null, null);
+                                    stringWriter.Write(strings.ElementAt(count).Value, null, ConsoleColor.Cyan);
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
                                 }
@@ -171,31 +174,27 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 if (originalFormat == null)
                 {
-                    messages.Add(new ConsoleMessage(message, null, null));
+                    stringWriter.Write(message, null, null);
                 }
                 else if (count == 0)
                 {
-                    messages.Add(new ConsoleMessage(originalFormat, null, null));
+                    stringWriter.Write(originalFormat, null, null);
                 }
             }
 
-            messages.Add(new ConsoleMessage(" ", null, null));
-            GetScopeInformation(scopeProvider, messages);
+            stringWriter.Write(" ", null, null);
+            GetScopeInformation(scopeProvider, stringWriter);
 
             if (exception != null)
             {
                 // exception message
-                messages.Add(new ConsoleMessage(" ", null, null));
-                messages.Add(new ConsoleMessage(exception.ToString().Replace(Environment.NewLine, " "), null, null));
+                stringWriter.Write(" ", null, null);
+                stringWriter.Write(exception.ToString().Replace(Environment.NewLine, " "), null, null);
                 // TODO: try to improve readability for exception message.
                 // TODO: maybe use Compact as default?
             }
-            messages.Add(new ConsoleMessage(Environment.NewLine, null, null));
-
-            return new LogMessageEntry(
-                messages: messages.ToArray(),
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
-            );
+            stringWriter.Write(Environment.NewLine, null, null);
+            return stringWriter;
         }
 
         // IConsoleMessageBuilder // allocates a string 
@@ -203,7 +202,7 @@ namespace Microsoft.Extensions.Logging.Console
         // SetColor(xx)
         // ToString()
 
-        private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
+        private StringWriter Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -264,21 +263,18 @@ namespace Microsoft.Extensions.Logging.Console
             }
             _logBuilder = logBuilder;
             
-            var messages = new List<ConsoleMessage>();
+            stringWriter.Clear();
             if (timestamp != null)
             {
-                messages.Add(new ConsoleMessage(timestamp, DefaultConsoleColor, DefaultConsoleColor));
+                stringWriter.Write(timestamp, DefaultConsoleColor, DefaultConsoleColor);
             }
             if (logLevelString != null)
             {
-                messages.Add(new ConsoleMessage(logLevelString, logLevelColors.Background, logLevelColors.Foreground));
+                stringWriter.Write(logLevelString, logLevelColors.Background, logLevelColors.Foreground);
             }
-            messages.Add(new ConsoleMessage(formattedMessage, DefaultConsoleColor, DefaultConsoleColor));
+            stringWriter.Write(formattedMessage, DefaultConsoleColor, DefaultConsoleColor);
 
-            return new LogMessageEntry(
-                messages: messages.ToArray(),
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
-            );
+            return stringWriter;
         }
 
         private DateTime GetCurrentDateTime()
@@ -335,17 +331,17 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(IExternalScopeProvider scopeProvider, List<ConsoleMessage> messages)
+        private void GetScopeInformation(IExternalScopeProvider scopeProvider, StringWriter stringWriter)
         {
             if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
-                scopeProvider.ForEachScope((scope, state) =>
+                scopeProvider.ForEachScope((scope, writer) =>
                 {
-                    state.Add(new ConsoleMessage("=> ", null, null));
-                    state.Add(new ConsoleMessage(scope.ToString(), null, ConsoleColor.DarkGray));
-                    state.Add(new ConsoleMessage(" ", null, null));
+                    writer.Write("=> ", null, null);
+                    writer.Write(scope.ToString(), null, ConsoleColor.DarkGray);
+                    writer.Write(" ", null, null);
 
-                }, messages);
+                }, stringWriter);
             }
         }
 

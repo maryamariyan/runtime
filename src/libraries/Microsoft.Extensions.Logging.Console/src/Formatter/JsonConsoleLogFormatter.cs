@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.Logging.Console
 
         public string Name => ConsoleLogFormatterNames.Json;
 
-        private string WriteJson(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)//long[] extraData)
+        private string WriteJson(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)//long[] extraData)
         {
             const int DefaultBufferSize = 1024;
             var output = new ArrayBufferWriter<byte>(DefaultBufferSize);
@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.Logging.Console
                 writer.WriteString("timestamp", timestamp);
                 writer.WriteNumber("eventId", eventId);
                 writer.WriteString("logLevel", GetLogLevelString(logLevel));
-                writer.WriteString("category", logName);
+                writer.WriteString("category", category);
                 writer.WriteString("message", message);
 
                 if (exception != null)
@@ -86,17 +86,19 @@ namespace Microsoft.Extensions.Logging.Console
             return Encoding.UTF8.GetString(output.WrittenMemory.Span);
         }
 
-        public LogMessageEntry Format<TState>(LogLevel logLevel, string logName, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider)
+        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
         {
             var message = formatter(state, exception);
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                return Format(logLevel, logName, eventId.Id, message, exception, scopeProvider);
+                var writer = new StringWriter();
+                writer = Format(logLevel, category, eventId.Id, message, exception, scopeProvider, writer);
+                textWriter.Write(writer.Text);
+                writer.Clear();
             }
-            return default;
         }
 
-        private LogMessageEntry Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)
+        private StringWriter Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -106,7 +108,7 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder = new StringBuilder();
             }
 
-            logBuilder.Append(WriteJson(logLevel, logName, eventId, message, exception, scopeProvider));
+            logBuilder.Append(WriteJson(logLevel, category, eventId, message, exception, scopeProvider));
 
             var formattedMessage = logBuilder.ToString();
             logBuilder.Clear();
@@ -115,16 +117,12 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder.Capacity = 1024;
             }
             _logBuilder = logBuilder;
-            
-            var messages = new ConsoleMessage[2] {
-                new ConsoleMessage(formattedMessage, null, null),
-                new ConsoleMessage(Environment.NewLine, null, null)
-            };
 
-            return new LogMessageEntry(
-                messages: messages,
-                logAsError: logLevel >= FormatterOptions.LogToStandardErrorThreshold
-            );
+            stringWriter.Clear();
+            stringWriter.Write(formattedMessage, null, null);
+            stringWriter.Write(Environment.NewLine, null, null);
+
+            return stringWriter;
         }
 
         private static string GetLogLevelString(LogLevel logLevel)
