@@ -25,6 +25,14 @@ namespace Microsoft.Extensions.Logging.Test.Console
 
         public ConsoleColor? ForegroundColor { get; private set; }
 
+        public void Write(string message)
+        {
+            var consoleContext = new ConsoleContext();
+            consoleContext.Message = message;
+            _sink.Write(consoleContext);
+            ResetColor();
+        }
+
         public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
         {
             var consoleContext = new ConsoleContext();
