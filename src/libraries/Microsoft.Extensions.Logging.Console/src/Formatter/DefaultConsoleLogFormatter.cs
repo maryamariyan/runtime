@@ -80,7 +80,6 @@ namespace Microsoft.Extensions.Logging.Console
                 var dateTime = GetCurrentDateTime();
                 timestamp = dateTime.ToString(timestampFormat);
             }
-            stringWriter.Clear();
             stringWriter.DisableColors = FormatterOptions.DisableColors;
             if (timestamp != null)
             {
@@ -211,7 +210,6 @@ namespace Microsoft.Extensions.Logging.Console
                 var dateTime = GetCurrentDateTime();
                 timestamp = dateTime.ToString(timestampFormat);
             }
-            stringWriter.Clear();
             stringWriter.DisableColors = FormatterOptions.DisableColors;
             stringWriter.ResetColor();
             if (timestamp != null)

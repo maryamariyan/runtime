@@ -118,9 +118,8 @@ namespace Microsoft.Extensions.Logging.Console
             }
             _logBuilder = logBuilder;
 
-            stringWriter.Clear();
-            stringWriter.Write(formattedMessage, null, null);
-            stringWriter.Write(Environment.NewLine, null, null);
+            stringWriter.Write(formattedMessage);
+            stringWriter.Write(Environment.NewLine);
         }
 
         private static string GetLogLevelString(LogLevel logLevel)

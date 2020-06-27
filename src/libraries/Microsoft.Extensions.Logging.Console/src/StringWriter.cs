@@ -106,18 +106,15 @@ namespace Microsoft.Extensions.Logging.Console
         }
 
         private string _computed = null;
-        public string ComputedString
+        public string ComputeAnsiString()
         {
-            get 
+            if (_sbMain.Length != 0)
             {
-                if (_sbMain.Length != 0)
-                {
-                    ResetColor();
-                    _computed = _sbMain.ToString();
-                    _sbMain.Clear();
-                }
-                return _computed;
+                ResetColor();
+                _computed = _sbMain.ToString();
+                _sbMain.Clear();
             }
+            return _computed;
         }
 
         public char this[int index]
@@ -128,7 +125,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        public void Clear()
+        private void Clear()
         {
             if (_sbMain.Length != 0)
             {

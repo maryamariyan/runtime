@@ -55,8 +55,7 @@ namespace Microsoft.Extensions.Logging.Console
                     _stringWriter = new StringWriter();
                 }
                 Formatter.Write(logLevel, _name, eventId.Id, state, exception, formatter, ScopeProvider, _stringWriter);
-                _queueProcessor.EnqueueMessage(new LogMessageEntry(_stringWriter.ComputedString, logLevel >= Options.LogToStandardErrorThreshold));
-                _stringWriter.Clear();
+                _queueProcessor.EnqueueMessage(new LogMessageEntry(_stringWriter.ComputeAnsiString(), logLevel >= Options.LogToStandardErrorThreshold));
             }
         }
 
