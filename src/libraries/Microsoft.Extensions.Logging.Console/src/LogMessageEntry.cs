@@ -10,17 +10,17 @@ namespace Microsoft.Extensions.Logging.Console
     internal readonly struct LogMessageEntry
     {
         public LogMessageEntry(
-            string message,
-            // char[] buffer, 
+            string message, 
+            // StringWriter stringWriter, 
             bool logAsError = false)
         {
             Message = message;
-            // Buffer = buffer;
+            // StringWriter = stringWriter;
             LogAsError = logAsError;
         }
 
-        // public readonly char[] Buffer;
         public readonly string Message;
+        // public readonly StringWriter StringWriter;
         public readonly bool LogAsError;
     }
 }

@@ -12,15 +12,15 @@ namespace Microsoft.Extensions.Logging.Console
 
     internal class StringWriter : TextWriter
     {
-        private readonly bool _ignoreColors;
         private readonly StringBuilder _sbMain;
+        internal bool DisableColors { get; set; }
 
         public override Encoding Encoding => Encoding.Unicode;
 
-        public StringWriter(bool ignoreColors = false)
+        public StringWriter(bool disableColors = false)
         {
             _sbMain = new StringBuilder();
-            _ignoreColors = ignoreColors;
+            DisableColors = disableColors;
         }
 
         public override void Write(char value)
@@ -28,77 +28,114 @@ namespace Microsoft.Extensions.Logging.Console
             _sbMain.Append(value);
         }
 
-        public override void Write(string value)
+        public bool SetBackgroundColor(ConsoleColor? background)
         {
-            _sbMain.Append(value);
+            if (DisableColors || background == _colorSettings.bg)
+            {
+                return false;
+            }
+            _colorSettings.bg = background;
+            if (background.HasValue)
+            {
+                Write(GetBackgroundColorEscapeCode(background.Value));
+            }
+            else
+            {
+                Write(DefaultBackgroundColor);
+            }
+            return true;
         }
 
-        public void SetColor(ConsoleColor? background, ConsoleColor? foreground)
+        public bool SetForegroundColor(ConsoleColor? foreground)
         {
-            if (!_ignoreColors)
+            if (DisableColors || foreground == _colorSettings.fg)
             {
-                if (background.HasValue)
-                {
-                    _sbMain.Append(GetBackgroundColorEscapeCode(background.Value));
-                }
-                
-                if (foreground.HasValue)
-                {
-                    _sbMain.Append(GetForegroundColorEscapeCode(foreground.Value));
-                }
+                return false;
             }
+            _colorSettings.fg = foreground;
+            if (foreground.HasValue)
+            {
+                Write(GetForegroundColorEscapeCode(foreground.Value));
+            }
+            else
+            {
+                Write(DefaultForegroundColor);
+            }
+            return true;
+        }
+
+        // todo finally reset color using string writer for all formatters -> dispose?
+
+        private (ConsoleColor? bg, ConsoleColor? fg) _colorSettings = (null, null);
+
+        public void ResetColor()
+        {
+            SetBackgroundColor(null);
+            SetForegroundColor(null);
         }
 
         private const string DefaultForegroundColor = "\x1B[39m\x1B[22m"; // reset to default foreground color
         private const string DefaultBackgroundColor = "\x1B[49m"; // reset to the background color
 
-        // public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
-        // {
-        //     SetColor(background, foreground);
-        //     Write(message);
-        //     SetColor(DefaultBackgroundColor, DefaultForegroundColor);
-        // }
-
-        public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
+        public void WriteAndReset(string message, ConsoleColor? background, ConsoleColor? foreground)
         {
-            // Order: backgroundcolor, foregroundcolor, Message, reset foregroundcolor, reset backgroundcolor
-            if (background.HasValue)
-            {
-                _sbMain.Append(GetBackgroundColorEscapeCode(background.Value));
-            }
+            var colorChanged = SetBackgroundColor(background);
+            colorChanged = SetForegroundColor(foreground) || colorChanged;
 
-            if (foreground.HasValue)
-            {
-                _sbMain.Append(GetForegroundColorEscapeCode(foreground.Value));
-            }
+            Write(message);
 
-            _sbMain.Append(message);
-
-            if (foreground.HasValue)
+            if (colorChanged)
             {
-                _sbMain.Append("\x1B[39m\x1B[22m"); // reset to default foreground color
-            }
-
-            if (background.HasValue)
-            {
-                _sbMain.Append("\x1B[49m"); // reset to the background color
+                ResetColor();
             }
         }
 
-        public string Text
+        public void WriteReplacing(string oldValue, string newValue, string message)
+        {
+            int len = _sbMain.Length;
+            _sbMain.Append(message);
+            _sbMain.Replace(oldValue, newValue, len, message.Length);
+        }
+
+        public int Length
         {
             get 
             {
-                // for special case only one chunk dont do ToString and use the array
-                return _sbMain.ToString();
+                return _sbMain.Length;
             }
         }
 
-        // instead use buffer char[] expose length ctor inject buffer
+        private string _computed = null;
+        public string ComputedString
+        {
+            get 
+            {
+                if (_sbMain.Length != 0)
+                {
+                    ResetColor();
+                    _computed = _sbMain.ToString();
+                    _sbMain.Clear();
+                }
+                return _computed;
+            }
+        }
+
+        public char this[int index]
+        {
+            get
+            {
+                return _sbMain[index];
+            }
+        }
 
         public void Clear()
         {
-            _sbMain.Clear();
+            if (_sbMain.Length != 0)
+            {
+                ResetColor();
+                _computed = _sbMain.ToString();
+                _sbMain.Clear();
+            }
             if (_sbMain.Capacity > 1024)
             {
                 _sbMain.Capacity = 1024;

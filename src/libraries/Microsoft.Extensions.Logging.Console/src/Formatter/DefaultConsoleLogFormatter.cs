@@ -22,9 +22,6 @@ namespace Microsoft.Extensions.Logging.Console
         // ConsoleColor does not have a value to specify the 'Default' color
         private readonly ConsoleColor? DefaultConsoleColor = null;
 
-        [ThreadStatic]
-        private static StringBuilder _logBuilder;
-
         static DefaultConsoleLogFormatter()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
@@ -55,24 +52,24 @@ namespace Microsoft.Extensions.Logging.Console
 
         public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
         {
-            var stringWriter = new StringWriter();
-            var message = formatter(state, exception);
-            if (!string.IsNullOrEmpty(message) || exception != null)
+            if (textWriter is StringWriter stringWriter)
+            // TODO: minor issue but ok
             {
-                if (!FormatterOptions.MultiLine)
+                var message = formatter(state, exception);
+                if (!string.IsNullOrEmpty(message) || exception != null)
                 {
-                    stringWriter = FormatHelperCompact(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter);
-                    textWriter.Write(stringWriter.Text);
-                    return;
+                    if (!FormatterOptions.MultiLine)
+                    {
+                        FormatHelperCompact(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter);
+                        return;
+                    }
+                    Format(logLevel, category, eventId.Id, message, exception, scopeProvider, stringWriter);
                 }
-                stringWriter = Format(logLevel, category, eventId.Id, message, exception, scopeProvider, stringWriter);
-                textWriter.Write(stringWriter.Text);
             }
         }
 
-        private StringWriter FormatHelperCompact<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter textWriter)
+        private void FormatHelperCompact<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter stringWriter)
         {
-            var stringWriter = new StringWriter();
             var logLevelColors = GetLogLevelConsoleColors(logLevel);
             var logLevelString = GetLogLevelString(logLevel);
 
@@ -84,16 +81,23 @@ namespace Microsoft.Extensions.Logging.Console
                 timestamp = dateTime.ToString(timestampFormat);
             }
             stringWriter.Clear();
+            stringWriter.DisableColors = FormatterOptions.DisableColors;
+            // stringWriter.ResetColor();
             if (timestamp != null)
             {
-                stringWriter.Write(timestamp + " ", null, null);
+                stringWriter.Write(timestamp + " ");
             }
             if (logLevelString != null)
             {
-                stringWriter.Write(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground);
+                stringWriter.WriteAndReset(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground);
             }
 
-            stringWriter.Write($"{category}[{eventId}] ", null, null);
+            // category and event id
+            stringWriter.Write(category + "[" + eventId + "] ");
+
+            GetScopeInformation(stringWriter, scopeProvider);
+            stringWriter.Write(" ");
+
             string originalFormat = null;
             int count = 0;
 
@@ -124,9 +128,8 @@ namespace Microsoft.Extensions.Logging.Console
                                 if (curIndex != -1)
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    stringWriter.Write(curString, null, null);
-                                    // TODO: when DisableColors is true, also uncolor the inner var colors
-                                    stringWriter.Write(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Cyan);
+                                    stringWriter.Write(curString);
+                                    stringWriter.WriteAndReset(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Yellow);
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
                                 }
@@ -159,8 +162,8 @@ namespace Microsoft.Extensions.Logging.Console
                                 if (curIndex != -1)
                                 {
                                     var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    stringWriter.Write(curString, null, null);
-                                    stringWriter.Write(strings.ElementAt(count).Value, null, ConsoleColor.Cyan);
+                                    stringWriter.Write(curString);
+                                    stringWriter.WriteAndReset(strings.ElementAt(count).Value, null, ConsoleColor.Yellow);
                                     prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                     count++;
                                 }
@@ -174,78 +177,30 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 if (originalFormat == null)
                 {
-                    stringWriter.Write(message, null, null);
+                    stringWriter.Write(message.Replace(Environment.NewLine, " "));
                 }
                 else if (count == 0)
                 {
-                    stringWriter.Write(originalFormat, null, null);
+                    stringWriter.Write(originalFormat.Replace(Environment.NewLine, " "));
                 }
             }
-
-            stringWriter.Write(" ", null, null);
-            GetScopeInformation(scopeProvider, stringWriter);
 
             if (exception != null)
             {
                 // exception message
                 stringWriter.Write(" ", null, null);
-                stringWriter.Write(exception.ToString().Replace(Environment.NewLine, " "), null, null);
-                // TODO: try to improve readability for exception message.
-                // TODO: maybe use Compact as default?
+                stringWriter.Write(exception.ToString().Replace(Environment.NewLine, " "));
             }
             stringWriter.Write(Environment.NewLine, null, null);
-            return stringWriter;
         }
 
-        // IConsoleMessageBuilder // allocates a string 
-        // Append(string messagee)
-        // SetColor(xx)
-        // ToString()
-
-        private StringWriter Format(LogLevel logLevel, string logName, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
+        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
         {
-            var logBuilder = _logBuilder;
-            _logBuilder = null;
-
-            if (logBuilder == null)
-            {
-                logBuilder = new StringBuilder();
-            }
-
             // Example:
             // INFO: ConsoleApp.Program[10]
             //       Request received
-
             var logLevelColors = GetLogLevelConsoleColors(logLevel);
             var logLevelString = GetLogLevelString(logLevel);
-            // category and event id
-            logBuilder.Append(_loglevelPadding);
-            logBuilder.Append(logName);
-            logBuilder.Append("[");
-            logBuilder.Append(eventId);
-            logBuilder.AppendLine("]");
-
-            // scope information
-            GetScopeInformation(logBuilder, scopeProvider);
-
-            if (!string.IsNullOrEmpty(message))
-            {
-                // message
-                logBuilder.Append(_messagePadding);
-
-                var len = logBuilder.Length;
-                logBuilder.AppendLine(message);
-                logBuilder.Replace(Environment.NewLine, _newLineWithMessagePadding, len, message.Length);
-            }
-
-            // Example:
-            // System.InvalidOperationException
-            //    at Namespace.Class.Function() in File:line X
-            if (exception != null)
-            {
-                // exception message
-                logBuilder.AppendLine(exception.ToString());
-            }
 
             string timestamp = null;
             var timestampFormat = FormatterOptions.TimestampFormat;
@@ -254,27 +209,42 @@ namespace Microsoft.Extensions.Logging.Console
                 var dateTime = GetCurrentDateTime();
                 timestamp = dateTime.ToString(timestampFormat);
             }
-
-            var formattedMessage = logBuilder.ToString();
-            logBuilder.Clear();
-            if (logBuilder.Capacity > 1024)
-            {
-                logBuilder.Capacity = 1024;
-            }
-            _logBuilder = logBuilder;
-            
             stringWriter.Clear();
+            stringWriter.DisableColors = FormatterOptions.DisableColors;
+            stringWriter.ResetColor();
             if (timestamp != null)
             {
-                stringWriter.Write(timestamp, DefaultConsoleColor, DefaultConsoleColor);
+                stringWriter.Write(timestamp);
             }
             if (logLevelString != null)
             {
-                stringWriter.Write(logLevelString, logLevelColors.Background, logLevelColors.Foreground);
+                stringWriter.WriteAndReset(logLevelString, logLevelColors.Background, logLevelColors.Foreground);
             }
-            stringWriter.Write(formattedMessage, DefaultConsoleColor, DefaultConsoleColor);
+            // category and event id
+            stringWriter.Write(_loglevelPadding + category + "[" + eventId + "]");
+            stringWriter.Write(Environment.NewLine);
 
-            return stringWriter;
+            // scope information
+            GetScopeInformation(stringWriter, scopeProvider);
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                // message
+                stringWriter.Write(_messagePadding);
+                stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, message);
+                stringWriter.Write(Environment.NewLine);
+            }
+
+            // Example:
+            // System.InvalidOperationException
+            //    at Namespace.Class.Function() in File:line X
+            if (exception != null)
+            {
+                // exception message
+                stringWriter.Write(_messagePadding);
+                stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, exception.ToString());
+                stringWriter.Write(Environment.NewLine);
+            }
         }
 
         private DateTime GetCurrentDateTime()
@@ -331,45 +301,32 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(IExternalScopeProvider scopeProvider, StringWriter stringWriter)
+        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider)
         {
             if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
-                scopeProvider.ForEachScope((scope, writer) =>
-                {
-                    writer.Write("=> ", null, null);
-                    writer.Write(scope.ToString(), null, ConsoleColor.DarkGray);
-                    writer.Write(" ", null, null);
-
-                }, stringWriter);
-            }
-        }
-
-        private void GetScopeInformation(StringBuilder stringBuilder, IExternalScopeProvider scopeProvider)
-        {
-            if (FormatterOptions.IncludeScopes && scopeProvider != null)
-            {
-                var initialLength = stringBuilder.Length;
+                int initialLength = stringWriter.Length;
 
                 scopeProvider.ForEachScope((scope, state) =>
                 {
-                    var (builder, paddAt) = state;
-                    var padd = paddAt == builder.Length;
+                    (StringWriter writer, int paddAt) = state;
+                    bool padd = paddAt == writer.Length;
                     if (padd)
                     {
-                        builder.Append(_messagePadding);
-                        builder.Append("=> ");
+                        // writer.ResetColor();
+                        writer.Write(_messagePadding);
+                        writer.Write("=> ");
                     }
                     else
                     {
-                        builder.Append(" => ");
+                        writer.Write(" => ");
                     }
-                    builder.Append(scope);
-                }, (stringBuilder, initialLength));
+                    writer.WriteAndReset(scope.ToString(), null, ConsoleColor.White);
+                }, (stringWriter, FormatterOptions.MultiLine ? initialLength : -1));
 
-                if (stringBuilder.Length > initialLength)
+                if (stringWriter.Length > initialLength && FormatterOptions.MultiLine)
                 {
-                    stringBuilder.AppendLine();
+                    stringWriter.Write(Environment.NewLine);
                 }
             }
         }

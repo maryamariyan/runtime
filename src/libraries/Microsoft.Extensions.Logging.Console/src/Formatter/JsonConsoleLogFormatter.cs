@@ -88,17 +88,17 @@ namespace Microsoft.Extensions.Logging.Console
 
         public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
         {
-            var message = formatter(state, exception);
-            if (!string.IsNullOrEmpty(message) || exception != null)
+            if (textWriter is StringWriter writer)
             {
-                var writer = new StringWriter();
-                writer = Format(logLevel, category, eventId.Id, message, exception, scopeProvider, writer);
-                textWriter.Write(writer.Text);
-                writer.Clear();
+                var message = formatter(state, exception);
+                if (!string.IsNullOrEmpty(message) || exception != null)
+                {
+                    Format(logLevel, category, eventId.Id, message, exception, scopeProvider, writer);
+                }
             }
         }
 
-        private StringWriter Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
+        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -121,8 +121,6 @@ namespace Microsoft.Extensions.Logging.Console
             stringWriter.Clear();
             stringWriter.Write(formattedMessage, null, null);
             stringWriter.Write(Environment.NewLine, null, null);
-
-            return stringWriter;
         }
 
         private static string GetLogLevelString(LogLevel logLevel)

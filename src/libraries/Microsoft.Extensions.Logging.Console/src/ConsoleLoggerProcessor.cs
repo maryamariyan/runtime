@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Security.Principal;
 using System.Threading;
 
 namespace Microsoft.Extensions.Logging.Console
@@ -58,204 +60,146 @@ namespace Microsoft.Extensions.Logging.Console
             console.Flush();
         }
 
+        // before parser -> just check if enable VT
+        // parser -> support simplest case -> color sequences
+        // parser -> skip escapes that it doesnt understand
+
         private void Write(IConsole console, ReadOnlySpan<char> span)
         {
             // parse out different color messages for Windows
-            if (console is WindowsLogConsole)// AnsiLogConsole
+            // TODO: how to know if it is enabled on windows, console mode.
+            if (console is AnsiLogConsole)
             {
                 console.Write(span, null, null);
                 return;
             }
-            const char escapeChar = '\x1B';
-            int curEscapeIndex = -1;
-            ConsoleColor? fg = null, bg = null;
-            int contentIndex = -1;
-            int contentLength = 0;
-            int colorCodeLength = 0;
-            ConsoleColor? color = default;
+            const char EscapeChar = '\x1B';
+            (int startIndex, int length, ConsoleColor? bg, ConsoleColor? fg) content = (-1, 0, null, null);
+            ConsoleColor? color = null;
             for (int i = 0; i < span.Length; i++)
             {
-                if (curEscapeIndex == -1 && span[i] == escapeChar)
+                if (span[i] != EscapeChar || span.Length < i + 3 || span[i + 1] != '[')
                 {
-                    colorCodeLength++;
-                    curEscapeIndex = i;
-                    continue;
-                }
-                if (curEscapeIndex != -1)
-                {
-                    colorCodeLength++;
-                    if (span[i] == 'm' && span[i - 3] == '[')
                     {
-                        if (GetForegroundColor(span.Slice(curEscapeIndex, colorCodeLength), out color))
+                        content.length++;
+                        if (content.startIndex == -1)
                         {
-                            if (contentIndex != -1)
-                            {
-                                console.Write(span.Slice(contentIndex, contentLength), bg, fg);
-                                contentIndex = -1;
-                                contentLength = 0;
-                            }
-                            fg = color;
-                            curEscapeIndex = -1;
-                            colorCodeLength = 0;
-                            continue;
-                        }
-                        if (GetBackgroundColor(span.Slice(curEscapeIndex, colorCodeLength), out color))
-                        {
-                            if (contentIndex != -1)
-                            {
-                                console.Write(span.Slice(contentIndex, contentLength), bg, fg);
-                                contentIndex = -1;
-                                contentLength = 0;
-                            }
-                            bg = color;
-                            curEscapeIndex = -1;
-                            colorCodeLength = 0;
-                            continue;
+                            content.startIndex = i;
                         }
                     }
                 }
-                else
+                else if (span[i + 3] == 'm')
                 {
-                    contentLength++;
-                    if (contentIndex == -1)
+                    // not an escape char // check more than 3 or 4
+                    if (int.TryParse(span.Slice(i + 2, length: 1), out int escapeCode))
+                        i += 3;
+                }
+                else if (span[i + 4] == 'm')
+                {
+                    if (int.TryParse(span.Slice(i + 2, length: 2), out int escapeCode))
                     {
-                        contentIndex = i;
+                        // todo support dark colors
+                        if (GetForegroundColor(escapeCode, false, out color))
+                        {
+                            // time for new light color fg
+                            if (content.startIndex != -1)
+                            {
+                                console.Write(span.Slice(content.startIndex, content.length), content.bg, content.fg);
+                                content.startIndex = -1;
+                                content.length = 0;
+                            }
+                            content.fg = color;
+                        }
+                        else if (GetBackgroundColor(escapeCode, out color))
+                        {
+                            // time for new color bg
+                            if (content.startIndex != -1)
+                            {
+                                console.Write(span.Slice(content.startIndex, content.length), content.bg, content.fg);
+                                content.startIndex = -1;
+                                content.length = 0;
+                            }
+                            content.bg = color;
+                        }
+                        i += 4;
                     }
                 }
             }
-            if (contentIndex != -1)
+            if (content.startIndex != -1)
             {
-                console.Write(span.Slice(contentIndex, contentLength), bg, fg);
+                console.Write(span.Slice(content.startIndex, content.length), content.bg, content.fg);
             }
         }
 
-        private static bool GetForegroundColor(ReadOnlySpan<char> text, out ConsoleColor? color)
+        private static bool GetForegroundColor(int number, bool isDark, out ConsoleColor? color)
         {
-            int number = 0;
-            if (text.Length == 5)
+            switch (number)
             {
-                if (text[0] == '\x1B' && text[1] == '[' && text[4] == 'm' &&
-                    int.TryParse(text.Slice(start: 2, length: 2), out number))
-                {
-                    switch (number)
-                    {
-                        case 30:
-                            color = ConsoleColor.Black;
-                            return true;
-                        case 31:
-                            color = ConsoleColor.DarkRed;
-                            return true;
-                        case 32:
-                            color = ConsoleColor.DarkGreen;
-                            return true;
-                        case 33:
-                            color = ConsoleColor.DarkYellow;
-                            return true;
-                        case 34:
-                            color = ConsoleColor.DarkBlue;
-                            return true;
-                        case 35:
-                            color = ConsoleColor.DarkMagenta;
-                            return true;
-                        case 36:
-                            color = ConsoleColor.DarkCyan;
-                            return true;
-                        case 37:
-                            color = ConsoleColor.Gray;
-                            return true;
-                    }
-                }
+                case 30:
+                    color = ConsoleColor.Black;
+                    return true;
+                case 31:
+                    color = isDark ? ConsoleColor.DarkRed : ConsoleColor.Red;
+                    return true;
+                case 32:
+                    color = isDark ? ConsoleColor.DarkGreen : ConsoleColor.Green;
+                    return true;
+                case 33:
+                    color = isDark ? ConsoleColor.DarkYellow : ConsoleColor.Yellow;
+                    return true;
+                case 34:
+                    color = isDark ? ConsoleColor.DarkBlue : ConsoleColor.Blue;
+                    return true;
+                case 35:
+                    color = isDark ? ConsoleColor.DarkMagenta : ConsoleColor.Magenta;
+                    return true;
+                case 36:
+                    color = isDark ? ConsoleColor.DarkCyan : ConsoleColor.Cyan;
+                    return true;
+                case 37:
+                    color = isDark ? ConsoleColor.Gray : ConsoleColor.White;
+                    return true;
+                case 39:
+                    color = null;
+                    return true;
             }
-            else if (text.Length == 9)
-            {
-                if (text[0] == '\x1B' && text[1] == '[' && text[2] == '1' && text[3] == 'm' &&
-                    text[4] == '\x1B' && text[5] == '[' && text[8] == 'm' && int.TryParse(text.Slice(start: 6, length: 2), out number))
-                {
-                    switch (number)
-                    {
-                        case 31:
-                            color = ConsoleColor.Red;
-                            return true;
-                        case 32:
-                            color = ConsoleColor.Green;
-                            return true;
-                        case 33:
-                            color = ConsoleColor.Yellow;
-                            return true;
-                        case 34:
-                            color = ConsoleColor.Blue;
-                            return true;
-                        case 35:
-                            color = ConsoleColor.Magenta;
-                            return true;
-                        case 36:
-                            color = ConsoleColor.Cyan;
-                            return true;
-                        case 37:
-                            color = ConsoleColor.White;
-                            return true;
-                    }
-                }
-            }
-            else if (text.Length == 10)
-            {
-                if (text[0] == '\x1B' && text[1] == '[' && int.TryParse(text.Slice(start: 2, length: 2), out var firstNumber) && text[4] == 'm' &&
-                       text[5] == '\x1B' && text[6] == '[' && text[9] == 'm' && int.TryParse(text.Slice(start: 7, length: 2), out number))
-                {
-                    //\x1B[39m\x1B[22m
-                    if (firstNumber == 39 && number == 22)
-                    {
-                        color = default;
-                        return true;
-                    }
-                }
-            }
-
-            color = default;
+            color = null;
             return false;
         }
-        private static bool GetBackgroundColor(ReadOnlySpan<char> text, out ConsoleColor? color)
-        {
-            int number = 0;
-            if (text.Length == 5)
-            {
-                if (text[0] == '\x1B' && text[1] == '[' && text[4] == 'm' &&
-                    int.TryParse(text.Slice(start: 2, length: 2), out number))
-                {
-                    switch (number)
-                    {
-                        case 40:
-                            color = ConsoleColor.Black;
-                            return true;
-                        case 41:
-                            color = ConsoleColor.Red;
-                            return true;
-                        case 42:
-                            color = ConsoleColor.Green;
-                            return true;
-                        case 43:
-                            color = ConsoleColor.Yellow;
-                            return true;
-                        case 44:
-                            color = ConsoleColor.Blue;
-                            return true;
-                        case 45:
-                            color = ConsoleColor.Magenta;
-                            return true;
-                        case 46:
-                            color = ConsoleColor.Cyan;
-                            return true;
-                        case 47:
-                            color = ConsoleColor.White;
-                            return true;
-                        case 49:
-                            color = default;
-                            return true;
-                    }
-                }
-            }
 
-            color = default;
+        private static bool GetBackgroundColor(int number, out ConsoleColor? color)
+        {
+            switch (number)
+            {
+                case 40:
+                    color = ConsoleColor.Black;
+                    return true;
+                case 41:
+                    color = ConsoleColor.Red;
+                    return true;
+                case 42:
+                    color = ConsoleColor.Green;
+                    return true;
+                case 43:
+                    color = ConsoleColor.Yellow;
+                    return true;
+                case 44:
+                    color = ConsoleColor.Blue;
+                    return true;
+                case 45:
+                    color = ConsoleColor.Magenta;
+                    return true;
+                case 46:
+                    color = ConsoleColor.Cyan;
+                    return true;
+                case 47:
+                    color = ConsoleColor.White;
+                    return true;
+                case 49:
+                    color = null;
+                    return true;
+            }
+            color = null;
             return false;
         }
 

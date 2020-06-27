@@ -16,9 +16,6 @@ namespace Microsoft.Extensions.Logging.Console
         private static readonly string _loglevelPadding = ": ";
         private static readonly string _messagePadding;
 
-        [ThreadStatic]
-        private static StringBuilder _logBuilder;
-
         static SystemdConsoleLogFormatter()
         {
             var logLevelString = GetSyslogSeverityString(LogLevel.Information);
@@ -48,27 +45,18 @@ namespace Microsoft.Extensions.Logging.Console
 
         public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
         {
-            var message = formatter(state, exception);
-            if (!string.IsNullOrEmpty(message) || exception != null)
+            if (textWriter is StringWriter stringWriter)
             {
-                var writer = new StringWriter();
-                writer = Format(logLevel, category, eventId.Id, message, exception, scopeProvider, writer);
-                textWriter.Write(writer.Text);
-                writer.Clear();
-                return;
+                var message = formatter(state, exception);
+                if (!string.IsNullOrEmpty(message) || exception != null)
+                {
+                    Format(logLevel, category, eventId.Id, message, exception, scopeProvider, stringWriter);
+                }
             }
         }
 
-        private StringWriter Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
+        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter textWriter)
         {
-            var logBuilder = _logBuilder;
-            _logBuilder = null;
-
-            if (logBuilder == null)
-            {
-                logBuilder = new StringBuilder();
-            }
-
             // systemd reads messages from standard out line-by-line in a '<pri>message' format.
             // newline characters are treated as message delimiters, so we must replace them.
             // Messages longer than the journal LineMax setting (default: 48KB) are cropped.
@@ -77,64 +65,40 @@ namespace Microsoft.Extensions.Logging.Console
 
             // loglevel
             var logLevelString = GetSyslogSeverityString(logLevel);
-            logBuilder.Append(logLevelString);
+            textWriter.Write(logLevelString);
 
             // timestamp
             var timestampFormat = FormatterOptions.TimestampFormat;
             if (timestampFormat != null)
             {
                 var dateTime = GetCurrentDateTime();
-                logBuilder.Append(dateTime.ToString(timestampFormat));
+                textWriter.Write(dateTime.ToString(timestampFormat));
             }
 
             // category and event id
-            logBuilder.Append(category);
-            logBuilder.Append("[");
-            logBuilder.Append(eventId);
-            logBuilder.Append("]");
+            textWriter.Write(category + "[" + eventId + "]");
 
             // scope information
-            GetScopeInformation(logBuilder, scopeProvider);
+            GetScopeInformation(textWriter, scopeProvider);
 
             // message
             if (!string.IsNullOrEmpty(message))
             {
-                logBuilder.Append(' ');
+                textWriter.Write(' ');
                 // message
-                AppendAndReplaceNewLine(logBuilder, message);
+                textWriter.WriteReplacing(Environment.NewLine, " ", message);
             }
 
             // exception
             // System.InvalidOperationException at Namespace.Class.Function() in File:line X
             if (exception != null)
             {
-                logBuilder.Append(' ');
-                AppendAndReplaceNewLine(logBuilder, exception.ToString());
+                textWriter.Write(' ');
+                textWriter.WriteReplacing(Environment.NewLine, " ", exception.ToString());
             }
 
             // newline delimiter
-            logBuilder.Append(Environment.NewLine);
-
-
-            var formattedMessage = logBuilder.ToString();
-            logBuilder.Clear();
-            if (logBuilder.Capacity > 1024)
-            {
-                logBuilder.Capacity = 1024;
-            }
-            _logBuilder = logBuilder;
-            
-            stringWriter.Clear();
-            stringWriter.Write(formattedMessage, null, null);
-
-            return stringWriter;
-
-            static void AppendAndReplaceNewLine(StringBuilder sb, string message)
-            {
-                var len = sb.Length;
-                sb.Append(message);
-                sb.Replace(Environment.NewLine, " ", len, message.Length);
-            }
+            textWriter.Write(Environment.NewLine);
         }
 
         private DateTime GetCurrentDateTime()
@@ -163,27 +127,25 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringBuilder stringBuilder, IExternalScopeProvider scopeProvider)
+        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider)
         {
             if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
-                var initialLength = stringBuilder.Length;
-
                 scopeProvider.ForEachScope((scope, state) =>
                 {
-                    var (builder, paddAt) = state;
-                    var padd = paddAt == builder.Length;
+                    (StringWriter writer, int paddAt) = state;
+                    bool padd = paddAt == writer.Length;
                     if (padd)
                     {
-                        builder.Append(_messagePadding);
-                        builder.Append("=> ");
+                        writer.Write(_messagePadding);
+                        writer.Write("=> ");
                     }
                     else
                     {
-                        builder.Append(" => ");
+                        writer.Write(" => ");
                     }
-                    builder.Append(scope);
-                }, (stringBuilder, -1));
+                    writer.Write(scope);
+                }, (stringWriter, -1));
             }
         }
     }
