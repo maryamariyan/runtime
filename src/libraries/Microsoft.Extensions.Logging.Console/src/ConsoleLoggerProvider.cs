@@ -54,6 +54,7 @@ namespace Microsoft.Extensions.Logging.Console
             _messageQueue = new ConsoleLoggerProcessor();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                // [TODO]: how to check if VT enabled on windows, console mode.
                 _messageQueue.Console = new WindowsLogConsole();
                 _messageQueue.ErrorConsole = new WindowsLogConsole(stdErr: true);
             }

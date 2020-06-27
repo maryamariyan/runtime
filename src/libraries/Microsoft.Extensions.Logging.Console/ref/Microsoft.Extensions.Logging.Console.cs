@@ -80,5 +80,6 @@ namespace Microsoft.Extensions.Logging.Console
         public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
         public string TimestampFormat { get { throw null; } set { } }
         public bool UseUtcTimestamp { get { throw null; } set { } }
+        public bool FindKeyValuePairsInLog { get { throw null; } set { } }
     }
 }

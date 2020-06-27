@@ -82,7 +82,6 @@ namespace Microsoft.Extensions.Logging.Console
             }
             stringWriter.Clear();
             stringWriter.DisableColors = FormatterOptions.DisableColors;
-            // stringWriter.ResetColor();
             if (timestamp != null)
             {
                 stringWriter.Write(timestamp + " ");
@@ -101,71 +100,74 @@ namespace Microsoft.Extensions.Logging.Console
             string originalFormat = null;
             int count = 0;
 
-            if (scope != null)
+            if (FormatterOptions.FindKeyValuePairsInLog)
             {
-                if (scope is IReadOnlyList<KeyValuePair<string, object>> kvpsx)
+                if (scope != null)
                 {
-                    var strings = new List<KeyValuePair<string, object>>();
-                    foreach (var kvp in kvpsx)
+                    if (scope is IReadOnlyList<KeyValuePair<string, object>> kvpsx)
                     {
-                        if (kvp.Key.Contains("{OriginalFormat}"))
-                        {
-                            originalFormat = kvp.Value.ToString();
-                        }
-                        else
-                        {
-                            strings.Add(kvp);
-                        }
-                    }
-                    int prevIndex = 0;
-                    if (originalFormat != null)
-                    {
+                        var strings = new List<KeyValuePair<string, object>>();
                         foreach (var kvp in kvpsx)
                         {
-                            if (!kvp.Key.Contains("{OriginalFormat}"))
+                            if (kvp.Key.Contains("{OriginalFormat}"))
                             {
-                                var curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
-                                if (curIndex != -1)
+                                originalFormat = kvp.Value.ToString();
+                            }
+                            else
+                            {
+                                strings.Add(kvp);
+                            }
+                        }
+                        int prevIndex = 0;
+                        if (originalFormat != null)
+                        {
+                            foreach (var kvp in kvpsx)
+                            {
+                                if (!kvp.Key.Contains("{OriginalFormat}"))
                                 {
-                                    var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    stringWriter.Write(curString);
-                                    stringWriter.WriteAndReset(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Yellow);
-                                    prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
-                                    count++;
+                                    var curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
+                                    if (curIndex != -1)
+                                    {
+                                        var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
+                                        stringWriter.Write(curString);
+                                        stringWriter.WriteAndReset(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Yellow);
+                                        prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
+                                        count++;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else if (scope is IReadOnlyList<KeyValuePair<string, string>> kvps)
-                {
-                    var strings = new List<KeyValuePair<string, string>>();
-                    foreach (var kvp in kvps)
+                    else if (scope is IReadOnlyList<KeyValuePair<string, string>> kvps)
                     {
-                        if (kvp.Key.Contains("{OriginalFormat}"))
-                        {
-                            originalFormat = kvp.Value;
-                        }
-                        else
-                        {
-                            strings.Add(kvp);
-                        }
-                    }
-                    int prevIndex = 0;
-                    if (originalFormat != null)
-                    {
+                        var strings = new List<KeyValuePair<string, string>>();
                         foreach (var kvp in kvps)
                         {
-                            if (!kvp.Key.Contains("{OriginalFormat}"))
+                            if (kvp.Key.Contains("{OriginalFormat}"))
                             {
-                                var curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
-                                if (curIndex != -1)
+                                originalFormat = kvp.Value;
+                            }
+                            else
+                            {
+                                strings.Add(kvp);
+                            }
+                        }
+                        int prevIndex = 0;
+                        if (originalFormat != null)
+                        {
+                            foreach (var kvp in kvps)
+                            {
+                                if (!kvp.Key.Contains("{OriginalFormat}"))
                                 {
-                                    var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                    stringWriter.Write(curString);
-                                    stringWriter.WriteAndReset(strings.ElementAt(count).Value, null, ConsoleColor.Yellow);
-                                    prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
-                                    count++;
+                                    var curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
+                                    if (curIndex != -1)
+                                    {
+                                        var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
+                                        stringWriter.Write(curString);
+                                        stringWriter.WriteAndReset(strings.ElementAt(count).Value, null, ConsoleColor.Yellow);
+                                        prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
+                                        count++;
+                                    }
                                 }
                             }
                         }
@@ -177,21 +179,21 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 if (originalFormat == null)
                 {
-                    stringWriter.Write(message.Replace(Environment.NewLine, " "));
+                    stringWriter.WriteReplacing(Environment.NewLine, " ", message);
                 }
                 else if (count == 0)
                 {
-                    stringWriter.Write(originalFormat.Replace(Environment.NewLine, " "));
+                    stringWriter.WriteReplacing(Environment.NewLine, " ", originalFormat);
                 }
             }
 
             if (exception != null)
             {
                 // exception message
-                stringWriter.Write(" ", null, null);
-                stringWriter.Write(exception.ToString().Replace(Environment.NewLine, " "));
+                stringWriter.WriteAndReset(" ", null, null);
+                stringWriter.WriteReplacing(Environment.NewLine, " ", exception.ToString());
             }
-            stringWriter.Write(Environment.NewLine, null, null);
+            stringWriter.WriteAndReset(Environment.NewLine, null, null);
         }
 
         private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)

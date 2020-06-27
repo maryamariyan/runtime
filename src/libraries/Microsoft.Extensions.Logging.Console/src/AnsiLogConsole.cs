@@ -21,9 +21,9 @@ namespace Microsoft.Extensions.Logging.Console
             _systemConsole = systemConsole;
         }
 
-        public void Write(ReadOnlySpan<char> span, ConsoleColor? background, ConsoleColor? foreground)
+        public void Write(string message)
         {
-            _outputBuilder.Append(span);
+            _outputBuilder.Append(message);
         }
 
         public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
