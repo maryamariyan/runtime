@@ -83,18 +83,19 @@ namespace Microsoft.Extensions.Logging.Console
             stringWriter.DisableColors = FormatterOptions.DisableColors;
             if (timestamp != null)
             {
-                stringWriter.Write(timestamp + " ");
+                stringWriter.Write(timestamp + ' ');
             }
             if (logLevelString != null)
             {
-                stringWriter.WriteAndReset(logLevelString + " ", logLevelColors.Background, logLevelColors.Foreground);
+                stringWriter.Write(logLevelString, logLevelColors);
+                stringWriter.Write(' ');
             }
 
             // category and event id
             stringWriter.Write(category + "[" + eventId + "] ");
 
             GetScopeInformation(stringWriter, scopeProvider);
-            stringWriter.Write(" ");
+            stringWriter.Write(' ');
 
             string originalFormat = null;
             int count = 0;
@@ -129,7 +130,9 @@ namespace Microsoft.Extensions.Logging.Console
                                     {
                                         var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
                                         stringWriter.Write(curString);
-                                        stringWriter.WriteAndReset(strings.ElementAt(count).Value.ToString(), null, ConsoleColor.Yellow);
+                                        stringWriter.SetForegroundColor(ConsoleColor.Yellow);
+                                        stringWriter.Write(strings.ElementAt(count).Value.ToString());
+                                        stringWriter.SetForegroundColor(null);
                                         prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                         count++;
                                     }
@@ -163,7 +166,9 @@ namespace Microsoft.Extensions.Logging.Console
                                     {
                                         var curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
                                         stringWriter.Write(curString);
-                                        stringWriter.WriteAndReset(strings.ElementAt(count).Value, null, ConsoleColor.Yellow);
+                                        stringWriter.SetForegroundColor(ConsoleColor.Yellow);
+                                        stringWriter.Write(strings.ElementAt(count).Value);
+                                        stringWriter.SetForegroundColor(null);
                                         prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
                                         count++;
                                     }
@@ -189,10 +194,10 @@ namespace Microsoft.Extensions.Logging.Console
             if (exception != null)
             {
                 // exception message
-                stringWriter.WriteAndReset(" ", null, null);
+                stringWriter.Write(' ');
                 stringWriter.WriteReplacing(Environment.NewLine, " ", exception.ToString());
             }
-            stringWriter.WriteAndReset(Environment.NewLine, null, null);
+            stringWriter.Write(Environment.NewLine);
         }
 
         private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
@@ -211,14 +216,13 @@ namespace Microsoft.Extensions.Logging.Console
                 timestamp = dateTime.ToString(timestampFormat);
             }
             stringWriter.DisableColors = FormatterOptions.DisableColors;
-            stringWriter.ResetColor();
             if (timestamp != null)
             {
                 stringWriter.Write(timestamp);
             }
             if (logLevelString != null)
             {
-                stringWriter.WriteAndReset(logLevelString, logLevelColors.Background, logLevelColors.Foreground);
+                stringWriter.Write(logLevelString, logLevelColors);
             }
             // category and event id
             stringWriter.Write(_loglevelPadding + category + "[" + eventId + "]");
@@ -313,7 +317,6 @@ namespace Microsoft.Extensions.Logging.Console
                     bool padd = paddAt == writer.Length;
                     if (padd)
                     {
-                        // writer.ResetColor();
                         writer.Write(_messagePadding);
                         writer.Write("=> ");
                     }
@@ -321,7 +324,9 @@ namespace Microsoft.Extensions.Logging.Console
                     {
                         writer.Write(" => ");
                     }
-                    writer.WriteAndReset(scope.ToString(), null, ConsoleColor.White);
+                    writer.SetForegroundColor(ConsoleColor.White);
+                    writer.Write(scope.ToString());
+                    writer.SetForegroundColor(null);
                 }, (stringWriter, FormatterOptions.MultiLine ? initialLength : -1));
 
                 if (stringWriter.Length > initialLength && FormatterOptions.MultiLine)
@@ -330,18 +335,18 @@ namespace Microsoft.Extensions.Logging.Console
                 }
             }
         }
+    }
 
-        private readonly struct ConsoleColors
+    internal readonly struct ConsoleColors
+    {
+        public ConsoleColors(ConsoleColor? foreground, ConsoleColor? background)
         {
-            public ConsoleColors(ConsoleColor? foreground, ConsoleColor? background)
-            {
-                Foreground = foreground;
-                Background = background;
-            }
-
-            public ConsoleColor? Foreground { get; }
-
-            public ConsoleColor? Background { get; }
+            Foreground = foreground;
+            Background = background;
         }
+
+        public ConsoleColor? Foreground { get; }
+
+        public ConsoleColor? Background { get; }
     }
 }

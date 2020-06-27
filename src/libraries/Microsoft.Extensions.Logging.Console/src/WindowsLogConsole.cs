@@ -147,6 +147,7 @@ namespace Microsoft.Extensions.Logging.Console
         {
             // No action required as for every write, data is sent directly to the console
             // output stream
+            // [TODO] consider ResetColor?
         }
 
         private static bool SetsForegroundColor(int number, bool isDark, out ConsoleColor? color)
