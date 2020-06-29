@@ -30,11 +30,70 @@ namespace Microsoft.Extensions.Logging.Console
         /// </summary>
         /// <param name="options">The options to create <see cref="ConsoleLogger"/> instances with.</param>
         public ConsoleLoggerProvider(Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions> options)
-            : this(options, Enumerable.Empty<IConsoleLogFormatter>())
+            : this(options, Enumerable.Empty<IConsoleLogFormatter>()) { }
+
+        private static IEnumerable<IConsoleLogFormatter> GetFormatters()
         {
-            ; // todo: check workflow. maybe we should always have 4 formatters prepped instead?
-            // current implementation wont work well with empty formatters.
-            // use IServiceLocator or IServiceCollection? to locate Default formatter and add as formatters?
+            var defaultMonitor = new DefaultOptionsMonitor(new DefaultConsoleLogFormatterOptions() { MultiLine = true });
+            var systemdMonitor = new SystemdOptionsMonitor(new SystemdConsoleLogFormatterOptions() { });
+            var formatters = new List<IConsoleLogFormatter>() {
+                new DefaultConsoleLogFormatter(defaultMonitor),
+                new SystemdConsoleLogFormatter(systemdMonitor) };
+            return formatters;
+        }
+
+        private class DefaultOptionsMonitor : IOptionsMonitor<DefaultConsoleLogFormatterOptions>
+        {
+            private DefaultConsoleLogFormatterOptions _options;
+            private event Action<DefaultConsoleLogFormatterOptions, string> _onChange;
+
+            public DefaultOptionsMonitor(DefaultConsoleLogFormatterOptions options)
+            {
+                _options = options;
+            }
+
+            public DefaultConsoleLogFormatterOptions Get(string name) => _options;
+
+            public IDisposable OnChange(Action<DefaultConsoleLogFormatterOptions, string> listener)
+            {
+                _onChange += listener;
+                return null;
+            }
+
+            public DefaultConsoleLogFormatterOptions CurrentValue => _options;
+
+            public void Set(DefaultConsoleLogFormatterOptions options)
+            {
+                _options = options;
+                _onChange?.Invoke(options, "");
+            }
+        }
+
+        private class SystemdOptionsMonitor : IOptionsMonitor<SystemdConsoleLogFormatterOptions>
+        {
+            private SystemdConsoleLogFormatterOptions _options;
+            private event Action<SystemdConsoleLogFormatterOptions, string> _onChange;
+
+            public SystemdOptionsMonitor(SystemdConsoleLogFormatterOptions options)
+            {
+                _options = options;
+            }
+
+            public SystemdConsoleLogFormatterOptions Get(string name) => _options;
+
+            public IDisposable OnChange(Action<SystemdConsoleLogFormatterOptions, string> listener)
+            {
+                _onChange += listener;
+                return null;
+            }
+
+            public SystemdConsoleLogFormatterOptions CurrentValue => _options;
+
+            public void Set(SystemdConsoleLogFormatterOptions options)
+            {
+                _options = options;
+                _onChange?.Invoke(options, "");
+            }
         }
 
         /// <summary>
@@ -46,7 +105,14 @@ namespace Microsoft.Extensions.Logging.Console
         {
             _options = options;
             _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
-            _formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(formatters.ToDictionary(f => f.Name));
+            if (formatters.ToList().Count > 0)
+            {
+                _formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(formatters.ToDictionary(f => f.Name));
+            }
+            else
+            {
+                _formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(GetFormatters().ToDictionary(f => f.Name));
+            }
 
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = _options.OnChange(ReloadLoggerOptions);
@@ -74,18 +140,19 @@ namespace Microsoft.Extensions.Logging.Console
                 !_formatters.TryGetValue(options.FormatterName?.ToLower(), out logFormatter)
                 )
             {
-                // switch (options.Format)
-                // {
-                //     case ConsoleLoggerFormat.Systemd:
-                //         logFormatter = _formatters[ConsoleLogFormatterNames.Systemd];
-                //         break;
-                //     default:
-                //         logFormatter = _formatters[ConsoleLogFormatterNames.Default];
-                //         break;
-                // }
-                logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+#pragma warning disable CS0618
+                switch (options.Format)
+                {
+                    case ConsoleLoggerFormat.Systemd:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Systemd];
+                        break;
+                    default:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+                        break;
+                }
+                UpdateFormatterOptions(logFormatter, options);
+#pragma warning restore CS0618
             }
-            // UpdateFormatterOptions(logFormatter, options);
 
             foreach (KeyValuePair<string, ConsoleLogger> logger in _loggers)
             {
@@ -103,18 +170,19 @@ namespace Microsoft.Extensions.Logging.Console
                 !_formatters.TryGetValue(_options.CurrentValue.FormatterName?.ToLower(), out logFormatter)
                 )
             {
-                // switch (_options.CurrentValue.Format)
-                // {
-                //     case ConsoleLoggerFormat.Systemd:
-                //         logFormatter = _formatters[ConsoleLogFormatterNames.Systemd];
-                //         break;
-                //     default:
-                //         logFormatter = _formatters[ConsoleLogFormatterNames.Default];
-                //         break;
-                // }
-                logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+#pragma warning disable CS0618
+                switch (_options.CurrentValue.Format)
+                {
+                    case ConsoleLoggerFormat.Systemd:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Systemd];
+                        break;
+                    default:
+                        logFormatter = _formatters[ConsoleLogFormatterNames.Default];
+                        break;
+                }
+                UpdateFormatterOptions(logFormatter, _options.CurrentValue);
+#pragma warning disable CS0618
             }
-            // UpdateFormatterOptions(logFormatter, _options.CurrentValue);
 
             return _loggers.GetOrAdd(name, loggerName => new ConsoleLogger(name, _messageQueue)
             {
@@ -123,29 +191,30 @@ namespace Microsoft.Extensions.Logging.Console
                 Options = _options.CurrentValue
             });
         }
-
-        // private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions deprecatedFromOptions)
-        // {
-        //     if (deprecatedFromOptions.FormatterName != null)
-        //         return;
-        //     // kept for deprecated apis:
-        //     if (formatter is DefaultConsoleLogFormatter defaultFormatter)
-        //     {
-        //         defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
-        //         defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
-        //         defaultFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
-        //         defaultFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
-        //         defaultFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
-        //     }
-        //     else
-        //     if (formatter is SystemdConsoleLogFormatter systemdFormatter)
-        //     {
-        //         systemdFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
-        //         systemdFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
-        //         systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
-        //         systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
-        //     }
-        // }
+#pragma warning disable CS0618
+        private void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions deprecatedFromOptions)
+        {
+            if (deprecatedFromOptions.FormatterName != null)
+                return;
+            // kept for deprecated apis:
+            if (formatter is DefaultConsoleLogFormatter defaultFormatter)
+            {
+                defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
+                defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
+                defaultFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
+                defaultFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
+                defaultFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
+            }
+            else
+            if (formatter is SystemdConsoleLogFormatter systemdFormatter)
+            {
+                systemdFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
+                systemdFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
+                systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
+                systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
+            }
+        }
+#pragma warning restore CS0618
 
         /// <inheritdoc />
         public void Dispose()

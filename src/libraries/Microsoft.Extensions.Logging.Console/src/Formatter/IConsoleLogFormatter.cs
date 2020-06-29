@@ -10,7 +10,6 @@ namespace Microsoft.Extensions.Logging.Console
 {
     public interface IConsoleLogFormatter
     {
-
         /// <summary>
         /// Gets the name associated with the console log formatter.
         /// </summary>

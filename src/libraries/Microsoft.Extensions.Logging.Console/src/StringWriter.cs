@@ -9,7 +9,6 @@ using System.Collections.Concurrent;
 
 namespace Microsoft.Extensions.Logging.Console
 {
-
     internal class StringWriter : TextWriter
     {
         private readonly StringBuilder _sbMain;
