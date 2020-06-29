@@ -791,7 +791,7 @@ namespace Microsoft.Extensions.Logging.Test
                  @"{""Key"":""stringParam"",""Value"":""bar""}",
                 @"{""Key"":""int1Param"",""Value"":""23""}",
                 @"{""Key"":""int2Param"",""Value"":""45""}",
-                @$"""Exception"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---> System.Exception: inner oops") },
+                @$"""Exception"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---> System.Exception: inner oops") },
 #else
             { "E5JS", (e) => VerifySingleEvent(e, "Logger2", EventTypes.MessageJson, 5, null, LogLevel.Critical,
                 @"""ArgumentsJson"":{""stringParam"":""bar"",""int1Param"":""23"",""int2Param"":""45""",
@@ -801,7 +801,7 @@ namespace Microsoft.Extensions.Logging.Test
                  @"{""Key"":""stringParam"",""Value"":""bar""}",
                 @"{""Key"":""int1Param"",""Value"":""23""}",
                 @"{""Key"":""int2Param"",""Value"":""45""}",
-                @"""Exception"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""VerboseMessage"":""System.Exception: oops ---> System.Exception: inner oops") },
+                @"""Exception"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops ---> System.Exception: inner oops") },
 #endif
 
             { "E6FM", (e) => VerifySingleEvent(e, "Logger2", EventTypes.FormattedMessage, 6, null, LogLevel.Warning,

@@ -23,12 +23,14 @@ namespace Microsoft.Extensions.Logging.EventSource
             TypeName = exception.GetType().FullName;
             Message = exception.Message;
             HResult = exception.HResult;
+            StackTrace = exception.StackTrace;
             VerboseMessage = exception.ToString();
         }
 
         public string TypeName { get; }
         public string Message { get; }
         public int HResult { get; }
+        public string StackTrace { get; }
         public string VerboseMessage { get; } // This is the ToString() of the Exception
     }
 }
