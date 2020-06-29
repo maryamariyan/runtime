@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using Xunit;
 
 namespace Microsoft.Extensions.Logging.AzureAppServices.Test
@@ -18,6 +19,14 @@ namespace Microsoft.Extensions.Logging.AzureAppServices.Test
             serviceCollection.AddLogging(builder => builder.AddEventSourceLogger());
 
             Assert.Equal(count, serviceCollection.Count);
+        }
+    }
+
+    public class ClassWithBug
+    {
+        public void MethodWithBug()
+        {
+            throw new InvalidOperationException("Exception showing stacktrace");
         }
     }
 }

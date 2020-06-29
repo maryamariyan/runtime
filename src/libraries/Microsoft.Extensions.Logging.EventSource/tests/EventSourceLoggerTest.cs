@@ -531,8 +531,19 @@ namespace Microsoft.Extensions.Logging.Test
             using (logger1.BeginScope("Outer scope {stringParam} {intParam} {doubleParam}", "scoped foo", 13, DoubleParam1))
             {
                 logger1.LogError(new EventId(4, "ErrorEvent"), "Logger1 Event4 Error {stringParam} {guidParam}", "foo", GuidParam);
+                Exception exx = new Exception("inner oops1");
+                try 
+                {
+                    new Microsoft.Extensions.Logging.AzureAppServices.Test.ClassWithBug().MethodWithBug();
+                }
+                catch (Exception ex)
+                {
+                    exx = ex;
+                }
+                finally{
+                }
 
-                logger2.LogCritical(new EventId(5), new Exception("oops", new Exception("inner oops")),
+                logger2.LogCritical(new EventId(5), new Exception("oops", exx),
                     "Logger2 Event5 Critical {stringParam} {int1Param} {int2Param}", "bar", 23, 45);
 
                 using (logger3.BeginScope("Inner scope {timeParam} {guidParam}", TimeParam, GuidParam))
@@ -541,6 +552,7 @@ namespace Microsoft.Extensions.Logging.Test
                 }
 
                 logger3.LogInformation(new EventId(7), "Logger3 Event7 Information {stringParam} {doubleParam} {intParam}", "inner scope closed", DoubleParam2, 37);
+                    // throw new NotImplementedException(exx.StackTrace);
             }
 
             logger2.LogWarning(new EventId(8), "Logger2 Event8 Warning {stringParam} {timeParam}", "Outer scope closed", TimeParam.ToString("O"));
@@ -549,6 +561,14 @@ namespace Microsoft.Extensions.Logging.Test
         private static void VerifyEvents(TestEventListener eventListener, params string[] verifierIDs)
         {
             Assert.Collection(eventListener.Events, verifierIDs.Select(id => EventVerifiers[id]).ToArray());
+            // for (int i = 0; i < eventListener.Events.Count; i++)
+            // {
+            //     var x = eventListener.Events.Skip(i).Take(1).FirstOrDefault();
+            //     if (x != null && x.Substring(0, x.IndexOf("VerboseMessage") >=0 ? x.IndexOf("VerboseMessage") : 0).Contains("ClassWithBug"))
+            //         throw new NotImplementedException(x);
+            // }
+            // Assert.Collection(eventListener.Events, verifierIDs.Select(id => EventVerifiers[id]).ToArray());
+            // Assert.Collection(eventListener.Events.Take(11).Union(eventListener.Events.Skip(12)).ToList(), verifierIDs.Select(id => EventVerifiers[id]).ToArray());
         }
 
         private static void VerifySingleEvent(string eventJson, string loggerName, string eventName, int? eventId, string eventIdName, LogLevel? level, params string[] fragments)
@@ -785,23 +805,23 @@ namespace Microsoft.Extensions.Logging.Test
 #if NETCOREAPP
             { "E5JS", (e) => VerifySingleEvent(e, "Logger2", EventTypes.MessageJson, 5, null, LogLevel.Critical,
                 @"""ArgumentsJson"":{""stringParam"":""bar"",""int1Param"":""23"",""int2Param"":""45""",
-                @$"""ExceptionJson"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":""-2146233088"",""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---\u003E System.Exception: inner oops") },
+                @$"""ExceptionJson"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":""-2146233088"",""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---\u003E System.Exception: inner oops2") },
 
             { "E5MSG", (e) => VerifySingleEvent(e, "Logger2", EventTypes.Message, 5, null, LogLevel.Critical,
                  @"{""Key"":""stringParam"",""Value"":""bar""}",
                 @"{""Key"":""int1Param"",""Value"":""23""}",
                 @"{""Key"":""int2Param"",""Value"":""45""}",
-                @$"""Exception"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops{EscapedNewline()} ---> System.Exception: inner oops") },
+                @$"""Exception"":{{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":""x"",""VerboseMessage"":""System.Exception: oops\r\n ---> System.InvalidOperationException: Exception showing stacktrace\r\n   at Microsoft.Extensions.Logging.AzureAppServices.Test.ClassWithBug.MethodWithBug() in C:\\CodeHub\\runtime\\src\\libraries\\Microsoft.Extensions.Logging.EventSource\\tests\\AzureAppServicesLoggerFactoryExtensionsTests.cs:line 29") },
 #else
             { "E5JS", (e) => VerifySingleEvent(e, "Logger2", EventTypes.MessageJson, 5, null, LogLevel.Critical,
                 @"""ArgumentsJson"":{""stringParam"":""bar"",""int1Param"":""23"",""int2Param"":""45""",
-                @"""ExceptionJson"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":""-2146233088"",""VerboseMessage"":""System.Exception: oops ---\u003E System.Exception: inner oops") },
+                @"""ExceptionJson"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":""-2146233088"",""VerboseMessage"":""System.Exception: oops ---\u003E System.Exception: inner oops3") },
 
             { "E5MSG", (e) => VerifySingleEvent(e, "Logger2", EventTypes.Message, 5, null, LogLevel.Critical,
                  @"{""Key"":""stringParam"",""Value"":""bar""}",
                 @"{""Key"":""int1Param"",""Value"":""23""}",
                 @"{""Key"":""int2Param"",""Value"":""45""}",
-                @"""Exception"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops ---> System.Exception: inner oops") },
+                @"""Exception"":{""TypeName"":""System.Exception"",""Message"":""oops"",""HResult"":-2146233088,""StackTrace"":"""",""VerboseMessage"":""System.Exception: oops ---> System.Exception: inner oops4") },
 #endif
 
             { "E6FM", (e) => VerifySingleEvent(e, "Logger2", EventTypes.FormattedMessage, 6, null, LogLevel.Warning,
