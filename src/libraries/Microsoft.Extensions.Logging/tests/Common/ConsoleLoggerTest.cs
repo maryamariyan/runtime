@@ -48,8 +48,8 @@ namespace Microsoft.Extensions.Logging.Test
             var logger = new ConsoleLogger(_loggerName, consoleLoggerProcessor);
             logger.ScopeProvider = new LoggerExternalScopeProvider();
             logger.Options = options ?? new ConsoleLoggerOptions();
-            var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(ConsoleLoggerTestNew.GetFormatters().ToDictionary(f => f.Name));
-            Assert.NotNull(logger.Options.FormatterName);
+            var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(GetFormatters().ToDictionary(f => f.Name));
+            Assert.Null(logger.Options.FormatterName);
 
             Func<LogLevel, string> levelAsString;
             int writesPerMsg;
@@ -395,7 +395,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
 
             // Assert
-            Assert.Equal(2 * levelSequence, sink.Writes.Count);
+            Assert.Equal(levelSequence, sink.Writes.Count);
             foreach (ConsoleContext write in sink.Writes)
             {
                 Assert.Null(write.ForegroundColor);
@@ -1035,7 +1035,7 @@ namespace Microsoft.Extensions.Logging.Test
             var console = new TestConsole(sink);
             var processor = new ConsoleLoggerProcessor();
             processor.Console = console;
-            var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(ConsoleLoggerTestNew.GetFormatters().ToDictionary(f => f.Name));
+            var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(GetFormatters().ToDictionary(f => f.Name));
 
             var logger = new ConsoleLogger(_loggerName, loggerProcessor: processor);
             logger.Options = new ConsoleLoggerOptions();

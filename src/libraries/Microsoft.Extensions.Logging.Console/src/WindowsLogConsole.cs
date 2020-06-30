@@ -64,6 +64,7 @@ namespace Microsoft.Extensions.Logging.Console
             var span = message.AsSpan();
             const char EscapeChar = '\x1B';
             ConsoleColor? color = null;
+            bool isDarkColor = true;
             for (int i = 0; i < span.Length; i++)
             {
                 if (span[i] != EscapeChar || span.Length < i + 3 || span[i + 1] != '[')
@@ -79,6 +80,8 @@ namespace Microsoft.Extensions.Logging.Console
                 {
                     if (int.TryParse(span.Slice(i + 2, length: 1), out int escapeCode))
                     {
+                        if (escapeCode == 1)
+                            isDarkColor = false;
                         // parsing only ansi color codes
                         i += 3;
                     }
@@ -87,14 +90,14 @@ namespace Microsoft.Extensions.Logging.Console
                 {
                     if (int.TryParse(span.Slice(i + 2, length: 2), out int escapeCode))
                     {
-                        // [TODO] support dark colors
-                        if (SetsForegroundColor(escapeCode, false, out color))
+                        if (SetsForegroundColor(escapeCode, isDarkColor, out color))
                         {
                             if (content.startIndex != -1)
                             {
                                 Write(span.Slice(content.startIndex, content.length), content.bg, content.fg);
                                 content.startIndex = -1;
                                 content.length = 0;
+                                isDarkColor = true;
                             }
                             content.fg = color;
                         }

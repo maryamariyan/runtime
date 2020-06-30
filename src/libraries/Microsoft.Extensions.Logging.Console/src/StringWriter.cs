@@ -76,19 +76,6 @@ namespace Microsoft.Extensions.Logging.Console
         private const string DefaultForegroundColor = "\x1B[39m\x1B[22m"; // reset to default foreground color
         private const string DefaultBackgroundColor = "\x1B[49m"; // reset to the background color
 
-        public void Write(string message, ConsoleColors colors)
-        {
-            var colorChanged = SetBackgroundColor(colors.Background);
-            colorChanged = SetForegroundColor(colors.Foreground) || colorChanged;
-
-            Write(message);
-
-            if (colorChanged)
-            {
-                ResetColor();
-            }
-        }
-
         public void WriteReplacing(string oldValue, string newValue, string message)
         {
             int len = _sbMain.Length;
