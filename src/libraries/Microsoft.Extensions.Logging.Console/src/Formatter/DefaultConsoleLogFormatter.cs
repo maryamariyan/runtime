@@ -14,16 +14,18 @@ namespace Microsoft.Extensions.Logging.Console
 {
     internal class DefaultConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
+        public IExternalScopeProvider ScopeProvider { get; set; }
         private const string LoglevelPadding = ": ";
         private static readonly string _messagePadding = new string(' ', GetLogLevelString(LogLevel.Information).Length + LoglevelPadding.Length);
         private static readonly string _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         private IDisposable _optionsReloadToken;
 
-        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options)
+        public DefaultConsoleLogFormatter(IOptionsMonitor<DefaultConsoleLogFormatterOptions> options, IExternalScopeProvider scopeProvider)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+            ScopeProvider = scopeProvider;
         }
 
         private void ReloadLoggerOptions(DefaultConsoleLogFormatterOptions options)
@@ -40,19 +42,19 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal DefaultConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
+        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, TextWriter textWriter)
         {
             if (textWriter is StringWriter stringWriter)
             {
                 string message = formatter(state, exception);
                 if (!string.IsNullOrEmpty(message) || exception != null)
                 {
-                    WriteSingleLine(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter);
+                    WriteSingleLine(logLevel, category, eventId.Id, message, exception, state, stringWriter);
                 }
             }
         }
 
-        private void WriteSingleLine<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter stringWriter)
+        private void WriteSingleLine<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, TState scope, StringWriter stringWriter)
         {
             bool singleLine = FormatterOptions.SingleLine;
             ConsoleColors logLevelColors = GetLogLevelConsoleColors(logLevel);
@@ -86,7 +88,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             // scope information
-            GetScopeInformation(stringWriter, scopeProvider, singleLine);
+            GetScopeInformation(stringWriter, singleLine);
             if (singleLine)
             {
                 stringWriter.Write(' ');
@@ -178,13 +180,13 @@ namespace Microsoft.Extensions.Logging.Console
             return new ConsoleColors(null, null);
         }
 
-        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider, bool singleLine)
+        private void GetScopeInformation(StringWriter stringWriter, bool singleLine)
         {
-            if (FormatterOptions.IncludeScopes && scopeProvider != null)
+            if (FormatterOptions.IncludeScopes && ScopeProvider != null)
             {
                 int initialLength = stringWriter.Length;
 
-                scopeProvider.ForEachScope((scope, state) =>
+                ScopeProvider.ForEachScope((scope, state) =>
                 {
                     (StringWriter writer, int paddAt) = state;
                     bool padd = paddAt == writer.Length;

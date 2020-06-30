@@ -66,7 +66,8 @@ namespace Microsoft.Extensions.Logging.Console
     public partial interface IConsoleLogFormatter
     {
         string Name { get; }
-        void Write<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string category, Microsoft.Extensions.Logging.EventId eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, Microsoft.Extensions.Logging.IExternalScopeProvider scopeProvider, System.IO.TextWriter textWriter);
+        Microsoft.Extensions.Logging.IExternalScopeProvider ScopeProvider { get; set; }
+        void Write<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, string category, Microsoft.Extensions.Logging.EventId eventId, TState state, System.Exception exception, System.Func<TState, System.Exception, string> formatter, System.IO.TextWriter textWriter);
     }
     public partial class JsonConsoleLogFormatterOptions : Microsoft.Extensions.Logging.Console.SystemdConsoleLogFormatterOptions
     {

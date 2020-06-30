@@ -11,16 +11,18 @@ namespace Microsoft.Extensions.Logging.Console
 {
     internal class SystemdConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
+        public IExternalScopeProvider ScopeProvider { get; set; }
         private IDisposable _optionsReloadToken;
 
         private const string LoglevelPadding = ": ";
         private static readonly string _messagePadding = new string(' ', GetSyslogSeverityString(LogLevel.Information).Length + LoglevelPadding.Length);
 
-        public SystemdConsoleLogFormatter(IOptionsMonitor<SystemdConsoleLogFormatterOptions> options)
+        public SystemdConsoleLogFormatter(IOptionsMonitor<SystemdConsoleLogFormatterOptions> options, IExternalScopeProvider scopeProvider)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+            ScopeProvider = scopeProvider;
         }
 
         private void ReloadLoggerOptions(SystemdConsoleLogFormatterOptions options)
@@ -37,19 +39,19 @@ namespace Microsoft.Extensions.Logging.Console
 
         internal SystemdConsoleLogFormatterOptions FormatterOptions { get; set; }
 
-        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
+        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, TextWriter textWriter)
         {
             if (textWriter is StringWriter stringWriter)
             {
                 var message = formatter(state, exception);
                 if (!string.IsNullOrEmpty(message) || exception != null)
                 {
-                    Format(logLevel, category, eventId.Id, message, exception, scopeProvider, stringWriter);
+                    Format(logLevel, category, eventId.Id, message, exception, stringWriter);
                 }
             }
         }
 
-        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter textWriter)
+        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, StringWriter textWriter)
         {
             // systemd reads messages from standard out line-by-line in a '<pri>message' format.
             // newline characters are treated as message delimiters, so we must replace them.
@@ -73,7 +75,7 @@ namespace Microsoft.Extensions.Logging.Console
             textWriter.Write(category + "[" + eventId + "]");
 
             // scope information
-            GetScopeInformation(textWriter, scopeProvider);
+            GetScopeInformation(textWriter);
 
             // message
             if (!string.IsNullOrEmpty(message))
@@ -121,11 +123,11 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider)
+        private void GetScopeInformation(StringWriter stringWriter)
         {
-            if (FormatterOptions.IncludeScopes && scopeProvider != null)
+            if (FormatterOptions.IncludeScopes && ScopeProvider != null)
             {
-                scopeProvider.ForEachScope((scope, state) =>
+                ScopeProvider.ForEachScope((scope, state) =>
                 {
                     (StringWriter writer, int paddAt) = state;
                     bool padd = paddAt == writer.Length;

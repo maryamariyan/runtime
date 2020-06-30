@@ -23,21 +23,23 @@ namespace Microsoft.Extensions.Logging.Console
 {
     internal class JsonConsoleLogFormatter : IConsoleLogFormatter, IDisposable
     {
+        public IExternalScopeProvider ScopeProvider { get; set; }
         private IDisposable _optionsReloadToken;
 
         [ThreadStatic]
         private static StringBuilder _logBuilder;
 
-        public JsonConsoleLogFormatter(IOptionsMonitor<JsonConsoleLogFormatterOptions> options)
+        public JsonConsoleLogFormatter(IOptionsMonitor<JsonConsoleLogFormatterOptions> options, IExternalScopeProvider scopeProvider)
         {
             FormatterOptions = options.CurrentValue;
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);
+            ScopeProvider = scopeProvider;
         }
 
         public string Name => ConsoleLogFormatterNames.Json;
 
-        private string WriteJson(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider)//long[] extraData)
+        private string WriteJson(LogLevel logLevel, string category, int eventId, string message, Exception exception)
         {
             const int DefaultBufferSize = 1024;
             var output = new ArrayBufferWriter<byte>(DefaultBufferSize);
@@ -77,7 +79,7 @@ namespace Microsoft.Extensions.Logging.Console
                     writer.WriteEndObject();
                 }
 
-                GetScopeInformation(writer, scopeProvider);
+                GetScopeInformation(writer);
 
                 writer.WriteEndObject();
 
@@ -86,19 +88,19 @@ namespace Microsoft.Extensions.Logging.Console
             return Encoding.UTF8.GetString(output.WrittenMemory.Span);
         }
 
-        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter)
+        public void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, TextWriter textWriter)
         {
             if (textWriter is StringWriter writer)
             {
                 var message = formatter(state, exception);
                 if (!string.IsNullOrEmpty(message) || exception != null)
                 {
-                    Format(logLevel, category, eventId.Id, message, exception, scopeProvider, writer);
+                    Format(logLevel, category, eventId.Id, message, exception, writer);
                 }
             }
         }
 
-        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
+        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, StringWriter stringWriter)
         {
             var logBuilder = _logBuilder;
             _logBuilder = null;
@@ -108,7 +110,7 @@ namespace Microsoft.Extensions.Logging.Console
                 logBuilder = new StringBuilder();
             }
 
-            logBuilder.Append(WriteJson(logLevel, category, eventId, message, exception, scopeProvider));
+            logBuilder.Append(WriteJson(logLevel, category, eventId, message, exception));
 
             var formattedMessage = logBuilder.ToString();
             logBuilder.Clear();
@@ -143,14 +145,14 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(Utf8JsonWriter writer, IExternalScopeProvider scopeProvider)
+        private void GetScopeInformation(Utf8JsonWriter writer)
         {
             try
             {
-                if (FormatterOptions.IncludeScopes && scopeProvider != null)
+                if (FormatterOptions.IncludeScopes && ScopeProvider != null)
                 {
                     writer.WriteStartObject("scopes");
-                    scopeProvider.ForEachScope((scope, state) =>
+                    ScopeProvider.ForEachScope((scope, state) =>
                     {
                         if (scope is IReadOnlyList<KeyValuePair<string, object>> kvps)
                         {

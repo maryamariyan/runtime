@@ -53,7 +53,7 @@ namespace Microsoft.Extensions.Logging.Console
 
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                Formatter.Write(logLevel, _name, eventId.Id, state, exception, formatter, ScopeProvider, _stringWriter);
+                Formatter.Write(logLevel, _name, eventId.Id, state, exception, formatter, _stringWriter);
                 _queueProcessor.EnqueueMessage(new LogMessageEntry(_stringWriter.ComputeAnsiString(), logAsError: logLevel >= Options.LogToStandardErrorThreshold));
             }
         }

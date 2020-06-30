@@ -18,6 +18,8 @@ namespace Microsoft.Extensions.Logging.Console
         /// </summary>
         string Name { get; }
 
+        IExternalScopeProvider ScopeProvider { get; set; }
+
         /// <summary>
         /// Formats a log message at the specified log level.
         /// </summary>
@@ -27,9 +29,8 @@ namespace Microsoft.Extensions.Logging.Console
         /// <param name="state">The entry to be written. Can be also an object.</param>
         /// <param name="exception">The exception related to this entry.</param>
         /// <param name="formatter">Function to create a <see cref="string"/> message of the <paramref name="state"/> and <paramref name="exception"/>.</param>
-        /// <param name="scopeProvider">The provider of scope data.</param>
         /// <param name="textWriter">The string writer embedding ansi code for colors.</param>
         /// <typeparam name="TState">The type of the object to be written.</typeparam>
-        void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, IExternalScopeProvider scopeProvider, TextWriter textWriter);
+        void Write<TState>(LogLevel logLevel, string category, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter, TextWriter textWriter);
     }
 }

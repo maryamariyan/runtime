@@ -25,13 +25,14 @@ namespace Microsoft.Extensions.Logging.Test
         private const string _state = "This is a test, and {curly braces} are just fine!";
         private readonly Func<object, Exception, string> _defaultFormatter = (state, exception) => state.ToString();
 
-        internal static IEnumerable<IConsoleLogFormatter> GetFormatters()
+        internal static IEnumerable<IConsoleLogFormatter> GetFormatters(IExternalScopeProvider givenScopeProvider = null)
         {
+            var scopeProvider = givenScopeProvider ?? new LoggerExternalScopeProvider();
             var defaultMonitor = new FormatterOptionsMonitor<DefaultConsoleLogFormatterOptions>(new DefaultConsoleLogFormatterOptions());
             var systemdMonitor = new FormatterOptionsMonitor<SystemdConsoleLogFormatterOptions>(new SystemdConsoleLogFormatterOptions());
             var formatters = new List<IConsoleLogFormatter>() { 
-                new DefaultConsoleLogFormatter(defaultMonitor),
-                new SystemdConsoleLogFormatter(systemdMonitor) };
+                new DefaultConsoleLogFormatter(defaultMonitor, scopeProvider),
+                new SystemdConsoleLogFormatter(systemdMonitor, scopeProvider) };
             return formatters;
         }
 
@@ -49,7 +50,7 @@ namespace Microsoft.Extensions.Logging.Test
             var logger = new ConsoleLogger(_loggerName, consoleLoggerProcessor);
             logger.ScopeProvider = new LoggerExternalScopeProvider();
             logger.Options = options ?? new ConsoleLoggerOptions();
-            var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(GetFormatters().ToDictionary(f => f.Name));
+            var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(GetFormatters(logger.ScopeProvider).ToDictionary(f => f.Name));
 
             Func<LogLevel, string> levelAsString;
             int writesPerMsg;
@@ -699,6 +700,7 @@ namespace Microsoft.Extensions.Logging.Test
                 }
             }
 
+            Assert.Equal(logger.ScopeProvider, logger.Formatter.ScopeProvider);
             switch (format)
             {
                 case ConsoleLoggerFormat.Default:

@@ -127,6 +127,7 @@ namespace Microsoft.Extensions.Logging
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConsoleLogFormatter, TFormatter>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<TOptions>, LogFormatterOptionsSetup<TFormatter, TOptions>>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IOptionsChangeTokenSource<TOptions>, LoggerProviderOptionsChangeTokenSource<TOptions, TFormatter>>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IExternalScopeProvider, LoggerExternalScopeProvider>());
 
             // TODO: Move configure and bind Console:Logging:FormatterName elsewhere
             // var configuration = new ConfigurationBuilder()

@@ -62,7 +62,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private static ConcurrentDictionary<string, IConsoleLogFormatter> SetFormatters(IEnumerable<IConsoleLogFormatter> fromSetup = null)
+        private ConcurrentDictionary<string, IConsoleLogFormatter> SetFormatters(IEnumerable<IConsoleLogFormatter> fromSetup = null)
         {
             IEnumerable<IConsoleLogFormatter> formatters = fromSetup;
             if (formatters == null || formatters.ToList().Count == 0)
@@ -71,8 +71,8 @@ namespace Microsoft.Extensions.Logging.Console
                 var systemdMonitor = new FormatterOptionsMonitor<SystemdConsoleLogFormatterOptions>(new SystemdConsoleLogFormatterOptions());
                 formatters = new List<IConsoleLogFormatter>()
                 {
-                    new DefaultConsoleLogFormatter(defaultMonitor),
-                    new SystemdConsoleLogFormatter(systemdMonitor)
+                    new DefaultConsoleLogFormatter(defaultMonitor, _scopeProvider),
+                    new SystemdConsoleLogFormatter(systemdMonitor, _scopeProvider)
                 };
             }
             return new ConcurrentDictionary<string, IConsoleLogFormatter>(formatters.ToDictionary(f => f.Name));
@@ -174,6 +174,11 @@ namespace Microsoft.Extensions.Logging.Console
             foreach (System.Collections.Generic.KeyValuePair<string, ConsoleLogger> logger in _loggers)
             {
                 logger.Value.ScopeProvider = _scopeProvider;
+            }
+
+            foreach (System.Collections.Generic.KeyValuePair<string, IConsoleLogFormatter> formatter in _formatters)
+            {
+                formatter.Value.ScopeProvider = _scopeProvider;
             }
 
         }
