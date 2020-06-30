@@ -21,6 +21,11 @@ namespace Microsoft.Extensions.Logging.Console
             _systemConsole = systemConsole;
         }
 
+        public void Write(string message)
+        {
+            _outputBuilder.Append(message);
+        }
+
         public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
         {
             // Order: backgroundcolor, foregroundcolor, Message, reset foregroundcolor, reset backgroundcolor
