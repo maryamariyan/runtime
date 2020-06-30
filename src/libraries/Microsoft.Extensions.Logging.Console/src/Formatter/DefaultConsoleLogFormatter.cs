@@ -51,13 +51,14 @@ namespace Microsoft.Extensions.Logging.Console
                 string message = formatter(state, exception);
                 if (!string.IsNullOrEmpty(message) || exception != null)
                 {
-                    WriteSingleLine(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter, singleLine: !FormatterOptions.MultiLine);
+                    WriteSingleLine(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter);
                 }
             }
         }
 
-        private void WriteSingleLine<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter stringWriter, bool singleLine, bool bugFixBetterFormatExceptionMessage = false)
+        private void WriteSingleLine<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter stringWriter)
         {
+            bool singleLine = FormatterOptions.SingleLine;
             ConsoleColors logLevelColors = GetLogLevelConsoleColors(logLevel);
             string logLevelString = GetLogLevelString(logLevel);
 
@@ -79,25 +80,17 @@ namespace Microsoft.Extensions.Logging.Console
                 stringWriter.SetForegroundColor(logLevelColors.Foreground);
                 stringWriter.Write(logLevelString);
                 stringWriter.ResetColor();
-                if (singleLine)
-                {
-                    stringWriter.Write(' ');
-                }
             }
 
             // category and event id
-            if (singleLine)
+            stringWriter.Write(LoglevelPadding + category + "[" + eventId + "]");
+            if (!singleLine)
             {
-                stringWriter.Write(category + "[" + eventId + "] ");
-            }
-            else
-            {
-                stringWriter.Write(LoglevelPadding + category + "[" + eventId + "]");
                 stringWriter.Write(Environment.NewLine);
             }
 
             // scope information
-            GetScopeInformation(stringWriter, scopeProvider, multiLine: !singleLine);
+            GetScopeInformation(stringWriter, scopeProvider, singleLine);
             if (singleLine)
             {
                 stringWriter.Write(' ');
@@ -126,15 +119,8 @@ namespace Microsoft.Extensions.Logging.Console
                 }
                 else
                 {
-                    if (bugFixBetterFormatExceptionMessage)
-                    {
-                        stringWriter.Write(_messagePadding);
-                        stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, exception.ToString());
-                    }
-                    else
-                    {
-                        stringWriter.Write(exception.ToString());
-                    }
+                    stringWriter.Write(_messagePadding);
+                    stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, exception.ToString());
                     stringWriter.Write(Environment.NewLine);
                 }
             }
@@ -198,7 +184,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider, bool multiLine = true, bool setColorForScope = false)
+        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider, bool singleLine)
         {
             if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
@@ -217,19 +203,10 @@ namespace Microsoft.Extensions.Logging.Console
                     {
                         writer.Write(" => ");
                     }
-                    if (setColorForScope)
-                    {
-                        writer.SetForegroundColor(ConsoleColor.White);
-                        writer.Write(scope.ToString());
-                        writer.SetForegroundColor(null);
-                    }
-                    else
-                    {
-                        writer.Write(scope.ToString());
-                    }
-                }, (stringWriter, multiLine ? initialLength : -1));
+                    writer.Write(scope.ToString());
+                }, (stringWriter, singleLine ? -1 : initialLength));
 
-                if (stringWriter.Length > initialLength && multiLine)
+                if (stringWriter.Length > initialLength && !singleLine)
                 {
                     stringWriter.Write(Environment.NewLine);
                 }

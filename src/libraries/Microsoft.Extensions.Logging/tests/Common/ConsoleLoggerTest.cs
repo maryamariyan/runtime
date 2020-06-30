@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Logging.Test
 
         internal static IEnumerable<IConsoleLogFormatter> GetFormatters()
         {
-            var defaultMonitor = new DefaultOptionsMonitor(new DefaultConsoleLogFormatterOptions() { MultiLine = true });
+            var defaultMonitor = new DefaultOptionsMonitor(new DefaultConsoleLogFormatterOptions() { });
             var systemdMonitor = new SystemdOptionsMonitor(new SystemdConsoleLogFormatterOptions() { });
             var formatters = new List<IConsoleLogFormatter>() { 
                 new DefaultConsoleLogFormatter(defaultMonitor),
@@ -83,7 +83,6 @@ namespace Microsoft.Extensions.Logging.Test
             {
                 defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
                 defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
-                defaultFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
                 defaultFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
                 defaultFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
             }
@@ -91,7 +90,6 @@ namespace Microsoft.Extensions.Logging.Test
             if (formatter is SystemdConsoleLogFormatter systemdFormatter)
             {
                 systemdFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
-                systemdFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
                 systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
                 systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
             }
@@ -156,17 +154,17 @@ namespace Microsoft.Extensions.Logging.Test
             Assert.Equal(6, sink.Writes.Count);
             Assert.Equal(
                 "crit: test[0]" + Environment.NewLine +
-                "      [null]" + Environment.NewLine,
+                _paddingString + "[null]" + Environment.NewLine,
                 GetMessage(sink.Writes.GetRange(0 * t.WritesPerMsg, t.WritesPerMsg)));
             Assert.Equal(
                 "crit: test[0]" + Environment.NewLine +
-                "      [null]" + Environment.NewLine,
+                _paddingString + "[null]" + Environment.NewLine,
                 GetMessage(sink.Writes.GetRange(1 * t.WritesPerMsg, t.WritesPerMsg)));
 
             Assert.Equal(
                 "crit: test[0]" + Environment.NewLine +
-                "      [null]" + Environment.NewLine +
-                "System.InvalidOperationException: Invalid value" + Environment.NewLine,
+                _paddingString + "[null]" + Environment.NewLine +
+                _paddingString + "System.InvalidOperationException: Invalid value" + Environment.NewLine,
                 GetMessage(sink.Writes.GetRange(2 * t.WritesPerMsg, t.WritesPerMsg)));
         }
 
@@ -179,10 +177,10 @@ namespace Microsoft.Extensions.Logging.Test
             var sink = t.Sink;
             var logMessage = "Route with name 'Default' was not found.";
             var expected1 = @"crit: test[0]" + Environment.NewLine +
-                            "      Route with name 'Default' was not found." + Environment.NewLine;
+                            _paddingString + "Route with name 'Default' was not found." + Environment.NewLine;
 
             var expected2 = @"crit: test[10]" + Environment.NewLine +
-                            "      Route with name 'Default' was not found." + Environment.NewLine;
+                            _paddingString + "Route with name 'Default' was not found." + Environment.NewLine;
 
             // Act
             logger.LogCritical(logMessage);
@@ -212,7 +210,7 @@ namespace Microsoft.Extensions.Logging.Test
             var expectedMessage =
                 _paddingString + message + Environment.NewLine;
             var expectedExceptionMessage =
-                exception.ToString() + Environment.NewLine;
+                _paddingString + exception.ToString() + Environment.NewLine;
 
             // Act
             logger.LogCritical(eventId, exception, message);
@@ -508,9 +506,9 @@ namespace Microsoft.Extensions.Logging.Test
                     Assert.Equal(2, sink.Writes.Count);
                     Assert.Equal(
                         levelPrefix + ": test[0]" + Environment.NewLine +
-                        "      This is a test, and {curly braces} are just fine!" + Environment.NewLine +
-                        "System.Exception: Exception message" + Environment.NewLine +
-                        "with a second line" + Environment.NewLine,
+                        _paddingString + "This is a test, and {curly braces} are just fine!" + Environment.NewLine +
+                        _paddingString + "System.Exception: Exception message" + Environment.NewLine +
+                        _paddingString + "with a second line" + Environment.NewLine,
                         GetMessage(sink.Writes));
                 }
                 break;
@@ -856,13 +854,13 @@ namespace Microsoft.Extensions.Logging.Test
                     Assert.Equal(2, sink.Writes.Count);
                     Assert.Equal(
                         "info: test[0]" + Environment.NewLine +
-                        "      Info" + Environment.NewLine,
+                        _paddingString + "Info" + Environment.NewLine,
                         GetMessage(sink.Writes));
 
                     Assert.Equal(2, errorSink.Writes.Count);
                     Assert.Equal(
                         "warn: test[0]" + Environment.NewLine +
-                        "      Warn" + Environment.NewLine,
+                        _paddingString + "Warn" + Environment.NewLine,
                         GetMessage(errorSink.Writes));
                 }
                 break;
@@ -908,8 +906,8 @@ namespace Microsoft.Extensions.Logging.Test
                     Assert.Equal(2, sink.Writes.Count);
                     Assert.Equal(
                         levelPrefix + ": test[0]" + Environment.NewLine +
-                        "System.Exception: Exception message" + Environment.NewLine +
-                        "with a second line" + Environment.NewLine,
+                        _paddingString + "System.Exception: Exception message" + Environment.NewLine +
+                        _paddingString + "with a second line" + Environment.NewLine,
                         GetMessage(sink.Writes));
                 }
                 break;
@@ -951,8 +949,8 @@ namespace Microsoft.Extensions.Logging.Test
                     Assert.Equal(2, sink.Writes.Count);
                     Assert.Equal(
                         levelPrefix + ": test[0]" + Environment.NewLine +
-                        "System.Exception: Exception message" + Environment.NewLine +
-                        "with a second line" + Environment.NewLine,
+                        _paddingString + "System.Exception: Exception message" + Environment.NewLine +
+                        _paddingString + "with a second line" + Environment.NewLine,
                         GetMessage(sink.Writes));
                 }
                 break;
@@ -993,7 +991,7 @@ namespace Microsoft.Extensions.Logging.Test
                     Assert.Equal(2, sink.Writes.Count);
                     Assert.Equal(
                         levelPrefix + ": test[0]" + Environment.NewLine +
-                        "      This is a test, and {curly braces} are just fine!" + Environment.NewLine,
+                        _paddingString + "This is a test, and {curly braces} are just fine!" + Environment.NewLine,
                         GetMessage(sink.Writes));
                 }
                 break;

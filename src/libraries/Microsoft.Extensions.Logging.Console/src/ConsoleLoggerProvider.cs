@@ -54,11 +54,13 @@ namespace Microsoft.Extensions.Logging.Console
 
         private static IEnumerable<IConsoleLogFormatter> GetFormatters()
         {
-            var defaultMonitor = new DefaultOptionsMonitor(new DefaultConsoleLogFormatterOptions() { MultiLine = true });
-            var systemdMonitor = new SystemdOptionsMonitor(new SystemdConsoleLogFormatterOptions() { });
-            var formatters = new List<IConsoleLogFormatter>() {
+            DefaultOptionsMonitor defaultMonitor = new DefaultOptionsMonitor(new DefaultConsoleLogFormatterOptions() { });
+            SystemdOptionsMonitor systemdMonitor = new SystemdOptionsMonitor(new SystemdConsoleLogFormatterOptions() { });
+            List<IConsoleLogFormatter> formatters = new List<IConsoleLogFormatter>()
+            {
                 new DefaultConsoleLogFormatter(defaultMonitor),
-                new SystemdConsoleLogFormatter(systemdMonitor) };
+                new SystemdConsoleLogFormatter(systemdMonitor)
+            };
             return formatters;
         }
 
@@ -219,7 +221,6 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 defaultFormatter.FormatterOptions.DisableColors = deprecatedFromOptions.DisableColors;
                 defaultFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
-                defaultFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
                 defaultFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
                 defaultFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
             }
@@ -227,7 +228,6 @@ namespace Microsoft.Extensions.Logging.Console
             if (formatter is SystemdConsoleLogFormatter systemdFormatter)
             {
                 systemdFormatter.FormatterOptions.IncludeScopes = deprecatedFromOptions.IncludeScopes;
-                systemdFormatter.FormatterOptions.LogToStandardErrorThreshold = deprecatedFromOptions.LogToStandardErrorThreshold;
                 systemdFormatter.FormatterOptions.TimestampFormat = deprecatedFromOptions.TimestampFormat;
                 systemdFormatter.FormatterOptions.UseUtcTimestamp = deprecatedFromOptions.UseUtcTimestamp;
             }

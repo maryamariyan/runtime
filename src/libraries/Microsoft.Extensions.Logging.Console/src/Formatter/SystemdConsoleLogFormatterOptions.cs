@@ -20,11 +20,6 @@ namespace Microsoft.Extensions.Logging.Console
         public bool IncludeScopes { get; set; }
 
         /// <summary>
-        /// Gets or sets value indicating the minimum level of messages that would get written to <c>Console.Error</c>.
-        /// </summary>
-        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get; set; }
-
-        /// <summary>
         /// Gets or sets format string used to format timestamp in logging messages. Defaults to <c>null</c>.
         /// </summary>
         public string TimestampFormat { get; set; }
@@ -33,7 +28,5 @@ namespace Microsoft.Extensions.Logging.Console
         /// Gets or sets indication whether or not UTC timezone should be used to for timestamps in logging messages. Defaults to <c>false</c>.
         /// </summary>
         public bool UseUtcTimestamp { get; set; }
-
-        public bool FindKeyValuePairsInLog { get; set; }
     }
 }

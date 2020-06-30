@@ -23,6 +23,6 @@ namespace Microsoft.Extensions.Logging.Console
         /// <summary>
         /// When <see langword="false" />, the entire message gets logged in a single line.
         /// </summary>
-        public bool MultiLine { get; set; }
+        public bool SingleLine { get; set; }
     }
 }

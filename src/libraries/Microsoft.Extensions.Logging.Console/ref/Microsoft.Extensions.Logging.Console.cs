@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         public DefaultConsoleLogFormatterOptions() { }
         public bool DisableColors { get { throw null; } set { } }
-        public bool MultiLine { get { throw null; } set { } }
+        public bool SingleLine { get { throw null; } set { } }
     }
     public partial interface IConsoleLogFormatter
     {
@@ -77,9 +77,7 @@ namespace Microsoft.Extensions.Logging.Console
     {
         public SystemdConsoleLogFormatterOptions() { }
         public bool IncludeScopes { get { throw null; } set { } }
-        public Microsoft.Extensions.Logging.LogLevel LogToStandardErrorThreshold { get { throw null; } set { } }
         public string TimestampFormat { get { throw null; } set { } }
         public bool UseUtcTimestamp { get { throw null; } set { } }
-        public bool FindKeyValuePairsInLog { get { throw null; } set { } }
     }
 }
