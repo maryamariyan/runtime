@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.Logging.Test
         private const string _state = "This is a test, and {curly braces} are just fine!";
         private readonly Func<object, Exception, string> _defaultFormatter = (state, exception) => state.ToString();
 
-        private static IEnumerable<IConsoleLogFormatter> GetFormatters()
+        internal static IEnumerable<IConsoleLogFormatter> GetFormatters()
         {
             var defaultMonitor = new DefaultOptionsMonitor(new DefaultConsoleLogFormatterOptions() { MultiLine = true });
             var systemdMonitor = new SystemdOptionsMonitor(new SystemdConsoleLogFormatterOptions() { });
@@ -49,7 +49,6 @@ namespace Microsoft.Extensions.Logging.Test
             logger.ScopeProvider = new LoggerExternalScopeProvider();
             logger.Options = options ?? new ConsoleLoggerOptions();
             var formatters = new ConcurrentDictionary<string, IConsoleLogFormatter>(GetFormatters().ToDictionary(f => f.Name));
-            Assert.Null(logger.Options.FormatterName);
 
             Func<LogLevel, string> levelAsString;
             int writesPerMsg;
@@ -70,13 +69,15 @@ namespace Microsoft.Extensions.Logging.Test
             }
 
             UpdateFormatterOptions(logger.Formatter, logger.Options);
+            if (ConsoleLoggerFormat.Default == logger.Options.Format)
+            {
+                Assert.Equal((logger.Formatter as DefaultConsoleLogFormatter).FormatterOptions.IncludeScopes, logger.Options.IncludeScopes);
+            }
             return (logger, sink, errorSink, levelAsString, writesPerMsg);
         }
 
         private static void UpdateFormatterOptions(IConsoleLogFormatter formatter, ConsoleLoggerOptions deprecatedFromOptions)
         {
-            if (deprecatedFromOptions.FormatterName != null)
-                return;
             // kept for deprecated apis:
             if (formatter is DefaultConsoleLogFormatter defaultFormatter)
             {
@@ -703,6 +704,7 @@ namespace Microsoft.Extensions.Logging.Test
             {
                 case ConsoleLoggerFormat.Default:
                 {
+                    Assert.True((logger.Formatter as DefaultConsoleLogFormatter).FormatterOptions.IncludeScopes);
                     // Assert
                     Assert.Equal(2, sink.Writes.Count);
                     // scope

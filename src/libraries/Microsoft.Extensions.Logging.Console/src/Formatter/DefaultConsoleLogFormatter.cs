@@ -51,17 +51,12 @@ namespace Microsoft.Extensions.Logging.Console
                 string message = formatter(state, exception);
                 if (!string.IsNullOrEmpty(message) || exception != null)
                 {
-                    if (!FormatterOptions.MultiLine)
-                    {
-                        FormatHelperCompact(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter);
-                        return;
-                    }
-                    Format(logLevel, category, eventId.Id, message, exception, scopeProvider, stringWriter);
+                    WriteSingleLine(logLevel, category, eventId.Id, message, exception, scopeProvider, state, stringWriter, singleLine: !FormatterOptions.MultiLine);
                 }
             }
         }
 
-        private void FormatHelperCompact<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter stringWriter)
+        private void WriteSingleLine<TState>(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, TState scope, StringWriter stringWriter, bool singleLine, bool bugFixBetterFormatExceptionMessage = false)
         {
             ConsoleColors logLevelColors = GetLogLevelConsoleColors(logLevel);
             string logLevelString = GetLogLevelString(logLevel);
@@ -76,170 +71,75 @@ namespace Microsoft.Extensions.Logging.Console
             stringWriter.DisableColors = FormatterOptions.DisableColors;
             if (timestamp != null)
             {
-                stringWriter.Write(timestamp + ' ');
+                stringWriter.Write(singleLine ? timestamp + ' ' : timestamp);
             }
             if (logLevelString != null)
             {
-                stringWriter.Write(logLevelString, logLevelColors);
-                stringWriter.Write(' ');
+                stringWriter.SetBackgroundColor(logLevelColors.Background);
+                stringWriter.SetForegroundColor(logLevelColors.Foreground);
+                stringWriter.Write(logLevelString);
+                stringWriter.ResetColor();
+                if (singleLine)
+                {
+                    stringWriter.Write(' ');
+                }
             }
 
             // category and event id
-            stringWriter.Write(category + "[" + eventId + "] ");
-
-            GetScopeInformation(stringWriter, scopeProvider);
-            stringWriter.Write(' ');
-
-            string originalFormat = null;
-            int count = 0;
-
-            if (FormatterOptions.FindKeyValuePairsInLog)
+            if (singleLine)
             {
-                if (scope != null)
-                {
-                    if (scope is IReadOnlyList<KeyValuePair<string, object>> kvpsx)
-                    {
-                        List<KeyValuePair<string, object>> strings = new List<KeyValuePair<string, object>>();
-                        foreach (KeyValuePair<string, object> kvp in kvpsx)
-                        {
-                            if (kvp.Key.Contains("{OriginalFormat}"))
-                            {
-                                originalFormat = kvp.Value.ToString();
-                            }
-                            else
-                            {
-                                strings.Add(kvp);
-                            }
-                        }
-                        int prevIndex = 0;
-                        if (originalFormat != null)
-                        {
-                            foreach (KeyValuePair<string, object> kvp in kvpsx)
-                            {
-                                if (!kvp.Key.Contains("{OriginalFormat}"))
-                                {
-                                    int curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
-                                    if (curIndex != -1)
-                                    {
-                                        string curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                        stringWriter.Write(curString);
-                                        stringWriter.SetForegroundColor(ConsoleColor.Yellow);
-                                        stringWriter.Write(strings.ElementAt(count).Value.ToString());
-                                        stringWriter.SetForegroundColor(null);
-                                        prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
-                                        count++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (scope is IReadOnlyList<KeyValuePair<string, string>> kvps)
-                    {
-                        List<KeyValuePair<string, string>> strings = new List<KeyValuePair<string, string>>();
-                        foreach (KeyValuePair<string, string> kvp in kvps)
-                        {
-                            if (kvp.Key.Contains("{OriginalFormat}"))
-                            {
-                                originalFormat = kvp.Value;
-                            }
-                            else
-                            {
-                                strings.Add(kvp);
-                            }
-                        }
-                        int prevIndex = 0;
-                        if (originalFormat != null)
-                        {
-                            foreach (KeyValuePair<string, string> kvp in kvps)
-                            {
-                                if (!kvp.Key.Contains("{OriginalFormat}"))
-                                {
-                                    int curIndex = originalFormat.IndexOf("{" + strings.ElementAt(count).Key + "}");
-                                    if (curIndex != -1)
-                                    {
-                                        string curString = originalFormat.Substring(prevIndex, curIndex - prevIndex);
-                                        stringWriter.Write(curString);
-                                        stringWriter.SetForegroundColor(ConsoleColor.Yellow);
-                                        stringWriter.Write(strings.ElementAt(count).Value);
-                                        stringWriter.SetForegroundColor(null);
-                                        prevIndex += curIndex + strings.ElementAt(count).Key.Length + 2;
-                                        count++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                stringWriter.Write(category + "[" + eventId + "] ");
             }
-
-            if (!string.IsNullOrEmpty(message))
+            else
             {
-                if (originalFormat == null)
-                {
-                    stringWriter.WriteReplacing(Environment.NewLine, " ", message);
-                }
-                else if (count == 0)
-                {
-                    stringWriter.WriteReplacing(Environment.NewLine, " ", originalFormat);
-                }
-            }
-
-            if (exception != null)
-            {
-                // exception message
-                stringWriter.Write(' ');
-                stringWriter.WriteReplacing(Environment.NewLine, " ", exception.ToString());
-            }
-            stringWriter.Write(Environment.NewLine);
-        }
-
-        private void Format(LogLevel logLevel, string category, int eventId, string message, Exception exception, IExternalScopeProvider scopeProvider, StringWriter stringWriter)
-        {
-            // Example:
-            // INFO: ConsoleApp.Program[10]
-            //       Request received
-            ConsoleColors logLevelColors = GetLogLevelConsoleColors(logLevel);
-            string logLevelString = GetLogLevelString(logLevel);
-
-            string timestamp = null;
-            string timestampFormat = FormatterOptions.TimestampFormat;
-            if (timestampFormat != null)
-            {
-                DateTime dateTime = GetCurrentDateTime();
-                timestamp = dateTime.ToString(timestampFormat);
-            }
-            stringWriter.DisableColors = FormatterOptions.DisableColors;
-            if (timestamp != null)
-            {
-                stringWriter.Write(timestamp);
-            }
-            if (logLevelString != null)
-            {
-                stringWriter.Write(logLevelString, logLevelColors);
-            }
-            // category and event id
-            stringWriter.Write(LoglevelPadding + category + "[" + eventId + "]");
-            stringWriter.Write(Environment.NewLine);
-
-            // scope information
-            GetScopeInformation(stringWriter, scopeProvider);
-
-            if (!string.IsNullOrEmpty(message))
-            {
-                // message
-                stringWriter.Write(_messagePadding);
-                stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, message);
+                stringWriter.Write(LoglevelPadding + category + "[" + eventId + "]");
                 stringWriter.Write(Environment.NewLine);
             }
 
-            // Example:
-            // System.InvalidOperationException
-            //    at Namespace.Class.Function() in File:line X
+            // scope information
+            GetScopeInformation(stringWriter, scopeProvider, multiLine: !singleLine);
+            if (singleLine)
+            {
+                stringWriter.Write(' ');
+            }
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                if (singleLine)
+                {
+                    stringWriter.WriteReplacing(Environment.NewLine, " ", message);
+                }
+                else
+                {
+                    stringWriter.Write(_messagePadding);
+                    stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, message);
+                    stringWriter.Write(Environment.NewLine);
+                }
+            }
+
             if (exception != null)
             {
-                // exception message
-                stringWriter.Write(_messagePadding);
-                stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, exception.ToString());
+                if (singleLine)
+                {
+                    stringWriter.Write(' ');
+                    stringWriter.WriteReplacing(Environment.NewLine, " ", exception.ToString());
+                }
+                else
+                {
+                    if (bugFixBetterFormatExceptionMessage)
+                    {
+                        stringWriter.Write(_messagePadding);
+                        stringWriter.WriteReplacing(Environment.NewLine, _newLineWithMessagePadding, exception.ToString());
+                    }
+                    else
+                    {
+                        stringWriter.Write(exception.ToString());
+                    }
+                    stringWriter.Write(Environment.NewLine);
+                }
+            }
+            if (singleLine)
+            {
                 stringWriter.Write(Environment.NewLine);
             }
         }
@@ -298,7 +198,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
-        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider)
+        private void GetScopeInformation(StringWriter stringWriter, IExternalScopeProvider scopeProvider, bool multiLine = true, bool setColorForScope = false)
         {
             if (FormatterOptions.IncludeScopes && scopeProvider != null)
             {
@@ -317,12 +217,19 @@ namespace Microsoft.Extensions.Logging.Console
                     {
                         writer.Write(" => ");
                     }
-                    writer.SetForegroundColor(ConsoleColor.White);
-                    writer.Write(scope.ToString());
-                    writer.SetForegroundColor(null);
-                }, (stringWriter, FormatterOptions.MultiLine ? initialLength : -1));
+                    if (setColorForScope)
+                    {
+                        writer.SetForegroundColor(ConsoleColor.White);
+                        writer.Write(scope.ToString());
+                        writer.SetForegroundColor(null);
+                    }
+                    else
+                    {
+                        writer.Write(scope.ToString());
+                    }
+                }, (stringWriter, multiLine ? initialLength : -1));
 
-                if (stringWriter.Length > initialLength && FormatterOptions.MultiLine)
+                if (stringWriter.Length > initialLength && multiLine)
                 {
                     stringWriter.Write(Environment.NewLine);
                 }

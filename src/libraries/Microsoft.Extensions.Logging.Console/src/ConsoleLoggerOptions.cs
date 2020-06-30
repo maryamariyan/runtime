@@ -12,8 +12,6 @@ namespace Microsoft.Extensions.Logging.Console
     /// </summary>
     public class ConsoleLoggerOptions
     {
-        private ConsoleLoggerFormat _format = ConsoleLoggerFormat.Default;
-
         /// <summary>
         /// Disables colors when <see langword="true" />.
         /// </summary>
@@ -26,14 +24,22 @@ namespace Microsoft.Extensions.Logging.Console
         [System.ObsoleteAttribute("ConsoleLoggerOptions.Format has been deprecated. Please use ConsoleLoggerOptions.FormatterName instead.", false)]
         public ConsoleLoggerFormat Format
         {
-            get => _format;
+            get
+            {
+                if (FormatterName != null && FormatterName.Equals(ConsoleLogFormatterNames.Systemd, StringComparison.OrdinalIgnoreCase))
+                    return ConsoleLoggerFormat.Systemd;
+                return ConsoleLoggerFormat.Default;
+            }
             set
             {
-                if (value < ConsoleLoggerFormat.Default || value > ConsoleLoggerFormat.Systemd)
+                if (value == ConsoleLoggerFormat.Systemd)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    FormatterName = ConsoleLogFormatterNames.Systemd;
                 }
-                _format = value;
+                else
+                {
+                    FormatterName = ConsoleLogFormatterNames.Default;
+                }
             }
         }
 
