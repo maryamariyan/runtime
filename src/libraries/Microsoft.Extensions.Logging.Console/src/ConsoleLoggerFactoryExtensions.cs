@@ -146,7 +146,7 @@ namespace Microsoft.Extensions.Logging
         where TOptions : ConsoleFormatterOptions
         where TFormatter : ConsoleFormatter
     {
-        public ConsoleLoggerFormatterConfigureOptions(ILoggerProviderConfiguration<TFormatter> providerConfiguration) :
+        public ConsoleLoggerFormatterConfigureOptions(ILoggerProviderConfiguration<ConsoleLoggerProvider> providerConfiguration) :
             base(providerConfiguration.Configuration.GetSection("FormatterOptions"))
         {
         }
@@ -156,7 +156,7 @@ namespace Microsoft.Extensions.Logging
         where TOptions : ConsoleFormatterOptions
         where TFormatter : ConsoleFormatter
     {
-        public ConsoleLoggerFormatterOptionsChangeTokenSource(ILoggerProviderConfiguration<TFormatter> providerConfiguration)
+        public ConsoleLoggerFormatterOptionsChangeTokenSource(ILoggerProviderConfiguration<ConsoleLoggerProvider> providerConfiguration)
             : base(providerConfiguration.Configuration.GetSection("FormatterOptions"))
         {
         }
