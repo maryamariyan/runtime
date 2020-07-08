@@ -21,26 +21,9 @@ namespace Microsoft.Extensions.Logging
 
             // Act
             console.Write(message);
-            console.Flush();
 
             // Assert
             Assert.Equal(expectedMessage, systemConsole.Message);
-        }
-
-        [Fact]
-        public void NotCallingFlush_DoesNotWriteData_ToSystemConsole()
-        {
-            // Arrange
-            var systemConsole = new TestAnsiSystemConsole();
-            var console = new AnsiLogConsole(systemConsole);
-            var message = "Request received";
-            var expectedMessage = message + Environment.NewLine;
-
-            // Act
-            console.Write(message);
-
-            // Assert
-            Assert.Null(systemConsole.Message);
         }
 
         [Fact]
@@ -54,9 +37,7 @@ namespace Microsoft.Extensions.Logging
 
             // Act
             console.Write(message);
-            console.Flush();
             console.Write(message);
-            console.Flush();
 
             // Assert
             Assert.Equal(expectedMessage, systemConsole.Message);
@@ -73,7 +54,6 @@ namespace Microsoft.Extensions.Logging
 
             // Act
             console.Write(message);
-            console.Flush();
 
             // Assert
             Assert.Equal(expectedMessage, systemConsole.Message);
