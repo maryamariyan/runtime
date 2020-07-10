@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetCoreAppCurrent);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetcoreAppCurrent)-Windows_NT;$(NetcoreAppCurrent);netstandard2.0-Windows_NT;netstandard2.0</TargetFrameworks>
+    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);TARGETS_WINDOWS</DefineConstants>
     <EnableDefaultItems>true</EnableDefaultItems>
   </PropertyGroup>
 
