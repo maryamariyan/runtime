@@ -61,6 +61,10 @@ namespace Microsoft.Extensions.Logging.Console
 
         private static bool DoesConsoleSupportAnsi()
         {
+            if (System.Console.IsErrorRedirected)
+            {
+                return false;
+            }
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return true;
