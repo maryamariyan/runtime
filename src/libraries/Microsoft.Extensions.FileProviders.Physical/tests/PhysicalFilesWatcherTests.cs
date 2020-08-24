@@ -57,6 +57,34 @@ namespace Microsoft.Extensions.FileProviders.Physical.Tests
             }
         }
 
+        [PlatformSpecific(TestPlatforms.Linux)]
+        // [OuterLoop("This test will use all available watchers and can cause failures in other concurrent tests or system processes.")]
+        [Fact]
+        public void PhysicalFilesWatcher_LimitPassed()
+        {
+            int maxUserWatches = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_watches"));
+            int maxUserInstances = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_instances"));
+            var msw = new FileSystemWatcher[maxUserWatches];
+            var fsw = new PhysicalFilesWatcher[maxUserWatches];
+            try
+            {
+                for(int i = 0; i < maxUserWatches; i++)
+                {
+                    msw[i] = new FileSystemWatcher("/proc/sys/fs/inotify/") { IncludeSubdirectories = true, NotifyFilter = NotifyFilters.FileName };
+                    fsw[i] = new PhysicalFilesWatcher("/proc/sys/fs/inotify/", msw[i], pollForChanges: true);
+                    fsw[i].CreateFileChangeToken("/proc/sys/fs/inotify/max_user_watches");
+                }
+            }
+            finally
+            {
+                for(int i = 0; i < maxUserWatches; i++)
+                {
+                    msw[i]?.Dispose();
+                    fsw[i]?.Dispose();
+                }
+            }
+        }
+
         [Fact]
         public void RaiseChangeEvents_CancelsCancellationTokenSourceForExpiredTokens()
         {
