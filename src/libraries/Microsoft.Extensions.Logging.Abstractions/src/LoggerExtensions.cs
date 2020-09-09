@@ -390,7 +390,9 @@ namespace Microsoft.Extensions.Logging
                 throw new ArgumentNullException(nameof(logger));
             }
 
+            // FormattedLogValues is boxed to params object[]
             logger.Log(logLevel, eventId, new FormattedLogValues(message, args), exception, _messageFormatter);
+// if there was better Log overload...
         }
 
         //------------------------------------------Scope------------------------------------------//

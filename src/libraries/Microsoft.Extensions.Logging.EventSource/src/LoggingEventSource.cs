@@ -157,6 +157,8 @@ namespace Microsoft.Extensions.Logging.EventSource
         /// </summary>
         [Event(2, Keywords = Keywords.Message, Level = EventLevel.LogAlways)]
         internal void Message(LogLevel Level, int FactoryID, string LoggerName, int EventId, string EventName, ExceptionInfo Exception, IEnumerable<KeyValuePair<string, string>> Arguments)
+        // IEnumerable<KeyValuePair<string, string>> allocations to contruct it
+        // Also LogLevel getting boxed (FactoryID int ...)
         {
             if (IsEnabled())
             {

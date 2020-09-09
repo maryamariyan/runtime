@@ -1300,7 +1300,7 @@ namespace System.Diagnostics.Tracing
         /// method signature. Even if you use this for rare events, this call should be guarded by an <see cref="IsEnabled()"/>
         /// check so that the varargs call is not made when the EventSource is not active.
         /// </summary>
-        protected unsafe void WriteEvent(int eventId, params object?[] args)
+        protected unsafe void WriteEvent(int eventId, params object?[] args) // int probably gets boxed into object?[]
         {
             WriteEventVarargs(eventId, null, args);
         }
@@ -1902,7 +1902,8 @@ namespace System.Diagnostics.Tracing
             return dispatcher;
         }
 
-        private unsafe void WriteEventVarargs(int eventId, Guid* childActivityID, object?[] args)
+        private unsafe void WriteEventVarargs(int eventId, Guid* childActivityID, object?[] args) // byte[] allocation
+        // SZArrayEnumerator needs more info
         {
             if (IsEnabled())
             {

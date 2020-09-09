@@ -197,7 +197,7 @@ namespace Microsoft.Extensions.Logging.EventSource
         {
             if (state is IReadOnlyList<KeyValuePair<string, object>> keyValuePairs)
             {
-                var arguments = new KeyValuePair<string, string>[keyValuePairs.Count];
+                var arguments = new KeyValuePair<string, string>[keyValuePairs.Count]; // found one...
                 for (int i = 0; i < keyValuePairs.Count; i++)
                 {
                     KeyValuePair<string, object> keyValuePair = keyValuePairs[i];
