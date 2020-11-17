@@ -9,10 +9,18 @@ using Microsoft.Extensions.Internal;
 
 namespace Microsoft.Extensions.Http
 {
+    // internal class DummyActiveHandlerTrackingEntry : IActiveHandlerTrackingEntry
+    // {
+    //     public DummyActiveHandlerTrackingEntry()
+    //     {
+    //         // when this gets called then the actual ActiveHandlerTrackingEntry needs to get instantiated
+    //     }
+    // }
     // Thread-safety: We treat this class as immutable except for the timer. Creating a new object
     // for the 'expiry' pool simplifies the threading requirements significantly.
-    internal class ActiveHandlerTrackingEntry
+    internal class ActiveHandlerTrackingEntry// : IActiveHandlerTrackingEntry
     {
+        // prop -> bool isLazyInstantiated
         private static readonly TimerCallback _timerCallback = (s) => ((ActiveHandlerTrackingEntry)s).Timer_Tick();
         private readonly object _lock;
         private bool _timerInitialized;
@@ -29,6 +37,7 @@ namespace Microsoft.Extensions.Http
             Handler = handler;
             Scope = scope;
             Lifetime = lifetime;
+            // prop would be true
 
             _lock = new object();
         }

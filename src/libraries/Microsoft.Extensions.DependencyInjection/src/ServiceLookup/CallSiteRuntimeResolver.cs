@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -57,24 +59,60 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 
         protected override object VisitRootCache(ServiceCallSite singletonCallSite, RuntimeResolverContext context)
         {
-            return VisitCache(singletonCallSite, context, context.Scope.Engine.Root, RuntimeResolverLock.Root);
+            var callSite = singletonCallSite;
+            var serviceProviderEngine = context.Scope.Engine.Root;
+            var lockType = RuntimeResolverLock.Root;
+            bool lockTaken = false;
+            ConcurrentDictionary<ServiceCacheKey, object> singletonServices = null;// serviceProviderEngine.SingletonServices;
+
+            // Taking locks only once allows us to fork resolution process
+            // on another thread without causing the deadlock because we
+            // always know that we are going to wait the other thread to finish before
+            // releasing the lock
+            if ((context.AcquiredLocks & lockType) == 0)
+            {
+                Monitor.Enter(singletonServices, ref lockTaken);
+            }
+
+            try
+            {
+                return singletonServices.GetOrAdd(callSite.Cache.Key, key => {
+                    var resolved = VisitCallSiteMain(callSite, new RuntimeResolverContext
+                    {
+                        Scope = serviceProviderEngine,
+                        AcquiredLocks = context.AcquiredLocks | lockType
+                    });
+
+                    serviceProviderEngine.CaptureDisposable(resolved);
+                    return resolved;
+                });
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    Monitor.Exit(singletonServices);
+                }
+            }
         }
 
-        protected override object VisitScopeCache(ServiceCallSite singletonCallSite, RuntimeResolverContext context)
+        protected override object VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
         {
             // Check if we are in the situation where scoped service was promoted to singleton
             // and we need to lock the root
             RuntimeResolverLock requiredScope = context.Scope == context.Scope.Engine.Root ?
                 RuntimeResolverLock.Root :
                 RuntimeResolverLock.Scope;
+            if (requiredScope == RuntimeResolverLock.Root)
+                return VisitRootCache(callSite, context);
 
-            return VisitCache(singletonCallSite, context, context.Scope, requiredScope);
+            return VisitCache(callSite, context, context.Scope, requiredScope);
         }
 
         private object VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
         {
             bool lockTaken = false;
-            System.Collections.Generic.Dictionary<ServiceCacheKey, object> resolvedServices = serviceProviderEngine.ResolvedServices;
+            Dictionary<ServiceCacheKey, object> resolvedServices = serviceProviderEngine.ResolvedServices;
 
             // Taking locks only once allows us to fork resolution process
             // on another thread without causing the deadlock because we
@@ -87,11 +125,15 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 
             try
             {
+                //T1: Thing2(S)(singletonLock) ->   Thing1(T)(deadlock waiting for lazyLock)   -> Thing0(S)
+                //T2:                               Thing1(T)(lazyLock)                        -> Thing0(S)(deadlock waiting for singletonLock)
+
                 if (!resolvedServices.TryGetValue(callSite.Cache.Key, out object resolved))
                 {
                     resolved = VisitCallSiteMain(callSite, new RuntimeResolverContext
                     {
                         Scope = serviceProviderEngine,
+                        // if we happen to need an instance that is transient maybe exit lock
                         AcquiredLocks = context.AcquiredLocks | lockType
                     });
 

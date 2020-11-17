@@ -47,6 +47,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
         protected override object VisitCallSiteMain(ServiceCallSite callSite, CallSiteFormatterContext argument)
         {
+            // // todo confirm we also have taken the lock when this is called
+            // if (Monitor.IsEntered(serviceProviderEngine.ResolvedServices))
+            // {
+            //     // exit and re-enter?
+            // }
             if (argument.ShouldFormat(callSite))
             {
                 CallSiteFormatterContext childContext = argument.StartObject();

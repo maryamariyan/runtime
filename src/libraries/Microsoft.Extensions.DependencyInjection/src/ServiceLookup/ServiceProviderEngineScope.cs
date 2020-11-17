@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
             Engine = engine;
         }
 
+// assumption: lock for all singletons
         internal Dictionary<ServiceCacheKey, object> ResolvedServices { get; } = new Dictionary<ServiceCacheKey, object>();
 
         public ServiceProviderEngine Engine { get; }

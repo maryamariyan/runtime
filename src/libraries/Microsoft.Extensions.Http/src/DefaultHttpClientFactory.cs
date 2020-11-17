@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.Http
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IOptionsMonitor<HttpClientFactoryOptions> _optionsMonitor;
         private readonly IHttpMessageHandlerBuilderFilter[] _filters;
-        private readonly Func<string, Lazy<ActiveHandlerTrackingEntry>> _entryFactory;
+        private readonly Func<string, Lazy<ActiveHandlerTrackingEntry>> _entryFactory; //
 
         // Default time of 10s for cleanup seems reasonable.
         // Quick math:
@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.Http
         private Timer _cleanupTimer;
         private readonly object _cleanupTimerLock;
         private readonly object _cleanupActiveLock;
+        private HttpMessageHandlerBuilder _builder;
 
         // Collection of 'active' handlers.
         //
@@ -91,20 +92,30 @@ namespace Microsoft.Extensions.Http
             }
 
             _services = services;
+            _builder = _services.GetRequiredService<HttpMessageHandlerBuilder>();
             _scopeFactory = scopeFactory;
             _optionsMonitor = optionsMonitor;
             _filters = filters.ToArray();
 
             _logger = loggerFactory.CreateLogger<DefaultHttpClientFactory>();
+            ActiveHandlerTrackingEntry someLocalVar = null;
 
             // case-sensitive because named options is.
             _activeHandlers = new ConcurrentDictionary<string, Lazy<ActiveHandlerTrackingEntry>>(StringComparer.Ordinal);
             _entryFactory = (name) =>
             {
-                return new Lazy<ActiveHandlerTrackingEntry>(() =>
+                return
+                // someLocalVar =
+                 new Lazy<ActiveHandlerTrackingEntry>(() =>
                 {
-                    return CreateHandlerEntry(name);
+                    return CreateHandlerEntry(name, _builder);
                 }, LazyThreadSafetyMode.ExecutionAndPublication);
+                // someLocalVar = GetActualThing();
+                // return someLocalVar;
+                // not lazy instantiated anymore... fix that by placing a prop somewhere
+                // never cal GetRequiredService in lazy instantiation
+                // but in the lazy instantiation maybe set a flag
+                // and where to use flag?????
             };
 
             _expiredHandlers = new ConcurrentQueue<ExpiredHandlerTrackingEntry>();
@@ -148,7 +159,7 @@ namespace Microsoft.Extensions.Http
         }
 
         // Internal for tests
-        internal ActiveHandlerTrackingEntry CreateHandlerEntry(string name)
+        internal ActiveHandlerTrackingEntry CreateHandlerEntry(string name, HttpMessageHandlerBuilder builder)
         {
             IServiceProvider services = _services;
             var scope = (IServiceScope)null;
@@ -162,7 +173,7 @@ namespace Microsoft.Extensions.Http
 
             try
             {
-                HttpMessageHandlerBuilder builder = services.GetRequiredService<HttpMessageHandlerBuilder>();
+                //HttpMessageHandlerBuilder builder = services.GetRequiredService<HttpMessageHandlerBuilder>();
                 builder.Name = name;
 
                 // This is similar to the initialization pattern in:
