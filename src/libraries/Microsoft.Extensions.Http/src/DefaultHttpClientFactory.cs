@@ -92,7 +92,6 @@ namespace Microsoft.Extensions.Http
             }
 
             _services = services;
-            _builder = _services.GetRequiredService<HttpMessageHandlerBuilder>();
             _scopeFactory = scopeFactory;
             _optionsMonitor = optionsMonitor;
             _filters = filters.ToArray();
@@ -108,7 +107,7 @@ namespace Microsoft.Extensions.Http
                 // someLocalVar =
                  new Lazy<ActiveHandlerTrackingEntry>(() =>
                 {
-                    return CreateHandlerEntry(name, _builder);
+                    return CreateHandlerEntry(name);
                 }, LazyThreadSafetyMode.ExecutionAndPublication);
                 // someLocalVar = GetActualThing();
                 // return someLocalVar;
@@ -159,7 +158,7 @@ namespace Microsoft.Extensions.Http
         }
 
         // Internal for tests
-        internal ActiveHandlerTrackingEntry CreateHandlerEntry(string name, HttpMessageHandlerBuilder builder)
+        internal ActiveHandlerTrackingEntry CreateHandlerEntry(string name)
         {
             IServiceProvider services = _services;
             var scope = (IServiceScope)null;
@@ -173,7 +172,7 @@ namespace Microsoft.Extensions.Http
 
             try
             {
-                //HttpMessageHandlerBuilder builder = services.GetRequiredService<HttpMessageHandlerBuilder>();
+                HttpMessageHandlerBuilder builder = services.GetRequiredService<HttpMessageHandlerBuilder>();
                 builder.Name = name;
 
                 // This is similar to the initialization pattern in:
