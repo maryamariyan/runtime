@@ -16,6 +16,9 @@ namespace Microsoft.Extensions.Configuration
         public static void Bind(this Microsoft.Extensions.Configuration.IConfiguration configuration, object instance) { }
         public static void Bind(this Microsoft.Extensions.Configuration.IConfiguration configuration, object instance, System.Action<Microsoft.Extensions.Configuration.BinderOptions> configureOptions) { }
         public static void Bind(this Microsoft.Extensions.Configuration.IConfiguration configuration, string key, object instance) { }
+        public static void Bind<T>(this Microsoft.Extensions.Configuration.IConfiguration configuration, string key, T instance) { }
+        public static void Bind<T>(this Microsoft.Extensions.Configuration.IConfiguration configuration, T instance) { }
+        public static void Bind<T>(this Microsoft.Extensions.Configuration.IConfiguration configuration, T instance, System.Action<Microsoft.Extensions.Configuration.BinderOptions> configureOptions) { }
         public static object Get(this Microsoft.Extensions.Configuration.IConfiguration configuration, System.Type type) { throw null; }
         public static object Get(this Microsoft.Extensions.Configuration.IConfiguration configuration, System.Type type, System.Action<Microsoft.Extensions.Configuration.BinderOptions> configureOptions) { throw null; }
         public static object GetValue(this Microsoft.Extensions.Configuration.IConfiguration configuration, System.Type type, string key) { throw null; }
