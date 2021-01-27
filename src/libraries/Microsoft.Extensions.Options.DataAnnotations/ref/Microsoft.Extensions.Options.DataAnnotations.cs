@@ -10,6 +10,18 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static Microsoft.Extensions.Options.OptionsBuilder<TOptions> ValidateDataAnnotations<TOptions>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions> optionsBuilder) where TOptions : class { throw null; }
     }
+    public static partial class OptionsBuilderValidationExtensions
+    {
+        public static Microsoft.Extensions.Options.OptionsBuilder<TOptions> ValidateDataAnnotationsEagerly<TOptions>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions> optionsBuilder) where TOptions : class, new() { throw null; }
+        public static Microsoft.Extensions.Options.OptionsBuilder<TOptions> ValidateEagerly<TOptions>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions> optionsBuilder) where TOptions : class, new() { throw null; }
+    }
+    public partial class ReadableOptionsValidationException : System.Exception
+    {
+        public ReadableOptionsValidationException(Microsoft.Extensions.Options.OptionsValidationException e) { }
+        public System.Collections.Generic.IReadOnlyCollection<string> Failures { get { throw null; } }
+        public override string Message { get { throw null; } }
+        public System.Type OptionsType { get { throw null; } }
+    }
 }
 namespace Microsoft.Extensions.Options
 {
