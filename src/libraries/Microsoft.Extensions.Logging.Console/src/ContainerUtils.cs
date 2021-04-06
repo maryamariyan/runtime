@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.AspNetCore.DataProtection.Internal
+namespace Microsoft.Extensions.Logging.Console
 {
     internal static class ContainerUtils
     {
