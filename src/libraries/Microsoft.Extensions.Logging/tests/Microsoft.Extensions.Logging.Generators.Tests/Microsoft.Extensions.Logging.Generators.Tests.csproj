@@ -5,6 +5,8 @@
     <EnableDefaultItems>true</EnableDefaultItems>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <Nullable>enable</Nullable>
+    <AllowFallbackFromDefine>true</AllowFallbackFromDefine>
+    <DefineConstants Condition="'$(AllowFallbackFromDefine)' == 'true'">$(DefineConstants);HAS_EXTENDED_SUPPORT</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +26,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Baselines\*.generated.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(AllowFallbackFromDefine)' == 'true'">
+    <Content Include="TestClassesDisabled\*.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaselinesDisabled\*.generated.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

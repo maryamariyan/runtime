@@ -215,4 +215,17 @@
   <data name="GeneratingForMax6ArgumentsMessage" xml:space="preserve">
     <value>Generating more than 6 arguments is not supported</value>
   </data>
+  <data name="DynamicLoggingNotSupportedMessage" xml:space="preserve">
+    <value>Dynamic log level is not supported</value>
+  </data>
+  <data name="TemplateParamCountMismatchMessage" xml:space="preserve">
+    <value>The number of arguments in template do not match the template argument parameters</value>
+  </data>
+  <data name="CaseInsensitiveTemplateArgumentsNotSupportedMessage" xml:space="preserve">
+    <value>Case insensitive matching between message template and parameter arguments is not supported</value>
+  </data>
+  <data name="EnumerableArgumentsNotSupportedMessage" xml:space="preserve">
+    <value>Using Enumerable arguments in message template is not supported</value>
+    <comment>{Locked="Enumerable"}</comment>
+  </data>
 </root>

@@ -96,6 +96,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             Assert.Equal("M7 1", logger.LastFormattedString);
             Assert.Equal(1, logger.CallCount);
 
+#if HAS_EXTENDED_SUPPORT
             logger.Reset();
             ArgTestExtensions.Method8(logger, 1, 2, 3, 4, 5, 6, 7);
             Assert.Equal("M81234567", logger.LastFormattedString);
@@ -105,6 +106,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             ArgTestExtensions.Method9(logger, 1, 2, 3, 4, 5, 6, 7);
             Assert.Equal("M9 1 2 3 4 5 6 7", logger.LastFormattedString);
             Assert.Equal(1, logger.CallCount);
+#endif
 
             logger.Reset();
             ArgTestExtensions.Method10(logger, 1);
@@ -145,6 +147,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             CollectionTestExtensions.M6(logger, 0, 1, 2, 3, 4, 5);
             TestCollection(7, logger);
 
+#if HAS_EXTENDED_SUPPORT
             logger.Reset();
             CollectionTestExtensions.M7(logger, 0, 1, 2, 3, 4, 5, 6);
             TestCollection(8, logger);
@@ -156,10 +159,12 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             logger.Reset();
             CollectionTestExtensions.M9(logger, LogLevel.Critical, 0, new ArgumentException("Foo"), 1);
             TestCollection(3, logger);
+#endif
 
             Assert.True(true);
         }
 
+#if HAS_EXTENDED_SUPPORT
         [Fact]
         public void MessageTests()
         {
@@ -179,6 +184,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             Assert.Equal(LogLevel.Debug, logger.LastLogLevel);
             Assert.Equal(1, logger.CallCount);
         }
+#endif
 
         [Fact]
         [ActiveIssue("https://github.com/dotnet/roslyn/issues/52527")]
@@ -296,6 +302,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             Assert.Equal((LogLevel)42, logger.LastLogLevel);
             Assert.Equal(1, logger.CallCount);
 
+#if HAS_EXTENDED_SUPPORT
             logger.Reset();
             LevelTestExtensions.M8(logger, LogLevel.Critical);
             Assert.Null(logger.LastException);
@@ -309,6 +316,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             Assert.Equal("M9", logger.LastFormattedString);
             Assert.Equal(LogLevel.Trace, logger.LastLogLevel);
             Assert.Equal(1, logger.CallCount);
+#endif
         }
 
         [Fact]
@@ -345,6 +353,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             Assert.Equal("CustomEventName", logger.LastEventId.Name);
         }
 
+#if false
         [Fact]
         public void TemplateTests()
         {
@@ -390,6 +399,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 new KeyValuePair<string, object?>("{OriginalFormat}", "M3 {a2} {A1}"));
 
         }
+#endif
 
         private static void AssertLastState(MockLogger logger, params KeyValuePair<string, object?>[] expected)
         {

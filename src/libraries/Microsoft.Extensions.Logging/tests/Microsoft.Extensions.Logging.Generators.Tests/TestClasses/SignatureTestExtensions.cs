@@ -31,7 +31,9 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
             M8(logger);
             M9(logger);
             M10(logger, null);
+#if HAS_EXTENDED_SUPPORT
             M11(logger, "A", LogLevel.Debug, "B");
+#endif
         }
 
         // normal public method
@@ -74,8 +76,10 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
         [LoggerMessage(EventId = 9, Level = LogLevel.Critical, Message = "Message10 {optional}")]
         internal static partial void M10(ILogger logger, string? optional);
 
+#if HAS_EXTENDED_SUPPORT
         // dynamic log level
         [LoggerMessage(EventId = 10, Message = "Message11 {p1} {p2}")]
         internal static partial void M11(ILogger logger, string p1, LogLevel level, string p2);
+#endif
     }
 }

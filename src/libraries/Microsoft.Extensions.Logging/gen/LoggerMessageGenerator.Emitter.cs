@@ -10,10 +10,11 @@ namespace Microsoft.Extensions.Logging.Generators
 {
     public partial class LoggerMessageGenerator
     {
+        // The maximum arity of LoggerMessage.Define.
+        private const int MaxLoggerMessageDefineArguments = 6;
+
         internal class Emitter
         {
-            // The maximum arity of LoggerMessage.Define.
-            private const int MaxLoggerMessageDefineArguments = 6;
             private const int DefaultStringBuilderCapacity = 1024;
 
             private readonly string _generatedCodeAttribute =
@@ -56,7 +57,7 @@ namespace Microsoft.Extensions.Logging.Generators
                             return false;
                         }
                     }
-                }
+                } // TODO: Diag for order matching
 
                 return result;
             }

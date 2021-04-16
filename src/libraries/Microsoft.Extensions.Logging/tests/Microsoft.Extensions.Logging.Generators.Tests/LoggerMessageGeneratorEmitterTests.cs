@@ -15,11 +15,15 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
     [ActiveIssue("https://github.com/dotnet/runtime/issues/32743", TestRuntimes.Mono)]
     public class LoggerMessageGeneratorEmitterTests
     {
-        [Fact]
-        public async Task TestEmitter()
+        [Theory]
+        [InlineData("TestClasses")]
+#if HAS_EXTENDED_SUPPORT            
+        [InlineData("TestClassesDisabled")]
+#endif
+        public async Task TestEmitter(string folder)
         {
             // The functionality of the resulting code is tested via LoggerMessageGeneratedCodeTests.cs
-            string[] sources = Directory.GetFiles("TestClasses");
+            string[] sources = Directory.GetFiles(folder);
             foreach (var src in sources)
             {
                 var testSourceCode = await File.ReadAllTextAsync(src).ConfigureAwait(false);
@@ -42,7 +46,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 {
     internal static partial class TestWithOneParam
     {
-        [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = ""M0 {A1}"")]
+        [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = ""M0 {a1}"")]
         public static partial void M0(ILogger logger, int a1);
     }
 }";
@@ -50,9 +54,24 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
         }
 
         [Fact]
+        public async Task TestBaseline_TestWithTwoParams_Success()
+        {
+            string testSourceCode = @"
+namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
+{
+    internal static partial class TestWithTwoParams
+    {
+        [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = ""M2{p0}{p1}"")]
+        public static partial void M2(ILogger logger, int p0, int p1);
+    }
+}";
+            await VerifyAgainstBaselineUsingFile("TestWithTwoParams.generated.txt", testSourceCode);
+        }
+
+#if HAS_EXTENDED_SUPPORT
+        [Fact]
         public async Task TestBaseline_TestWithMoreThan6Params_Success()
         {
-            // TODO: Remove support for more than 6 arguments
             string testSourceCode = @"
 namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 {
@@ -62,7 +81,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
         public static partial void Method9(ILogger logger, int p1, int p2, int p3, int p4, int p5, int p6, int p7);
     }
 }";
-            await VerifyAgainstBaselineUsingFile("TestWithMoreThan6Params.generated.txt", testSourceCode);
+            await VerifyAgainstBaselineUsingFile("TestWithMoreThan6Params.generated.txt", testSourceCode, conditionallySupported: true);
         }
 
         [Fact]
@@ -77,12 +96,63 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
         public static partial void M9(LogLevel level, ILogger logger);
     }
 }";
-            await VerifyAgainstBaselineUsingFile("TestWithDynamicLogLevel.generated.txt", testSourceCode);
+            await VerifyAgainstBaselineUsingFile("TestWithDynamicLogLevel.generated.txt", testSourceCode, conditionallySupported: true);
         }
 
-        private async Task VerifyAgainstBaselineUsingFile(string filename, string testSourceCode)
+        [Fact]
+        public async Task TestBaseline_TestWithEnumerableParam_Success()
         {
-            string[] expectedLines = await File.ReadAllLinesAsync(Path.Combine("Baselines", filename)).ConfigureAwait(false);
+            string testSourceCode = @"
+using System.Collections;
+using System.Collections.Generic;
+namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
+{
+    internal static partial class TestWithEnumerableParam
+    {
+        [LoggerMessage(EventId = 12, Level = LogLevel.Error, Message = ""M2{p0}{p1}"")]
+        public static partial void LogMethod(ILogger logger, int p0, IEnumerable<int> p1);
+    }
+}";
+            await VerifyAgainstBaselineUsingFile("TestWithEnumerableParam.generated.txt", testSourceCode, conditionallySupported: true);
+        }
+
+        [Fact]
+        public async Task TestBaseline_CaseInsensitiveArguments_Success()
+        {
+            string testSourceCode = @"
+namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
+{
+    internal static partial class TestWithCaseInsensitiveArguments
+    {
+        [LoggerMessage(EventId = 12, Level = LogLevel.Error, Message = ""M2 {A1} {a2} {A3} {a4} {A5}"")]
+        public static partial void LogMethod(ILogger logger, int a1, int a2, int a3, int a4, int a5);
+    }
+}";
+            await VerifyAgainstBaselineUsingFile("TestWithCaseInsensitiveArguments.generated.txt", testSourceCode, conditionallySupported: true);
+        }
+#endif
+
+        [Fact]
+        public async Task NoLoggerMessageAttributeUsage_NothingGetsGenerated()
+        {
+            var testSourceCode = $@"
+namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
+{{
+    internal static class ClassWithNoLoggerMessageAttributeUsage {{ }}
+}}";
+            var (d, r) = await RoslynTestUtils.RunGenerator(
+                new LoggerMessageGenerator(),
+                new[] { typeof(ILogger).Assembly, typeof(LoggerMessageAttribute).Assembly },
+                new[] { testSourceCode }).ConfigureAwait(false);
+
+            Assert.Empty(d);
+            Assert.Empty(r);
+        }
+
+        private async Task VerifyAgainstBaselineUsingFile(string filename, string testSourceCode, bool conditionallySupported = false)
+        {
+            string folderName = conditionallySupported ? "BaselinesDisabled" : "Baselines";
+            string[] expectedLines = await File.ReadAllLinesAsync(Path.Combine(folderName, filename)).ConfigureAwait(false);
 
             var (d, r) = await RoslynTestUtils.RunGenerator(
                 new LoggerMessageGenerator(),

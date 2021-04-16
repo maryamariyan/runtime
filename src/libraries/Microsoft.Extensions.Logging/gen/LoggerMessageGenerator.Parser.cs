@@ -134,6 +134,13 @@ namespace Microsoft.Extensions.Logging.Generators
                                         ExtractTemplates(message, lm.TemplateMap, lm.TemplateList);
 
                                         bool keepMethod = true;   // whether or not we want to keep the method definition or if it's got errors making it so we should discard it instead
+#if !HAS_EXTENDED_SUPPORT
+                                        if (lm.Level == null)
+                                        {
+                                            Diag(DiagnosticDescriptors.DynamicLoggingNotSupported, method.Identifier.GetLocation());
+                                            keepMethod = false;
+                                        }
+#endif
                                         if (lm.Name[0] == '_')
                                         {
                                             // can't have logging method names that start with _ since that can lead to conflicting symbol names
@@ -281,6 +288,18 @@ namespace Microsoft.Extensions.Logging.Generators
                                             }
                                         }
 
+#if !HAS_EXTENDED_SUPPORT
+                                        if (lm.TemplateParameters.Count > MaxLoggerMessageDefineArguments)
+                                        {
+                                            Diag(DiagnosticDescriptors.GeneratingForMax6Arguments, method.Identifier.GetLocation());
+                                            keepMethod = false;
+                                        }
+                                        if (lm.TemplateList.Count != lm.TemplateParameters.Count)
+                                        {
+                                            Diag(DiagnosticDescriptors.TemplateParamCountMismatch, method.Identifier.GetLocation());
+                                            keepMethod = false;
+                                        }
+#endif
                                         if (keepMethod)
                                         {
                                             if (isStatic && !foundLogger)
@@ -333,7 +352,25 @@ namespace Microsoft.Extensions.Logging.Generators
                                                     }
                                                 }
 
-                                                if (!found)
+                                                if (found)
+                                                {
+#if !HAS_EXTENDED_SUPPORT
+                                                    found = false;
+                                                    foreach (LoggerParameter p in lm.AllParameters)
+                                                    {
+                                                        if (t.Key.Equals(p.Name, StringComparison.Ordinal))
+                                                        {
+                                                            found = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (!found)
+                                                    {
+                                                        Diag(DiagnosticDescriptors.CaseInsensitiveTemplateArgumentsNotSupported, ma.GetLocation(), t);
+                                                    }
+#endif
+                                                }
+                                                else
                                                 {
                                                     Diag(DiagnosticDescriptors.TemplateHasNoCorrespondingArgument, ma.GetLocation(), t);
                                                 }
