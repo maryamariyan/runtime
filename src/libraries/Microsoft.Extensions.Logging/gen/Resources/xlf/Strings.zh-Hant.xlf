@@ -12,6 +12,21 @@
         <target state="new">Argument is not referenced from the logging message</target>
         <note />
       </trans-unit>
+      <trans-unit id="CaseInsensitiveTemplateArgumentsNotSupportedMessage">
+        <source>Case insensitive matching between message template and parameter arguments is not supported</source>
+        <target state="new">Case insensitive matching between message template and parameter arguments is not supported</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DynamicLoggingNotSupportedMessage">
+        <source>Dynamic log level is not supported</source>
+        <target state="new">Dynamic log level is not supported</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumerableArgumentsNotSupportedMessage">
+        <source>Using Enumerable arguments in message template is not supported</source>
+        <target state="new">Using Enumerable arguments in message template is not supported</target>
+        <note>{Locked="Enumerable"}</note>
+      </trans-unit>
       <trans-unit id="GeneratingForMax6ArgumentsMessage">
         <source>Generating more than 6 arguments is not supported</source>
         <target state="new">Generating more than 6 arguments is not supported</target>
@@ -155,6 +170,11 @@
       <trans-unit id="TemplateHasNoCorrespondingArgumentTitle">
         <source>Logging template has no corresponding method argument</source>
         <target state="new">Logging template has no corresponding method argument</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateParamCountMismatchMessage">
+        <source>The number of arguments in template do not match the template argument parameters</source>
+        <target state="new">The number of arguments in template do not match the template argument parameters</target>
         <note />
       </trans-unit>
     </body>

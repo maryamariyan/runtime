@@ -29,10 +29,12 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
         [LoggerMessage(EventId = 7, Level = (LogLevel)42, Message = "M7")]
         public static partial void M7(ILogger logger);
 
+#if HAS_EXTENDED_SUPPORT
         [LoggerMessage(EventId = 8, Message = "M8")]
         public static partial void M8(ILogger logger, LogLevel level);
 
         [LoggerMessage(EventId = 9, Message = "M9")]
         public static partial void M9(LogLevel level, ILogger logger);
+#endif
     }
 }

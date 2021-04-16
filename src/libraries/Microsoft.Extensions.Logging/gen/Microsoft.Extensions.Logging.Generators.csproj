@@ -7,6 +7,8 @@
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     <UsingToolXliff>true</UsingToolXliff>
     <CLSCompliant>false</CLSCompliant>
+    <AllowFallbackFromDefine>true</AllowFallbackFromDefine>
+    <DefineConstants Condition="'$(AllowFallbackFromDefine)' == 'true'">$(DefineConstants);HAS_EXTENDED_SUPPORT</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

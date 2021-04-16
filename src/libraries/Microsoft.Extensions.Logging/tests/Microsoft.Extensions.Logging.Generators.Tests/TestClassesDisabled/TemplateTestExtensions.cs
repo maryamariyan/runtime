@@ -5,6 +5,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 {
     internal static partial class TemplateTestExtensions
     {
+#if HAS_EXTENDED_SUPPORT
         [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = "M0 {A1}")]
         public static partial void M0(ILogger logger, int a1);
 
@@ -16,5 +17,6 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 
         [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "M3 {a2} {A1}")]
         public static partial void M3(ILogger logger, int a1, int a2);
+#endif
     }
 }

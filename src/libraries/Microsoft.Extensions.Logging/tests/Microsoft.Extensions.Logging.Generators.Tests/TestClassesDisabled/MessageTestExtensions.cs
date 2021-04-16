@@ -7,11 +7,14 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 {
     internal static partial class MessageTestExtensions
     {
+#if HAS_EXTENDED_SUPPORT
+        // TODO: Add baseline and possibly diagnostic here
         [LoggerMessage(EventId = 0, Level = LogLevel.Trace)]
         public static partial void M0(ILogger logger);
 
         [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "")]
         public static partial void M1(ILogger logger);
+#endif
 
 #if false
         // Diagnostics produced by source generators do not respect the /warnAsError or /noWarn compiler flags.

@@ -191,5 +191,37 @@ namespace Microsoft.Extensions.Logging.Generators
             category: "LoggingGenerator",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true);
+
+        public static DiagnosticDescriptor DynamicLoggingNotSupported { get; } = new DiagnosticDescriptor(
+            id: "SYSLIB1024",
+            title: new LocalizableResourceString(nameof(SR.DynamicLoggingNotSupportedMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            messageFormat: new LocalizableResourceString(nameof(SR.DynamicLoggingNotSupportedMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            category: "LoggingGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+        public static DiagnosticDescriptor TemplateParamCountMismatch { get; } = new DiagnosticDescriptor(
+            id: "SYSLIB1025",
+            title: new LocalizableResourceString(nameof(SR.TemplateParamCountMismatchMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            messageFormat: new LocalizableResourceString(nameof(SR.TemplateParamCountMismatchMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            category: "LoggingGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+        public static DiagnosticDescriptor CaseInsensitiveTemplateArgumentsNotSupported { get; } = new DiagnosticDescriptor(
+            id: "SYSLIB1026",
+            title: new LocalizableResourceString(nameof(SR.CaseInsensitiveTemplateArgumentsNotSupportedMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            messageFormat: new LocalizableResourceString(nameof(SR.CaseInsensitiveTemplateArgumentsNotSupportedMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            category: "LoggingGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+        public static DiagnosticDescriptor EnumerableArgumentsNotSupported { get; } = new DiagnosticDescriptor(
+            id: "SYSLIB1027",
+            title: new LocalizableResourceString(nameof(SR.EnumerableArgumentsNotSupportedMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            messageFormat: new LocalizableResourceString(nameof(SR.EnumerableArgumentsNotSupportedMessage), SR.ResourceManager, typeof(FxResources.Microsoft.Extensions.Logging.Generators.SR)),
+            category: "LoggingGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
     }
 }

@@ -8,6 +8,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 {
     internal static partial class EnumerableTestExtensions
     {
+#if HAS_EXTENDED_SUPPORT
         [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = "M0")]
         public static partial void M0(ILogger logger);
 
@@ -29,6 +30,7 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
         [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "M6{p0}{p1}{p2}{p3}{p4}{p5}")]
         public static partial void M6(ILogger logger, int p0, IEnumerable<int> p1, int p2, int p3, int p4, int p5);
 
+// #if HAS_EXTENDED_SUPPORT
         [LoggerMessage(EventId = 7, Level = LogLevel.Error, Message = "M7{p0}{p1}{p2}{p3}{p4}{p5}{p6}")]
         public static partial void M7(ILogger logger, int p0, IEnumerable<int> p1, int p2, int p3, int p4, int p5, int p6);
 
@@ -37,5 +39,6 @@ namespace Microsoft.Extensions.Logging.Generators.Tests.TestClasses
 
         [LoggerMessage(EventId = 9, Level = LogLevel.Error, Message = "M9{p0}{p1}{p2}{p3}{p4}{p5}{p6}{p7}{p8}")]
         public static partial void M9(ILogger logger, int p0, IEnumerable<int> p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8);
+#endif
     }
 }

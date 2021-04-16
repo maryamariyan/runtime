@@ -42,7 +42,11 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
             ");
 
             Assert.Single(diagnostics);
+#if HAS_EXTENDED_SUPPORT
             Assert.Equal(DiagnosticDescriptors.MissingLogLevel.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(DiagnosticDescriptors.DynamicLoggingNotSupported.Id, diagnostics[0].Id);
+#endif
         }
 
         [Fact]
@@ -75,8 +79,14 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[1].Id);
+#endif
         }
 
         [Fact]
@@ -90,8 +100,13 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.TemplateHasNoCorrespondingArgument.Id, diagnostics[0].Id);
+#else
+            Assert.Single(diagnostics);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[0].Id);
+#endif
         }
 
         [Fact]
@@ -120,8 +135,14 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.ShouldntMentionExceptionInMessage.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.ShouldntMentionExceptionInMessage.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[1].Id);
+#endif
         }
 
         [Fact]
@@ -135,8 +156,15 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.ShouldntMentionLogLevelInMessage.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(3, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.DynamicLoggingNotSupported.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.ShouldntMentionLogLevelInMessage.Id, diagnostics[1].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[2].Id);
+#endif
         }
 
         [Fact]
@@ -150,8 +178,14 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.ShouldntMentionLoggerInMessage.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.ShouldntMentionLoggerInMessage.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[1].Id);
+#endif
         }
 
         [Fact]
@@ -165,8 +199,14 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[1].Id);
+#endif
         }
 
         [Fact]
@@ -180,8 +220,14 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Single(diagnostics);
             Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+#else
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[1].Id);
+#endif
         }
 
         [Fact]
@@ -195,10 +241,17 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ");
 
+#if HAS_EXTENDED_SUPPORT
             Assert.Empty(diagnostics);
+#else
+            Assert.Single(diagnostics);
+            Assert.Equal(DiagnosticDescriptors.DynamicLoggingNotSupported.Id, diagnostics[0].Id);
+#endif
         }
 
 #if false
+        // TODO: add failing use case with fallback approach: a dynamic log level + "{p1} {P1}" combo produces error
+
         // TODO: can't have the same template with different casing
         [Fact]
         public async Task InconsistentTemplateCasing()
@@ -583,6 +636,95 @@ namespace Microsoft.Extensions.Logging.Generators.Tests
                 }
             ", cancellationToken: new CancellationToken(true)));
         }
+
+#if !HAS_EXTENDED_SUPPORT
+        [Theory]
+        [InlineData(@"""M8{p0}{p1}""")]
+        public async Task DynamicLogLevelNotSupported(string message)
+        {
+            IReadOnlyList<Diagnostic> diagnostics = await RunGenerator($@"
+                partial class C
+                {{
+                    [LoggerMessage(EventId = 9, Message = {message})]
+                    public static partial void M9(ILogger logger, LogLevel level, int p0, System.Exception ex, int p1);
+                }}
+            ");
+
+            Assert.Single(diagnostics);
+            Assert.Equal(DiagnosticDescriptors.DynamicLoggingNotSupported.Id, diagnostics[0].Id);
+        }
+
+        [Theory]
+        [InlineData(@"""M8{p1}{p2}{p3}{p4}{p5}{p6}{p7}""")]
+        [InlineData(@"""M9 {p1} {p2} {p3} {p4} {p5} {p6} {p7}""")]
+        public async Task MaxArgumentsNotSupported(string message)
+        {
+            IReadOnlyList<Diagnostic> diagnostics = await RunGenerator($@"
+                partial class C
+                {{
+                    [LoggerMessage(EventId = 7, Level = LogLevel.Error, Message = {message})]
+                    public static partial void Method8(ILogger logger, int p1, int p2, int p3, int p4, int p5, int p6, int p7);
+                }}
+            ");
+
+            Assert.Single(diagnostics);
+            Assert.Equal(DiagnosticDescriptors.GeneratingForMax6Arguments.Id, diagnostics[0].Id);
+        }
+
+        [Theory]
+        [InlineData(@"""M1 {A1} {A1}""", "int a1")] // same arg repeated in message template
+        public async Task MessageTemplateBadArguments(string message, string templateParameters)
+        {
+            IReadOnlyList<Diagnostic> diagnostics = await RunGenerator($@"
+                partial class C
+                {{
+                    [LoggerMessage(EventId = 1, Level = LogLevel.Error, Message = {message})]
+                    public static partial void LogMethod(ILogger logger, {templateParameters});
+                }}
+            ");
+
+            Assert.Single(diagnostics);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[0].Id);
+        }
+
+        [Theory]
+        [InlineData(@"""M0 {A1}""", "int a1", 1)]
+        [InlineData(@"""M3 {a2} {A1} {x}""", "int a1, int a2, int X", 2)]
+        [InlineData(@"""M2 {A1} {a2} {A3} {a4} {A5}""", "int a1, int a2, int a3, int a4, int a5", 3)]
+        public async Task CaseInsensitiveTemplateArgumentsNotSupported(string message, string templateParameters, int numberOfMismatchedArguments)
+        {
+            IReadOnlyList<Diagnostic> diagnostics = await RunGenerator($@"
+                partial class C
+                {{
+                    [LoggerMessage(EventId = 1, Level = LogLevel.Error, Message = {message})]
+                    public static partial void LogMethod(ILogger logger, {templateParameters});
+                }}
+            ");
+
+            Assert.Equal(numberOfMismatchedArguments, diagnostics.Count);
+            for (int i = 0; i < numberOfMismatchedArguments; i++)
+            {
+                Assert.Equal(DiagnosticDescriptors.CaseInsensitiveTemplateArgumentsNotSupported.Id, diagnostics[i].Id);
+            }
+        }
+
+        [Theory]
+        [InlineData(@"""M2 {foo} {bar}""", "string bar, string foo")]
+        public async Task CaseInsensitiveAndDynamicLogging_GeneratesTwoDiagnosticMessages(string message, string templateParameters)
+        {
+            IReadOnlyList<Diagnostic> diagnostics = await RunGenerator($@"
+                partial class C
+                {{
+                    [LoggerMessage(EventId = 1, Level = LogLevel.Error, Message = {message})]
+                    public static partial void LogMethod(ILogger logger, LogLevel level, {templateParameters});
+                }}
+            ");
+
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(DiagnosticDescriptors.ArgumentHasNoCorrespondingTemplate.Id, diagnostics[0].Id);
+            Assert.Equal(DiagnosticDescriptors.TemplateParamCountMismatch.Id, diagnostics[1].Id);
+        }
+#endif
 
         [Fact]
         public async Task SourceErrors()
