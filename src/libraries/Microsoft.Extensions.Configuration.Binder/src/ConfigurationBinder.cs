@@ -84,6 +84,24 @@ namespace Microsoft.Extensions.Configuration
         }
 
         /// <summary>
+        /// TODO add
+        /// </summary>
+        public static void Bind<T>(this IConfiguration configuration, string key, T instance)
+            => configuration.GetSection(key).Bind<T>(instance);
+
+        /// <summary>
+        /// TODO add
+        /// </summary>
+        public static void Bind<T>(this IConfiguration configuration, T instance)
+            => configuration.Bind<T>(instance, o => { });
+
+        /// <summary>
+        /// TODO add
+        /// </summary>
+        public static void Bind<T>(this IConfiguration configuration, T instance, Action<BinderOptions> configureOptions)
+            => configuration.Bind((object)instance, configureOptions);
+
+        /// <summary>
         /// Attempts to bind the given object instance to the configuration section specified by the key by matching property names against configuration keys recursively.
         /// </summary>
         /// <param name="configuration">The configuration instance to bind.</param>
